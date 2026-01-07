@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Roast Challenge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="stats">
+            <div>Lives: <span id="lives">❤️❤️❤️</span></div>
+            <div>Streak: <span id="streak">0</span></div>
+            <div>Best: <span id="high-score">0</span></div>
+        </div>
+
+        <div id="game-box">
+            <h1 id="question">Loading...</h1>
+            <input type="text" id="answer-input" placeholder="Type answer here..." autocomplete="off">
+            <button id="submit-btn">Submit</button>
+        </div>
+
+        <div id="roast-overlay" class="hidden">
+            <div class="roast-content">
+                <p id="roast-text">You're bad at this.</p>
+                <button onclick="closeRoast()">Try Again</button>
+            </div>
+        </div>
+
+        <div id="game-over" class="hidden">
+            <h1>GAME OVER</h1>
+            <p>Your streak was crushed.</p>
+            <button onclick="location.reload()">Restart</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
