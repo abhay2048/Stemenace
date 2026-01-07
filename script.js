@@ -51,7 +51,7 @@ function newQuestion() {
 function checkAnswer() {
     const userAnswer = answerInput.value.trim();
 
-    if (userAnswer === currentQuestion.a) {
+    if (userAnswer.toLowerCase().replace(/\s+/g, '') === currentQuestion.a.toLowerCase().replace(/\s+/g, '')) {
         // Correct
         score++;
         if (score > highScore) {
@@ -96,5 +96,6 @@ submitBtn.addEventListener('click', checkAnswer);
 answerInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') checkAnswer();
 });
+
 
 init();
