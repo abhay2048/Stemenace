@@ -1,116 +1,93 @@
 let questions = [];
 let roasts = [];
-let currentQuestion = {};
+let currentQ = null;
 let score = 0;
 let lives = 3;
-let highScore = localStorage.getItem('highScore') || 0;
+let highScore = localStorage.getItem('trigHighScore') || 0;
 
-// Elements
-const questionEl = document.getElementById('question');
-const answerInput = document.getElementById('answer-input');
-const livesEl = document.getElementById('lives');
-const streakEl = document.getElementById('streak');
-const highscoreEl = document.getElementById('high-score');
-const roastOverlay = document.getElementById('roast-overlay');
-const roastText = document.getElementById('roast-text');
-const gameOverEl = document.getElementById('game-over');
-
-// 1. "Smart" Math Pre-processor
-function fixNotation(str) {
-    let res = str.toLowerCase().replace(/\s+/g, '');
-
-    // Convert "cos2(x)" or "cos^2(x)" to "(cos(x))^2"
-    // Regex: find trig word, optional ^, then a number, then (content)
-    res = res.replace(/(sin|cos|tan|sec|cosec|cot|asin|acos|atan)\^?([0-9]+)\((.*?)\)/gi, "($1($3))^$2");
-
-    // Convert "cos^2x" (without parens) to "(cos(x))^2"
-    res = res.replace(/(sin|cos|tan|sec|cosec|cot)\^([0-9]+)([xθa-z])/gi, "($1($3))^$2");
-
-    return res;
-}
-
-// 2. Load Files
 async function init() {
-    highscoreEl.innerText = highScore;
+    document.getElementById('high-score').innerText = highScore;
+
     try {
+        // Load Formulas
         const mathRes = await fetch('mathformula.txt');
         const mathData = await mathRes.text();
-        questions = mathData.split('\n').filter(l => l.includes('|')).map(l => {
-            const [q, a] = l.split('|');
-            return { q: q.trim(), a: a.trim() };
+        questions = mathData.split('\n').filter(l => l.includes('|')).map(line => {
+            const [q, correct, w1, w2, w3] = line.split('|').map(s => s.trim());
+            return { q, correct, options: [correct, w1, w2, w3] };
         });
 
+        // Load Roasts
         const roastRes = await fetch('roast.txt');
         const roastData = await roastRes.text();
         roasts = roastData.split('\n').filter(l => l.trim() !== "");
 
-        newQuestion();
+        loadRound();
     } catch (e) {
-        questionEl.innerText = "Error: Use a Local Server!";
+        console.error(e);
+        alert("Files not found! Make sure mathformula.txt and roast.txt exist.");
     }
 }
 
-function newQuestion() {
-    currentQuestion = questions[Math.floor(Math.random() * questions.length)];
-    questionEl.innerText = currentQuestion.q;
-    answerInput.value = "";
-    answerInput.focus();
+function loadRound() {
+    if (questions.length === 0) return;
+    
+    currentQ = questions[Math.floor(Math.random() * questions.length)];
+    
+    // Set Question (LaTeX)
+    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    
+    // Shuffle Options
+    const shuffled = [...currentQ.options].sort(() => Math.random() - 0.5);
+    
+    // Generate Buttons
+    const grid = document.getElementById('options-grid');
+    grid.innerHTML = "";
+    shuffled.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `\\( ${opt} \\)`; // Inline LaTeX
+        btn.onclick = () => checkChoice(opt);
+        grid.appendChild(btn);
+    });
+
+    // Re-render MathJax
+    MathJax.typesetPromise();
 }
 
-function checkAnswer() {
-    const userRaw = answerInput.value.trim();
-    if (!userRaw) return;
-
-    // We compare against the first possible correct answer in the txt file
-    const correctRaw = currentQuestion.a.split(',')[0].trim();
-
-    const userParsed = fixNotation(userRaw);
-    const correctParsed = fixNotation(correctRaw);
-
-    try {
-        // Compare algebraic equivalence by testing a value for x
-        // Math.js is smart enough to know 1-sin(x)^2 == cos(x)^2
-        const scope = { x: 0.5, theta: 0.5, a: 0.5 }; 
-        const isCorrect = math.evaluate(`(${userParsed}) == (${correctParsed})`, scope);
-
-        if (isCorrect) {
-            score++;
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('highScore', highScore);
-                highscoreEl.innerText = highScore;
-            }
-            streakEl.innerText = score;
-            newQuestion();
-        } else {
-            handleWrongAnswer();
+function checkChoice(choice) {
+    if (choice === currentQ.correct) {
+        score++;
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('trigHighScore', highScore);
+            document.getElementById('high-score').innerText = highScore;
         }
-    } catch (e) {
-        // If math.js can't parse it, it's probably a wrong answer
-        handleWrongAnswer();
+        document.getElementById('streak').innerText = score;
+        loadRound();
+    } else {
+        handleFail();
     }
 }
 
-function handleWrongAnswer() {
+function handleFail() {
     lives--;
     score = 0;
-    streakEl.innerText = score;
-    livesEl.innerText = "❤️".repeat(Math.max(0, lives));
+    document.getElementById('streak').innerText = score;
+    document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives));
 
     if (lives <= 0) {
-        gameOverEl.classList.remove('hidden');
+        document.getElementById('death-screen').classList.remove('hidden');
     } else {
-        roastText.innerText = roasts[Math.floor(Math.random() * roasts.length)];
-        roastOverlay.classList.remove('hidden');
+        const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
+        document.getElementById('roast-text').innerText = randomRoast;
+        document.getElementById('overlay').classList.remove('hidden');
     }
 }
 
-function closeRoast() {
-    roastOverlay.classList.add('hidden');
-    newQuestion();
+function nextRound() {
+    document.getElementById('overlay').classList.add('hidden');
+    loadRound();
 }
-
-document.getElementById('submit-btn').addEventListener('click', checkAnswer);
-answerInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAnswer(); });
 
 init();
