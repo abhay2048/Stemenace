@@ -1,25 +1,4 @@
+1 + cos(2x) | 2cos(x)^2
+1 - cos(2x) | 2sin(x)^2
 sin^-1(x) + cos^-1(x) | pi/2
-tan^-1(x) + cot^-1(x) | pi/2
-cosec^-1(x) + sec^-1(x) | pi/2
-tan^-1(x) + tan^-1(y) | tan^-1((x+y)/(1-xy))
-tan^-1(x) - tan^-1(y) | tan^-1((x-y)/(1+xy))
-2tan^-1(x) in terms of sin^-1 | sin^-1(2x/(1+x^2))
-2tan^-1(x) in terms of cos^-1 | cos^-1((1-x^2)/(1+x^2))
-2tan^-1(x) in terms of tan^-1 | tan^-1(2x/(1-x^2))
-sin^-1(-x) | -sin^-1(x)
-cos^-1(-x) | pi - cos^-1(x)
-tan^-1(-x) | -tan^-1(x)
-cosec^-1(-x) | -cosec^-1(x)
-sec^-1(-x) | pi - sec^-1(x)
-cot^-1(-x) | pi - cot^-1(x)
-3sin^-1(x) | sin^-1(3x - 4x^3)
-3cos^-1(x) | cos^-1(4x^3 - 3x)
-1 - cos(2x) | 2sin^2(x)
-1 + cos(2x) | 2cos^2(x)
-d/dx of sin^-1(x) | 1/sqrt(1-x^2)
-d/dx of cos^-1(x) | -1/sqrt(1-x^2)
 d/dx of tan^-1(x) | 1/(1+x^2)
-Integral of tan(x) dx | log|sec x|
-Integral of cot(x) dx | log|sin x|
-Integral of sec(x) dx | log|sec x + tan x|
-Integral of cosec(x) dx | log|cosec x - cot x|
