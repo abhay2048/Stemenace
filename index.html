@@ -3,39 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trig Roast Master</title>
-    <!-- Math.js Library for algebraic comparison -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <title>Class 12 Math: Suicide Mission</title>
+    <!-- MathJax for high-quality LaTeX -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="game-container">
-        <div class="stats">
-            <div>Lives: <span id="lives">❤️❤️❤️</span></div>
-            <div>Streak: <span id="streak">0</span></div>
-            <div>Best: <span id="high-score">0</span></div>
+    <div class="game-wrapper">
+        <div class="hud">
+            <div class="stat-box">LIVES: <span id="lives">❤️❤️❤️</span></div>
+            <div class="stat-box">STREAK: <span id="streak">0</span></div>
+            <div class="stat-box">BEST: <span id="high-score">0</span></div>
         </div>
 
-        <div id="game-box">
-            <h2 id="question">Loading...</h2>
-            <input type="text" id="answer-input" placeholder="e.g., cos2(x) or sin(2x)" autocomplete="off">
-            <button id="submit-btn">Submit Answer</button>
-        </div>
+        <main id="game-container">
+            <div class="question-header">Identify the correct identity:</div>
+            <div id="formula-display">
+                <!-- LaTeX Question goes here -->
+                \[ \dots \]
+            </div>
 
-        <!-- Pop up for roasts -->
-        <div id="roast-overlay" class="hidden">
-            <div class="roast-content">
-                <p id="roast-text">You're bad at this.</p>
-                <button onclick="closeRoast()">Keep Crying & Try Again</button>
+            <div id="options-grid">
+                <!-- 4 Options will be injected here -->
+            </div>
+        </main>
+
+        <!-- Roast Popup -->
+        <div id="overlay" class="hidden">
+            <div class="popup">
+                <h2 id="roast-title">WRONG!</h2>
+                <p id="roast-text">Your brain cells are running in safe mode.</p>
+                <button onclick="nextRound()">Try to be smarter</button>
             </div>
         </div>
 
-        <!-- Game Over Screen -->
-        <div id="game-over" class="hidden">
-            <h1>DEFEAT</h1>
-            <p>Your streak was ended.</p>
-            <button onclick="location.reload()">Restart Challenge</button>
+        <!-- Death Screen -->
+        <div id="death-screen" class="hidden">
+            <div class="popup">
+                <h1 style="color: #ff0000; font-size: 3rem;">FAILURE</h1>
+                <p>You aren't ready for the Boards.</p>
+                <button onclick="location.reload()">Restart from Class 1</button>
+            </div>
         </div>
     </div>
 
