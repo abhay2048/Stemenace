@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Roast Challenge</title>
+    <title>Trig Roast Master</title>
+    <!-- Math.js Library for algebraic comparison -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,22 +18,24 @@
         </div>
 
         <div id="game-box">
-            <h1 id="question">Loading...</h1>
-            <input type="text" id="answer-input" placeholder="Type answer here..." autocomplete="off">
-            <button id="submit-btn">Submit</button>
+            <h2 id="question">Loading...</h2>
+            <input type="text" id="answer-input" placeholder="e.g., cos2(x) or sin(2x)" autocomplete="off">
+            <button id="submit-btn">Submit Answer</button>
         </div>
 
+        <!-- Pop up for roasts -->
         <div id="roast-overlay" class="hidden">
             <div class="roast-content">
                 <p id="roast-text">You're bad at this.</p>
-                <button onclick="closeRoast()">Try Again</button>
+                <button onclick="closeRoast()">Keep Crying & Try Again</button>
             </div>
         </div>
 
+        <!-- Game Over Screen -->
         <div id="game-over" class="hidden">
-            <h1>GAME OVER</h1>
-            <p>Your streak was crushed.</p>
-            <button onclick="location.reload()">Restart</button>
+            <h1>DEFEAT</h1>
+            <p>Your streak was ended.</p>
+            <button onclick="location.reload()">Restart Challenge</button>
         </div>
     </div>
 
