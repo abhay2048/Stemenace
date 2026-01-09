@@ -12,19 +12,19 @@ let timeLeft = 30;
 async function init() {
     try {
         const mathRes = await fetch('mathformula.txt');
-        const mathText = await mathRes.text();
-        allQuestions = mathText.split('\n').filter(l => l.includes('::')).map(line => {
+        const mathData = await mathRes.text();
+        allQuestions = mathData.split('\n').filter(l => l.includes('::')).map(line => {
             const p = line.split('::').map(s => s.trim());
             return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
         });
 
         const roastRes = await fetch('roast.txt');
-        const roastText = await roastRes.text();
-        roasts = roastText.split('\n').filter(l => l.trim() !== "");
+        const roastData = await roastRes.text();
+        roasts = roastData.split('\n').filter(l => l.trim() !== "");
 
         document.getElementById('high-score').innerText = highScore;
         showScreen('screen-home');
-    } catch (e) { console.error("STEMANACE Initialization Failed:", e); }
+    } catch (e) { console.error("Initialization Failed:", e); }
 }
 
 function showScreen(id) {
@@ -105,7 +105,6 @@ function handleWrong() {
     lives--;
     updateHUD();
     
-    // Show Roast + Correct Answer
     const roast = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "Critical Failure.";
     document.getElementById('roast-message').innerText = roast;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
@@ -121,7 +120,7 @@ function resumeAfterRoast() {
 
 function endGame() {
     document.getElementById('final-streak').innerText = score;
-    document.getElementById('final-roast').innerText = "Simulation Terminated. Efficiency below threshold.";
+    document.getElementById('final-roast').innerText = "ARENA FAILED. STUDY THE VAULT.";
     showScreen('screen-over');
 }
 
