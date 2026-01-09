@@ -4,7 +4,7 @@ let roasts = [];
 let currentQ = null;
 let score = 0;
 let lives = 3;
-let highScore = localStorage.getItem('stemanaceHS') || 0;
+let highScore = localStorage.getItem('stemanaceScore') || 0;
 let timerId = null;
 let timeLimit = 30;
 let timeLeft = 30;
@@ -24,14 +24,14 @@ async function init() {
 
         document.getElementById('high-score').innerText = highScore;
         showScreen('screen-home');
-    } catch (e) { console.error("Stemanace Init Fail:", e); }
+    } catch (e) { console.error("STEMANACE Initialization Failed:", e); }
 }
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
     if (timerId) clearInterval(timerId);
-    if (id === 'screen-learn') populateLearn();
+    if (id === 'screen-learn') populateVault();
 }
 
 function selectChapter(chap) {
@@ -81,16 +81,16 @@ function resetTimer() {
     timerId = setInterval(() => {
         timeLeft -= 0.1;
         bar.style.width = (timeLeft / timeLimit * 100) + "%";
-        if (timeLeft <= 0) { handleWrong(); }
+        if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) {
         score++;
-        if (score > highScore) { 
-            highScore = score; 
-            localStorage.setItem('stemanaceHS', highScore); 
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('stemanaceScore', highScore);
             document.getElementById('high-score').innerText = highScore;
         }
         updateHUD();
@@ -105,29 +105,28 @@ function handleWrong() {
     lives--;
     updateHUD();
     
-    // Show Roast for EVERY wrong answer
-    const roastMsg = roasts[Math.floor(Math.random() * roasts.length)];
-    document.getElementById('roast-message').innerText = roastMsg;
+    // Show Roast + Correct Answer
+    const roast = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "Critical Failure.";
+    document.getElementById('roast-message').innerText = roast;
+    document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
+    
     document.getElementById('roast-popup').classList.remove('hidden');
+    MathJax.typesetPromise();
 }
 
 function resumeAfterRoast() {
     document.getElementById('roast-popup').classList.add('hidden');
-    if (lives <= 0) {
-        endGame();
-    } else {
-        nextRound();
-    }
+    if (lives <= 0) endGame(); else nextRound();
 }
 
 function endGame() {
     document.getElementById('final-streak').innerText = score;
-    document.getElementById('final-roast').innerText = "Arena run completed. Level up your brain.";
+    document.getElementById('final-roast').innerText = "Simulation Terminated. Efficiency below threshold.";
     showScreen('screen-over');
 }
 
-function populateLearn() {
-    const list = document.getElementById('learn-list');
+function populateVault() {
+    const list = document.getElementById('vault-content');
     const grouped = allQuestions.reduce((acc, q) => {
         if (!acc[q.chapter]) acc[q.chapter] = [];
         acc[q.chapter].push(q);
@@ -135,11 +134,11 @@ function populateLearn() {
     }, {});
 
     let html = "";
-    for (const chapter in grouped) {
-        html += `<h3 class="chapter-header">${chapter.toUpperCase()}</h3>`;
-        html += `<table class="learn-table"><tbody>`;
-        grouped[chapter].forEach(q => {
-            html += `<tr><td>\\(${q.q}\\)</td><td class="correct-ans">\\(${q.correct}\\)</td></tr>`;
+    for (const chap in grouped) {
+        html += `<h3 class="chap-header">${chap.toUpperCase()}</h3>`;
+        html += `<table class="v-table"><tbody>`;
+        grouped[chap].forEach(q => {
+            html += `<tr><td>\\(${q.q}\\)</td><td class="v-ans">\\(${q.correct}\\)</td></tr>`;
         });
         html += `</tbody></table>`;
     }
