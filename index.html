@@ -3,50 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class 12 Math: Suicide Mission</title>
-    <!-- MathJax for high-quality LaTeX -->
+    <title>Math Master: Class 12</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="game-wrapper">
-        <div class="hud">
-            <div class="stat-box">LIVES: <span id="lives">❤️❤️❤️</span></div>
-            <div class="stat-box">STREAK: <span id="streak">0</span></div>
-            <div class="stat-box">BEST: <span id="high-score">0</span></div>
-        </div>
-
-        <main id="game-container">
-            <div class="question-header">Identify the correct identity:</div>
-            <div id="formula-display">
-                <!-- LaTeX Question goes here -->
-                \[ \dots \]
-            </div>
-
-            <div id="options-grid">
-                <!-- 4 Options will be injected here -->
-            </div>
-        </main>
-
-        <!-- Roast Popup -->
-        <div id="overlay" class="hidden">
-            <div class="popup">
-                <h2 id="roast-title">WRONG!</h2>
-                <p id="roast-text">Your brain cells are running in safe mode.</p>
-                <button onclick="nextRound()">Try to be smarter</button>
+    <div class="app-container">
+        
+        <!-- HOME SCREEN -->
+        <div id="screen-home" class="screen">
+            <h1>MATH MASTER <span class="v12">v12</span></h1>
+            <div class="menu-btns">
+                <button class="main-btn" onclick="showScreen('screen-learn')">LEARN</button>
+                <button class="main-btn play" onclick="showScreen('screen-difficulty')">PLAY</button>
             </div>
         </div>
 
-        <!-- Death Screen -->
-        <div id="death-screen" class="hidden">
-            <div class="popup">
-                <h1 style="color: #ff0000; font-size: 3rem;">FAILURE</h1>
-                <p>You aren't ready for the Boards.</p>
-                <button onclick="location.reload()">Restart from Class 1</button>
+        <!-- LEARN SCREEN -->
+        <div id="screen-learn" class="screen hidden">
+            <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
+            <h2>Formula Reference</h2>
+            <div id="learn-list">
+                <!-- Populated by JS -->
             </div>
         </div>
+
+        <!-- DIFFICULTY SELECTOR -->
+        <div id="screen-difficulty" class="screen hidden">
+            <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
+            <h2>Select Intensity</h2>
+            <div class="menu-btns">
+                <button class="diff-btn" onclick="startGame(30)">EASY (30s)</button>
+                <button class="diff-btn" onclick="startGame(15)">MEDIUM (15s)</button>
+                <button class="diff-btn" onclick="startGame(8)">HARD (8s)</button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="screen hidden">
+            <div class="hud">
+                <div class="stat">LIVES: <span id="lives">❤️❤️❤️</span></div>
+                <div class="stat">STREAK: <span id="streak">0</span></div>
+            </div>
+            
+            <!-- Timer Bar -->
+            <div class="timer-container">
+                <div id="timer-bar"></div>
+            </div>
+
+            <div id="formula-display">\[ \dots \]</div>
+            <div id="options-grid"></div>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="screen-over" class="screen hidden">
+            <h1 class="burn-text">GAME OVER</h1>
+            <p id="roast-display"></p>
+            <div class="stats-summary">Final Streak: <span id="final-streak">0</span></div>
+            <div class="menu-btns">
+                <button class="main-btn" onclick="showScreen('screen-difficulty')">TRY AGAIN</button>
+                <button class="main-btn" onclick="showScreen('screen-learn')">STUDY MORE</button>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
