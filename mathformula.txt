@@ -1,9 +1,7 @@
-\int \frac{dx}{x^2 - a^2} | \frac{1}{2a}\log\left|\frac{x-a}{x+a}\right|+C | \frac{1}{2a}\log\left|\frac{x+a}{x-a}\right|+C | \frac{1}{a}\tan^{-1}\frac{x}{a}+C | \frac{1}{a}\log\left|\frac{x-a}{x+a}\right|+C
-\int \frac{dx}{a^2 - x^2} | \frac{1}{2a}\log\left|\frac{a+x}{a-x}\right|+C | \frac{1}{2a}\log\left|\frac{a-x}{a+x}\right|+C | \frac{1}{2a}\log\left|\frac{x-a}{x+a}\right|+C | \frac{1}{2a}\sin^{-1}\frac{x}{a}+C
-\int \sqrt{a^2 - x^2} dx | \frac{x}{2}\sqrt{a^2-x^2} + \frac{a^2}{2}\sin^{-1}\frac{x}{a}+C | \frac{x}{2}\sqrt{a^2-x^2} - \frac{a^2}{2}\sin^{-1}\frac{x}{a}+C | x\sqrt{a^2-x^2} + a^2\sin^{-1}\frac{x}{a}+C | \frac{1}{2}\sin^{-1}\frac{x}{a}+C
-\frac{d}{dx}(\sec^{-1}x) | \frac{1}{|x|\sqrt{x^2-1}} | \frac{1}{\sqrt{x^2-1}} | \frac{-1}{|x|\sqrt{x^2-1}} | \frac{1}{|x|\sqrt{1-x^2}}
-\int \frac{dx}{x\sqrt{x^2-a^2}} | \frac{1}{a}\sec^{-1}\frac{x}{a}+C | \sec^{-1}\frac{x}{a}+C | \frac{1}{a}\sin^{-1}\frac{x}{a}+C | \frac{1}{a}\tan^{-1}\frac{x}{a}+C
-\sin^{-1}\left(\frac{2x}{1+x^2}\right) | 2\tan^{-1}x | 2\sin^{-1}x | \tan^{-1}(2x) | \cos^{-1}(1-x^2)
-\int e^x(f(x) + f'(x)) dx | e^x f(x) + C | e^x f'(x) + C | e^{2x} f(x) + C | f(x) + C
-\frac{d}{dx}(a^x) | a^x \log_e a | x a^{x-1} | \frac{a^x}{\log_e a} | a^x \log_{10} a
-\int \sec x \, dx | \log|\sec x + \tan x|+C | \log|\sec x - \tan x|+C | \sec x \tan x+C | \log|\tan x|+C
+calculus :: \int \frac{dx}{x^2 - a^2} :: \frac{1}{2a}\log\left|\frac{x-a}{x+a}\right|+C :: \frac{1}{2a}\log\left|\frac{x+a}{x-a}\right|+C :: \frac{1}{a}\tan^{-1}\frac{x}{a}+C :: \frac{1}{a}\log\left|\frac{x-a}{x+a}\right|+C
+calculus :: \int \frac{dx}{a^2 - x^2} :: \frac{1}{2a}\log\left|\frac{a+x}{a-x}\right|+C :: \frac{1}{2a}\log\left|\frac{a-x}{a+x}\right|+C :: \frac{1}{2a}\log\left|\frac{x-a}{x+a}\right|+C :: \frac{1}{2a}\sin^{-1}\frac{x}{a}+C
+calculus :: \int \sqrt{a^2 - x^2} dx :: \frac{x}{2}\sqrt{a^2-x^2} + \frac{a^2}{2}\sin^{-1}\frac{x}{a}+C :: \frac{x}{2}\sqrt{a^2-x^2} - \frac{a^2}{2}\sin^{-1}\frac{x}{a}+C :: x\sqrt{a^2-x^2} + a^2\sin^{-1}\frac{x}{a}+C :: \frac{1}{2}\sin^{-1}\frac{x}{a}+C
+calculus :: \frac{d}{dx}(\sec^{-1}x) :: \frac{1}{|x|\sqrt{x^2-1}} :: \frac{1}{\sqrt{x^2-1}} :: \frac{-1}{|x|\sqrt{x^2-1}} :: \frac{1}{|x|\sqrt{1-x^2}}
+trigonometry :: \sin^{-1}\left(\frac{2x}{1+x^2}\right) :: 2\tan^{-1}x :: 2\sin^{-1}x :: \tan^{-1}(2x) :: \cos^{-1}(1-x^2)
+trigonometry :: \cos^{-1}(-x) :: \pi - \cos^{-1}x :: -\cos^{-1}x :: \cos^{-1}x :: \frac{\pi}{2} - \cos^{-1}x
+trigonometry :: \sin^{-1}x + \cos^{-1}x :: \frac{\pi}{2} :: \pi :: 0 :: 1
