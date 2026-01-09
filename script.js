@@ -5,6 +5,7 @@ let currentQ = null;
 let score = 0;
 let lives = 3;
 let highScore = localStorage.getItem('stemanaceScore') || 0;
+let totalFails = localStorage.getItem('stemanaceFails') || 0;
 let timerId = null;
 let timeLimit = 30;
 let timeLeft = 30;
@@ -12,8 +13,8 @@ let timeLeft = 30;
 async function init() {
     try {
         const mathRes = await fetch('mathformula.txt');
-        const mathData = await mathRes.text();
-        allQuestions = mathData.split('\n').filter(l => l.includes('::')).map(line => {
+        const mathText = await mathRes.text();
+        allQuestions = mathText.split('\n').filter(l => l.includes('::')).map(line => {
             const p = line.split('::').map(s => s.trim());
             return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
         });
@@ -23,13 +24,15 @@ async function init() {
         roasts = roastData.split('\n').filter(l => l.trim() !== "");
 
         document.getElementById('high-score').innerText = highScore;
+        document.getElementById('total-fails').innerText = totalFails;
         showScreen('screen-home');
-    } catch (e) { console.error("Initialization Failed:", e); }
+    } catch (e) { console.error("STEMANACE Init Failure."); }
 }
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
+    document.getElementById('red-alert').classList.add('hidden');
     if (timerId) clearInterval(timerId);
     if (id === 'screen-learn') populateVault();
 }
@@ -58,6 +61,9 @@ function updateHUD() {
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
+    document.getElementById('red-alert').classList.add('hidden');
+    document.querySelector('.app-container').classList.remove('panic');
+
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     
@@ -78,9 +84,21 @@ function nextRound() {
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
+    bar.classList.remove('timer-low');
+    
     timerId = setInterval(() => {
         timeLeft -= 0.1;
-        bar.style.width = (timeLeft / timeLimit * 100) + "%";
+        const ratio = timeLeft / timeLimit;
+        bar.style.width = (ratio * 100) + "%";
+
+        document.getElementById('efficiency').innerText = Math.round(ratio * 100) + "%";
+
+        if (ratio < 0.25) {
+            bar.classList.add('timer-low');
+            document.getElementById('red-alert').classList.remove('hidden');
+            document.querySelector('.app-container').classList.add('panic');
+        }
+
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
@@ -103,9 +121,15 @@ function handleChoice(choice) {
 function handleWrong() {
     clearInterval(timerId);
     lives--;
+    totalFails++;
+    localStorage.setItem('stemanaceFails', totalFails);
+    document.getElementById('total-fails').innerText = totalFails;
     updateHUD();
-    
-    const roast = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "Critical Failure.";
+
+    const container = document.querySelector('.app-container');
+    container.style.animation = "shake 0.2s ease-in-out 0s 2";
+
+    const roast = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "DATA_ERROR";
     document.getElementById('roast-message').innerText = roast;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     
@@ -120,7 +144,7 @@ function resumeAfterRoast() {
 
 function endGame() {
     document.getElementById('final-streak').innerText = score;
-    document.getElementById('final-roast').innerText = "ARENA FAILED. STUDY THE VAULT.";
+    document.getElementById('final-roast').innerText = "DISAPPOINTING. RETURN TO THE VAULT.";
     showScreen('screen-over');
 }
 
