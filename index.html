@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Master: Class 12</title>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Updated MathJax Link -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,41 +15,39 @@
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <h1>MATH MASTER <span class="v12">v12</span></h1>
+            <p class="subtitle">Best Score: <span id="high-score">0</span></p>
             <div class="menu-btns">
-                <button class="main-btn" onclick="showScreen('screen-learn')">LEARN</button>
-                <button class="main-btn play" onclick="showScreen('screen-difficulty')">PLAY</button>
+                <button class="main-btn play" onclick="showScreen('screen-difficulty')">PLAY GAME</button>
+                <button class="main-btn" onclick="showScreen('screen-learn')">FORMULA LIST</button>
             </div>
         </div>
 
         <!-- LEARN SCREEN -->
         <div id="screen-learn" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
-            <h2>Formula Reference</h2>
-            <div id="learn-list">
-                <!-- Populated by JS -->
-            </div>
+            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
+            <h2>Study Hall</h2>
+            <div id="learn-list"></div>
         </div>
 
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← Back</button>
-            <h2>Select Intensity</h2>
+            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
+            <h2>Intensity Level</h2>
             <div class="menu-btns">
-                <button class="diff-btn" onclick="startGame(30)">EASY (30s)</button>
-                <button class="diff-btn" onclick="startGame(15)">MEDIUM (15s)</button>
-                <button class="diff-btn" onclick="startGame(8)">HARD (8s)</button>
+                <button class="diff-btn easy" onclick="selectDifficulty(30)">EASY (30s)</button>
+                <button class="diff-btn medium" onclick="selectDifficulty(15)">MEDIUM (15s)</button>
+                <button class="diff-btn hard" onclick="selectDifficulty(8)">HARD (8s)</button>
             </div>
         </div>
 
         <!-- GAME SCREEN -->
         <div id="screen-game" class="screen hidden">
             <div class="hud">
-                <div class="stat">LIVES: <span id="lives">❤️❤️❤️</span></div>
-                <div class="stat">STREAK: <span id="streak">0</span></div>
+                <div>LIVES: <span id="lives">❤️❤️❤️</span></div>
+                <div>STREAK: <span id="streak">0</span></div>
             </div>
             
-            <!-- Timer Bar -->
-            <div class="timer-container">
+            <div class="timer-wrap">
                 <div id="timer-bar"></div>
             </div>
 
@@ -59,12 +57,12 @@
 
         <!-- GAME OVER SCREEN -->
         <div id="screen-over" class="screen hidden">
-            <h1 class="burn-text">GAME OVER</h1>
-            <p id="roast-display"></p>
-            <div class="stats-summary">Final Streak: <span id="final-streak">0</span></div>
+            <h1 class="over-title">DEFEAT</h1>
+            <p id="roast-msg" class="roast-msg"></p>
+            <p>Final Streak: <span id="final-streak">0</span></p>
             <div class="menu-btns">
-                <button class="main-btn" onclick="showScreen('screen-difficulty')">TRY AGAIN</button>
-                <button class="main-btn" onclick="showScreen('screen-learn')">STUDY MORE</button>
+                <button class="main-btn play" onclick="showScreen('screen-difficulty')">RETRY</button>
+                <button class="main-btn" onclick="showScreen('screen-home')">HOME</button>
             </div>
         </div>
 
