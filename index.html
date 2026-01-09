@@ -4,21 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Master: Class 12</title>
-    <!-- Updated MathJax Link -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="app-container">
-        
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <h1>MATH MASTER <span class="v12">v12</span></h1>
             <p class="subtitle">Best Score: <span id="high-score">0</span></p>
             <div class="menu-btns">
-                <button class="main-btn play" onclick="showScreen('screen-difficulty')">PLAY GAME</button>
+                <button class="main-btn play" onclick="showScreen('screen-chapters')">PLAY GAME</button>
                 <button class="main-btn" onclick="showScreen('screen-learn')">FORMULA LIST</button>
+            </div>
+        </div>
+
+        <!-- CHAPTER SELECTION -->
+        <div id="screen-chapters" class="screen hidden">
+            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
+            <h2>Select Chapter</h2>
+            <div class="menu-btns">
+                <button class="main-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="main-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+            </div>
+        </div>
+
+        <!-- DIFFICULTY SELECTOR -->
+        <div id="screen-difficulty" class="screen hidden">
+            <button class="back-btn" onclick="showScreen('screen-chapters')">← BACK</button>
+            <h2>Intensity Level</h2>
+            <div class="menu-btns">
+                <button class="diff-btn easy" onclick="selectDifficulty(30)">EASY (30s)</button>
+                <button class="diff-btn medium" onclick="selectDifficulty(15)">MEDIUM (15s)</button>
+                <button class="diff-btn hard" onclick="selectDifficulty(8)">HARD (8s)</button>
             </div>
         </div>
 
@@ -29,28 +47,13 @@
             <div id="learn-list"></div>
         </div>
 
-        <!-- DIFFICULTY SELECTOR -->
-        <div id="screen-difficulty" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
-            <h2>Intensity Level</h2>
-            <div class="menu-btns">
-                <button class="diff-btn easy" onclick="selectDifficulty(30)">EASY (30s)</button>
-                <button class="diff-btn medium" onclick="selectDifficulty(15)">MEDIUM (15s)</button>
-                <button class="diff-btn hard" onclick="selectDifficulty(8)">HARD (8s)</button>
-            </div>
-        </div>
-
         <!-- GAME SCREEN -->
         <div id="screen-game" class="screen hidden">
             <div class="hud">
                 <div>LIVES: <span id="lives">❤️❤️❤️</span></div>
                 <div>STREAK: <span id="streak">0</span></div>
             </div>
-            
-            <div class="timer-wrap">
-                <div id="timer-bar"></div>
-            </div>
-
+            <div class="timer-wrap"><div id="timer-bar"></div></div>
             <div id="formula-display">\[ \dots \]</div>
             <div id="options-grid"></div>
         </div>
@@ -65,9 +68,7 @@
                 <button class="main-btn" onclick="showScreen('screen-home')">HOME</button>
             </div>
         </div>
-
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
