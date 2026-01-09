@@ -3,91 +3,114 @@ let roasts = [];
 let currentQ = null;
 let score = 0;
 let lives = 3;
-let highScore = localStorage.getItem('trigHighScore') || 0;
+let timer = null;
+let timeLimit = 30;
+let timeLeft = 30;
 
-async function init() {
-    document.getElementById('high-score').innerText = highScore;
-
-    try {
-        // Load Formulas
-        const mathRes = await fetch('mathformula.txt');
-        const mathData = await mathRes.text();
-        questions = mathData.split('\n').filter(l => l.includes('|')).map(line => {
-            const [q, correct, w1, w2, w3] = line.split('|').map(s => s.trim());
-            return { q, correct, options: [correct, w1, w2, w3] };
-        });
-
-        // Load Roasts
-        const roastRes = await fetch('roast.txt');
-        const roastData = await roastRes.text();
-        roasts = roastData.split('\n').filter(l => l.trim() !== "");
-
-        loadRound();
-    } catch (e) {
-        console.error(e);
-        alert("Files not found! Make sure mathformula.txt and roast.txt exist.");
-    }
-}
-
-function loadRound() {
-    if (questions.length === 0) return;
-    
-    currentQ = questions[Math.floor(Math.random() * questions.length)];
-    
-    // Set Question (LaTeX)
-    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    
-    // Shuffle Options
-    const shuffled = [...currentQ.options].sort(() => Math.random() - 0.5);
-    
-    // Generate Buttons
-    const grid = document.getElementById('options-grid');
-    grid.innerHTML = "";
-    shuffled.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerHTML = `\\( ${opt} \\)`; // Inline LaTeX
-        btn.onclick = () => checkChoice(opt);
-        grid.appendChild(btn);
+// Load Everything
+async function loadData() {
+    const mathRes = await fetch('mathformula.txt');
+    const mathText = await mathRes.text();
+    questions = mathText.split('\n').filter(l => l.includes('|')).map(line => {
+        const p = line.split('|').map(s => s.trim());
+        return { q: p[0], correct: p[1], options: [p[1], p[2], p[3], p[4]] };
     });
 
-    // Re-render MathJax
+    const roastRes = await fetch('roast.txt');
+    const roastText = await roastRes.text();
+    roasts = roastText.split('\n').filter(l => l.trim() !== "");
+
+    populateLearnList();
+}
+
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(screenId).classList.remove('hidden');
+    if (timer) clearInterval(timer);
+}
+
+function populateLearnList() {
+    const list = document.getElementById('learn-list');
+    list.innerHTML = questions.map(q => 
+        `<div class="learn-item">
+            <b>${q.q}</b> <br> Answer: \\( ${q.correct} \\)
+        </div>`).join('');
     MathJax.typesetPromise();
 }
 
-function checkChoice(choice) {
-    if (choice === currentQ.correct) {
-        score++;
-        if (score > highScore) {
-            highScore = score;
-            localStorage.setItem('trigHighScore', highScore);
-            document.getElementById('high-score').innerText = highScore;
-        }
-        document.getElementById('streak').innerText = score;
-        loadRound();
-    } else {
-        handleFail();
-    }
-}
-
-function handleFail() {
-    lives--;
+function startGame(difficulty) {
+    lives = 3;
     score = 0;
-    document.getElementById('streak').innerText = score;
-    document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives));
-
-    if (lives <= 0) {
-        document.getElementById('death-screen').classList.remove('hidden');
-    } else {
-        const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
-        document.getElementById('roast-text').innerText = randomRoast;
-        document.getElementById('overlay').classList.remove('hidden');
-    }
+    timeLimit = difficulty;
+    document.getElementById('lives').innerText = "❤️❤️❤️";
+    document.getElementById('streak').innerText = "0";
+    showScreen('screen-game');
+    nextRound();
 }
 
 function nextRound() {
-    document.getElementById('overlay').classList.add('hidden');
-    loadRound();
+    if (timer) clearInterval(timer);
+    currentQ = questions[Math.floor(Math.random() * questions.length)];
+    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    
+    const grid = document.getElementById('options-grid');
+    grid.innerHTML = "";
+    
+    // Shuffle Options
+    [...currentQ.options].sort(() => Math.random() - 0.5).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `\\( ${opt} \\)`;
+        btn.onclick = () => checkAnswer(opt);
+        grid.appendChild(btn);
+    });
+
+    MathJax.typesetPromise();
+    startTimer();
 }
 
-init();
+function startTimer() {
+    timeLeft = timeLimit;
+    const bar = document.getElementById('timer-bar');
+    
+    timer = setInterval(() => {
+        timeLeft -= 0.1;
+        const percent = (timeLeft / timeLimit) * 100;
+        bar.style.width = percent + "%";
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            handleWrong("Time Expired!");
+        }
+    }, 100);
+}
+
+function checkAnswer(choice) {
+    if (choice === currentQ.correct) {
+        score++;
+        document.getElementById('streak').innerText = score;
+        nextRound();
+    } else {
+        handleWrong();
+    }
+}
+
+function handleWrong(msg) {
+    if (timer) clearInterval(timer);
+    lives--;
+    document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives));
+
+    if (lives <= 0) {
+        endGame();
+    } else {
+        nextRound();
+    }
+}
+
+function endGame() {
+    document.getElementById('final-streak').innerText = score;
+    document.getElementById('roast-display').innerText = roasts[Math.floor(Math.random() * roasts.length)];
+    showScreen('screen-over');
+}
+
+loadData();
