@@ -3,32 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Quantum Prep</title>
+    <title>STEMANACE | Neural Combat</title>
     <!-- MathJax for rendering math -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Menacing Scanline Overlay -->
+    <div class="scanlines"></div>
 
     <div class="app-container">
         
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
-            <div class="brand">
-                <h1 class="logo">STEM<span>ANACE</span></h1>
-                <p class="tagline">QUANTUM LEVEL CLASS 12 PREP</p>
+            <div class="glitch-wrapper">
+                <h1 class="logo" data-text="STEMANACE">STEM<span>ANACE</span></h1>
             </div>
-            <div class="record-badge">BEST COMBO: <span id="high-score">0</span></div>
+            <p class="tagline">CALCULUS & TRIGONOMETRY KILLZONE</p>
+            <div class="record-badge">SYSTEM PEAK: <span id="high-score">0</span></div>
             <div class="nav-grid">
-                <button class="nav-btn arena" onclick="showScreen('screen-chapters')">ENTER ARENA</button>
-                <button class="nav-btn vault" onclick="showScreen('screen-learn')">FORMULA VAULT</button>
+                <button class="nav-btn arena hazard-btn" onclick="showScreen('screen-chapters')">INITIATE COMBAT</button>
+                <button class="nav-btn vault" onclick="showScreen('screen-learn')">ACCESS DATABASE</button>
             </div>
         </div>
 
         <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
-            <h2 class="title">CHOOSE SUBJECT</h2>
+            <button class="back-link" onclick="showScreen('screen-home')">[ TERMINATE_SESSION ]</button>
+            <h2 class="title">SELECT TARGET</h2>
             <div class="nav-grid">
                 <button class="chap-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                 <button class="chap-btn" onclick="selectChapter('calculus')">CALCULUS</button>
@@ -37,8 +39,8 @@
 
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2 class="title">INTENSITY</h2>
+            <button class="back-link" onclick="showScreen('screen-chapters')">[ BACK ]</button>
+            <h2 class="title">THREAT LEVEL</h2>
             <div class="nav-grid">
                 <button class="diff-btn easy" onclick="selectDifficulty(30)">STABLE (30s)</button>
                 <button class="diff-btn medium" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
@@ -46,16 +48,16 @@
             </div>
         </div>
 
-        <!-- STUDY HALL (VAULT) -->
+        <!-- STUDY VAULT (LEARN) -->
         <div id="screen-learn" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-            <h2 class="title">THE VAULT</h2>
+            <button class="back-link" onclick="showScreen('screen-home')">[ EXIT_VAULT ]</button>
+            <h2 class="title">NEURAL UPLOAD</h2>
             <div id="vault-content"></div>
         </div>
 
         <!-- GAME ARENA -->
         <div id="screen-game" class="screen hidden">
-            <div class="hud">
+            <div class="game-hud">
                 <div class="hud-stat">VITALITY: <span id="lives">❤️❤️❤️</span></div>
                 <div class="hud-stat">COMBO: <span id="streak">0</span></div>
             </div>
@@ -67,24 +69,24 @@
         <!-- ROAST & CORRECTION MODAL -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
-                <div class="warning-icon">⚠️</div>
+                <div class="caution-header">CRITICAL ERROR</div>
                 <p id="roast-message"></p>
                 <div class="correction-zone">
-                    <span class="label">CORRECT IDENTITY:</span>
+                    <span class="label">EXPECTED INPUT:</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="modal-btn" onclick="resumeAfterRoast()">ACKNOWLEDGED</button>
+                <button class="modal-btn" onclick="resumeAfterRoast()">REBOOT NEURONS</button>
             </div>
         </div>
 
         <!-- FINAL DEFEAT -->
         <div id="screen-over" class="screen hidden">
-            <h1 class="failure-msg">DEFEAT</h1>
+            <h1 class="failure-msg">FLATLINED</h1>
             <p id="final-roast" class="roast-sub"></p>
             <div class="final-stat">FINAL COMBO: <span id="final-streak">0</span></div>
             <div class="nav-grid">
-                <button class="nav-btn arena" onclick="showScreen('screen-difficulty')">RE-ENTER</button>
-                <button class="nav-btn vault" onclick="showScreen('screen-home')">HOME</button>
+                <button class="nav-btn arena hazard-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
+                <button class="nav-btn vault" onclick="showScreen('screen-home')">MAIN_MENU</button>
             </div>
         </div>
 
