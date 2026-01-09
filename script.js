@@ -8,7 +8,6 @@ let timerId = null;
 let timeLimit = 30;
 let timeLeft = 30;
 
-// Initialization
 async function init() {
     try {
         const mathRes = await fetch('mathformula.txt');
@@ -22,33 +21,36 @@ async function init() {
         const roastText = await roastRes.text();
         roasts = roastText.split('\n').filter(l => l.trim() !== "");
 
-        document.getElementById('high-score').innerText = highScore;
+        const hsEl = document.getElementById('high-score');
+        if(hsEl) hsEl.innerText = highScore;
+        
         showScreen('screen-home');
     } catch (e) {
-        alert("Error loading data files. Ensure mathformula.txt and roast.txt are in the same folder.");
+        console.error("Initialization failed:", e);
     }
 }
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+    const target = document.getElementById(id);
+    if(target) target.classList.remove('hidden');
+    
     if (timerId) clearInterval(timerId);
     if (id === 'screen-learn') populateLearn();
 }
 
-// Learn logic
 function populateLearn() {
     const list = document.getElementById('learn-list');
-    let html = `<table class="learn-table"><thead><tr><th>EXPRESSION</th><th>IDENTITY</th></tr></thead><tbody>`;
+    if(!list) return;
+    let html = `<table class="learn-table"><thead><tr><th>QUESTION</th><th>ANSWER</th></tr></thead><tbody>`;
     questions.forEach(q => {
         html += `<tr><td>\\(${q.q}\\)</td><td class="correct-ans">\\(${q.correct}\\)</td></tr>`;
     });
     html += `</tbody></table>`;
     list.innerHTML = html;
-    MathJax.typesetPromise();
+    if(window.MathJax) MathJax.typesetPromise();
 }
 
-// Game logic
 function selectDifficulty(sec) {
     timeLimit = sec;
     startGame();
@@ -63,18 +65,20 @@ function startGame() {
 }
 
 function updateHUD() {
-    document.getElementById('lives').innerText = "❤️".repeat(lives);
-    document.getElementById('streak').innerText = score;
+    const livesEl = document.getElementById('lives');
+    const streakEl = document.getElementById('streak');
+    // FIX: Math.max(0, lives) prevents RangeError
+    if(livesEl) livesEl.innerText = "❤️".repeat(Math.max(0, lives));
+    if(streakEl) streakEl.innerText = score;
 }
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
+    if (questions.length === 0) return;
+
     currentQ = questions[Math.floor(Math.random() * questions.length)];
-    
-    // Display LaTeX
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     
-    // Shuffle Options
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
     [...currentQ.options].sort(() => Math.random() - 0.5).forEach(opt => {
@@ -85,20 +89,19 @@ function nextRound() {
         grid.appendChild(btn);
     });
 
-    MathJax.typesetPromise();
+    if(window.MathJax) MathJax.typesetPromise();
     resetTimer();
 }
 
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-bar');
-    bar.style.width = "100%";
+    if(bar) bar.style.width = "100%";
     
     timerId = setInterval(() => {
         timeLeft -= 0.1;
-        bar.style.width = (timeLeft / timeLimit * 100) + "%";
+        if(bar) bar.style.width = (timeLeft / timeLimit * 100) + "%";
         if (timeLeft <= 0) {
-            clearInterval(timerId);
             handleWrong();
         }
     }, 100);
@@ -125,14 +128,22 @@ function handleWrong() {
     if (lives <= 0) {
         endGame();
     } else {
-        nextRound();
+        // Short delay so user sees they were wrong before next Q
+        setTimeout(nextRound, 500); 
     }
 }
 
 function endGame() {
-    document.getElementById('final-streak').innerText = score;
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)];
+    const finalStreakEl = document.getElementById('final-streak');
+    const roastMsgEl = document.getElementById('roast-msg');
+    
+    if(finalStreakEl) finalStreakEl.innerText = score;
+    if(roastMsgEl) {
+        const msg = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "Game Over!";
+        roastMsgEl.innerText = msg;
+    }
     showScreen('screen-over');
 }
 
+// Start the app
 init();
