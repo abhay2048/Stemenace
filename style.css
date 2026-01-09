@@ -5,121 +5,49 @@
     --accent: #00d2ff;
     --success: #2ed573;
     --text: #ffffff;
-    --panel: #1e1e2a;
 }
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-}
-
-.app-container {
-    width: 95%;
-    max-width: 600px;
-    height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.screen {
-    background: var(--card);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    text-align: center;
-    position: relative;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border: 1px solid #333;
-}
-
+body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+.app-container { width: 95%; max-width: 650px; height: 90vh; }
+.screen { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); text-align: center; position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; border: 1px solid #333; height: 100%; }
 .hidden { display: none !important; }
 
-/* Home Screen */
-h1 { font-size: 2.8rem; margin-bottom: 5px; letter-spacing: -1px; }
-.v12 { color: var(--primary); font-style: italic; font-weight: 900; }
-.subtitle { color: #888; margin-bottom: 30px; font-size: 0.9rem; }
-
-/* Buttons */
-.menu-btns { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px; margin: 0 auto; }
-button {
-    padding: 16px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    font-size: 1rem;
-    text-transform: uppercase;
-}
+/* Menu */
+h1 { font-size: 2.5rem; }
+.v12 { color: var(--primary); font-weight: 900; }
+.menu-btns { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 350px; margin: 0 auto; }
+button { padding: 16px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1rem; }
 .main-btn { background: #2a2a35; color: white; border: 1px solid #444; }
-.main-btn.play { background: var(--primary); border: none; font-size: 1.3rem; }
-.main-btn:hover { transform: scale(1.03); background: #333; }
-.main-btn.play:hover { background: #ff6b81; }
+.main-btn.play { background: var(--primary); font-size: 1.2rem; }
+.diff-btn { background: #1e1e2a; border: 2px solid #444; color: white; }
+.easy { border-color: var(--success); } .medium { border-color: #ffa502; } .hard { border-color: var(--primary); }
+.back-btn { position: absolute; top: 20px; left: 20px; background: transparent; color: #888; font-size: 0.8rem; }
 
-.diff-btn { background: var(--panel); border: 2px solid transparent; color: white; }
-.easy { border-color: var(--success); color: var(--success); }
-.medium { border-color: #ffa502; color: #ffa502; }
-.hard { border-color: var(--primary); color: var(--primary); }
-.diff-btn:hover { background: white; color: black; }
+/* Formula Display */
+#formula-display { font-size: 1.8rem; margin: 20px 0; min-height: 120px; display: flex; align-items: center; justify-content: center; overflow-x: auto; }
 
-.back-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: transparent;
-    color: #888;
-    padding: 5px 10px;
-    font-size: 0.8rem;
+/* Options Grid - THE FIX FOR VISIBILITY */
+#options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+.opt-btn { 
+    background: #1e1e2a; 
+    color: white; 
+    border: 1px solid #444; 
+    padding: 25px 10px; 
+    min-height: 100px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 0.85rem; /* Smaller font to fit complex LaTeX */
 }
+.opt-btn mjx-container { font-size: 1.1em !important; } /* Adjust MathJax scale inside buttons */
 
-/* Learn Table */
-#learn-list {
-    flex: 1;
-    overflow-y: auto;
-    margin-top: 40px;
-    padding-right: 10px;
-}
-.learn-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-.learn-table th {
-    background: #000;
-    color: var(--accent);
-    padding: 12px;
-    font-size: 0.7rem;
-    position: sticky;
-    top: 0;
-}
-.learn-table td {
-    padding: 15px 10px;
-    border-bottom: 1px solid #333;
-    font-size: 0.9rem;
-}
-.correct-ans { color: var(--success); font-weight: bold; }
-
-/* Game Elements */
-.hud { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; margin-bottom: 15px; color: var(--primary); }
-.timer-wrap { background: #000; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 30px; }
+/* HUD & Timer */
+.hud { display: flex; justify-content: space-between; color: var(--primary); margin-bottom: 10px; }
+.timer-wrap { background: #000; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
 #timer-bar { background: var(--primary); width: 100%; height: 100%; transition: width 0.1s linear; }
 
-#formula-display { font-size: 1.8rem; margin-bottom: 40px; min-height: 100px; display: flex; align-items: center; justify-content: center; }
-
-#options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.opt-btn { background: var(--panel); color: white; border: 1px solid #444; font-size: 0.9rem; padding: 20px 10px; }
-.opt-btn:hover { border-color: var(--accent); background: #252535; }
-
-/* Game Over */
-.over-title { color: var(--primary); font-size: 3.5rem; margin: 0; }
-.roast-msg { font-style: italic; color: #aaa; margin: 20px 0; min-height: 50px; }
+/* Learn Table */
+#learn-list { flex: 1; overflow-y: auto; margin-top: 20px; }
+.learn-table { width: 100%; border-collapse: collapse; text-align: left; }
+.learn-table td { padding: 12px; border-bottom: 1px solid #333; font-size: 0.9rem; }
+.correct-ans { color: var(--success); }
