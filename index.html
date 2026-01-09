@@ -4,35 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Master: Class 12</title>
+    <!-- MathJax for high-quality formulas -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="app-container">
+        
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
-            <h1>MATH MASTER <span class="v12">v12</span></h1>
-            <p class="subtitle">Best Score: <span id="high-score">0</span></p>
+            <div class="logo">
+                <h1>MATH MASTER</h1>
+                <span class="v12">CLASS 12</span>
+            </div>
+            <p class="hs-display">PERSONAL BEST: <span id="high-score">0</span></p>
             <div class="menu-btns">
-                <button class="main-btn play" onclick="showScreen('screen-chapters')">PLAY GAME</button>
-                <button class="main-btn" onclick="showScreen('screen-learn')">FORMULA LIST</button>
+                <button class="main-btn play-btn" onclick="showScreen('screen-chapters')">PLAY MISSION</button>
+                <button class="main-btn" onclick="showScreen('screen-learn')">STUDY HALL</button>
             </div>
         </div>
 
         <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
             <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
-            <h2>Select Chapter</h2>
+            <h2 class="screen-title">SELECT TOPIC</h2>
             <div class="menu-btns">
-                <button class="main-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="main-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+                <button class="chapter-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="chapter-btn" onclick="selectChapter('calculus')">CALCULUS</button>
             </div>
         </div>
 
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
             <button class="back-btn" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2>Intensity Level</h2>
+            <h2 class="screen-title">INTENSITY LEVEL</h2>
             <div class="menu-btns">
                 <button class="diff-btn easy" onclick="selectDifficulty(30)">EASY (30s)</button>
                 <button class="diff-btn medium" onclick="selectDifficulty(15)">MEDIUM (15s)</button>
@@ -40,35 +46,51 @@
             </div>
         </div>
 
-        <!-- LEARN SCREEN -->
+        <!-- STUDY HALL (LEARN) -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
-            <h2>Study Hall</h2>
-            <div id="learn-list"></div>
+            <h2 class="screen-title">FORMULA REFERENCE</h2>
+            <div id="learn-list">
+                <!-- Grouped formulas injected here -->
+            </div>
         </div>
 
-        <!-- GAME SCREEN -->
+        <!-- GAME ARENA -->
         <div id="screen-game" class="screen hidden">
             <div class="hud">
-                <div>LIVES: <span id="lives">❤️❤️❤️</span></div>
-                <div>STREAK: <span id="streak">0</span></div>
+                <div class="stat">LIVES: <span id="lives">❤️❤️❤️</span></div>
+                <div class="stat">STREAK: <span id="streak">0</span></div>
             </div>
-            <div class="timer-wrap"><div id="timer-bar"></div></div>
-            <div id="formula-display">\[ \dots \]</div>
-            <div id="options-grid"></div>
+            
+            <div class="timer-container">
+                <div id="timer-bar"></div>
+            </div>
+
+            <div id="question-box">
+                <p class="instruction">Identify the correct identity:</p>
+                <div id="formula-display">\[ \dots \]</div>
+            </div>
+
+            <div id="options-grid">
+                <!-- MCQ buttons injected here -->
+            </div>
         </div>
 
-        <!-- GAME OVER SCREEN -->
+        <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
-            <h1 class="over-title">DEFEAT</h1>
-            <p id="roast-msg" class="roast-msg"></p>
-            <p>Final Streak: <span id="final-streak">0</span></p>
+            <h1 class="over-status">DEFEAT</h1>
+            <p id="roast-text" class="roast-text"></p>
+            <div class="final-score-box">
+                STREAK ENDED AT: <span id="final-streak">0</span>
+            </div>
             <div class="menu-btns">
-                <button class="main-btn play" onclick="showScreen('screen-difficulty')">RETRY</button>
-                <button class="main-btn" onclick="showScreen('screen-home')">HOME</button>
+                <button class="main-btn play-btn" onclick="showScreen('screen-chapters')">RETRY MISSION</button>
+                <button class="main-btn" onclick="showScreen('screen-home')">RETURN HOME</button>
             </div>
         </div>
+
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
