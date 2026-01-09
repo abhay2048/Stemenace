@@ -3,92 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Master: Class 12</title>
-    <!-- MathJax for high-quality formulas -->
+    <title>Stemanace | STEM Mastery</title>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="app-container">
-        
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
-            <div class="logo">
-                <h1>MATH MASTER</h1>
-                <span class="v12">CLASS 12</span>
+            <div class="brand-header">
+                <h1 class="logo-text">STEM<span>ANACE</span></h1>
+                <p class="tagline">QUANTUM LEVEL CLASS 12 PREP</p>
             </div>
-            <p class="hs-display">PERSONAL BEST: <span id="high-score">0</span></p>
-            <div class="menu-btns">
-                <button class="main-btn play-btn" onclick="showScreen('screen-chapters')">PLAY MISSION</button>
-                <button class="main-btn" onclick="showScreen('screen-learn')">STUDY HALL</button>
+            <div class="main-stats">BEST STREAK: <span id="high-score">0</span></div>
+            <div class="nav-grid">
+                <button class="nav-btn primary" onclick="showScreen('screen-chapters')">ENTER ARENA</button>
+                <button class="nav-btn secondary" onclick="showScreen('screen-learn')">FORMULA VAULT</button>
             </div>
         </div>
 
         <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
-            <h2 class="screen-title">SELECT TOPIC</h2>
-            <div class="menu-btns">
-                <button class="chapter-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="chapter-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT ARENA</button>
+            <h2 class="section-title">CHOOSE SUBJECT</h2>
+            <div class="nav-grid">
+                <button class="chap-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="chap-btn" onclick="selectChapter('calculus')">CALCULUS</button>
             </div>
         </div>
 
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2 class="screen-title">INTENSITY LEVEL</h2>
-            <div class="menu-btns">
-                <button class="diff-btn easy" onclick="selectDifficulty(30)">EASY (30s)</button>
-                <button class="diff-btn medium" onclick="selectDifficulty(15)">MEDIUM (15s)</button>
-                <button class="diff-btn hard" onclick="selectDifficulty(8)">HARD (8s)</button>
+            <button class="back-link" onclick="showScreen('screen-chapters')">← BACK</button>
+            <h2 class="section-title">SET INTENSITY</h2>
+            <div class="nav-grid">
+                <button class="diff-btn easy" onclick="selectDifficulty(30)">STABLE (30s)</button>
+                <button class="diff-btn medium" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
+                <button class="diff-btn hard" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
         </div>
 
         <!-- STUDY HALL (LEARN) -->
         <div id="screen-learn" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
-            <h2 class="screen-title">FORMULA REFERENCE</h2>
-            <div id="learn-list">
-                <!-- Grouped formulas injected here -->
-            </div>
+            <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
+            <h2 class="section-title">THE VAULT</h2>
+            <div id="learn-list"></div>
         </div>
 
-        <!-- GAME ARENA -->
+        <!-- ARENA (GAME) -->
         <div id="screen-game" class="screen hidden">
-            <div class="hud">
-                <div class="stat">LIVES: <span id="lives">❤️❤️❤️</span></div>
-                <div class="stat">STREAK: <span id="streak">0</span></div>
+            <div class="game-hud">
+                <div class="hud-item">VITALITY: <span id="lives">❤️❤️❤️</span></div>
+                <div class="hud-item">COMBO: <span id="streak">0</span></div>
             </div>
-            
-            <div class="timer-container">
-                <div id="timer-bar"></div>
-            </div>
+            <div class="timer-rail"><div id="timer-fill"></div></div>
+            <div id="formula-display"></div>
+            <div id="options-grid"></div>
+        </div>
 
-            <div id="question-box">
-                <p class="instruction">Identify the correct identity:</p>
-                <div id="formula-display">\[ \dots \]</div>
-            </div>
-
-            <div id="options-grid">
-                <!-- MCQ buttons injected here -->
+        <!-- INTERSTITIAL ROAST POPUP (Shows on EVERY wrong answer) -->
+        <div id="roast-popup" class="overlay hidden">
+            <div class="modal roast-modal">
+                <div class="roast-icon">⚠️</div>
+                <p id="roast-message"></p>
+                <button class="modal-btn" onclick="resumeAfterRoast()">CONTINUE Drilling</button>
             </div>
         </div>
 
-        <!-- GAME OVER -->
+        <!-- GAME OVER SCREEN -->
         <div id="screen-over" class="screen hidden">
-            <h1 class="over-status">DEFEAT</h1>
-            <p id="roast-text" class="roast-text"></p>
-            <div class="final-score-box">
-                STREAK ENDED AT: <span id="final-streak">0</span>
-            </div>
-            <div class="menu-btns">
-                <button class="main-btn play-btn" onclick="showScreen('screen-chapters')">RETRY MISSION</button>
-                <button class="main-btn" onclick="showScreen('screen-home')">RETURN HOME</button>
+            <h1 class="failure-title">ARENA FAILED</h1>
+            <p id="final-roast" class="roast-text"></p>
+            <div class="score-summary">SCORE: <span id="final-streak">0</span></div>
+            <div class="nav-grid">
+                <button class="nav-btn primary" onclick="showScreen('screen-difficulty')">RE-ENTER</button>
+                <button class="nav-btn secondary" onclick="showScreen('screen-home')">HOME</button>
             </div>
         </div>
-
     </div>
 
     <script src="script.js"></script>
