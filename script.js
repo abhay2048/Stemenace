@@ -27,13 +27,14 @@ async function init() {
         document.getElementById('total-fails').innerText = totalFails;
         showScreen('screen-home');
     } catch (e) {
-        console.error("Initialization Failed.");
+        console.error("BOOT_ERROR: Neural database offline.");
     }
 }
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
+    document.getElementById('red-alert').classList.add('hidden');
     if (timerId) clearInterval(timerId);
     if (id === 'screen-learn') populateVault();
 }
@@ -57,10 +58,14 @@ function startGame() {
 
 function updateHUD() {
     document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives));
+    document.getElementById('streak').innerText = score;
 }
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
+    document.getElementById('red-alert').classList.add('hidden');
+    document.querySelector('.screen').classList.remove('panic');
+
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     
@@ -81,15 +86,19 @@ function nextRound() {
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
+    
     timerId = setInterval(() => {
         timeLeft -= 0.1;
         const ratio = timeLeft / timeLimit;
         bar.style.width = (ratio * 100) + "%";
         document.getElementById('efficiency').innerText = Math.round(ratio * 100) + "%";
 
-        if (timeLeft <= 0) {
-            handleWrong();
+        if (ratio < 0.25) {
+            document.getElementById('red-alert').classList.remove('hidden');
+            document.querySelector('#screen-game').classList.add('panic');
         }
+
+        if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
@@ -101,6 +110,7 @@ function handleChoice(choice) {
             localStorage.setItem('stemanaceScore', highScore);
             document.getElementById('high-score').innerText = highScore;
         }
+        updateHUD();
         nextRound();
     } else {
         handleWrong();
@@ -113,9 +123,10 @@ function handleWrong() {
     totalFails++;
     localStorage.setItem('stemanaceFails', totalFails);
     document.getElementById('total-fails').innerText = totalFails;
-    
-    document.querySelector('.app-container').classList.add('shake');
-    setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 400);
+    updateHUD();
+
+    document.querySelector('.app-container').style.transform = "scale(0.95)";
+    setTimeout(() => document.querySelector('.app-container').style.transform = "scale(1)", 150);
 
     const msg = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "DATA_ERROR";
     document.getElementById('roast-message').innerText = msg;
@@ -129,7 +140,7 @@ function resumeAfterRoast() {
     document.getElementById('roast-popup').classList.add('hidden');
     if (lives <= 0) {
         document.getElementById('final-streak').innerText = score;
-        document.getElementById('final-roast').innerText = "CALIBRATION_FAILED. RETURN TO THE VAULT.";
+        document.getElementById('final-roast').innerText = "DISAPPOINTING. RETURN TO THE VAULT.";
         showScreen('screen-over');
     } else {
         nextRound();
@@ -146,7 +157,7 @@ function populateVault() {
 
     let html = "";
     for (const chap in grouped) {
-        html += `<h3 class="vault-header">${chap.toUpperCase()}</h3>`;
+        html += `<h3 class="vault-header">${chap.toUpperCase()} UNIT</h3>`;
         html += `<table class="v-table"><tbody>`;
         grouped[chap].forEach(q => {
             html += `<tr><td>\\(${q.q}\\)</td><td class="v-ans">\\(${q.correct}\\)</td></tr>`;
