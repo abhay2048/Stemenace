@@ -3,94 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Ego Crusher</title>
+    <title>STEMANACE | Class 12 Neural Training</title>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="scanlines"></div>
-    <div id="red-alert" class="hidden"></div>
-
     <div class="app-container">
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
-            <div class="glitch-wrapper">
-                <h1 class="logo" data-text="STEMANACE">STEM<span>ANACE</span></h1>
-            </div>
-            <p class="tagline">WHERE DREAMS GO TO DIE</p>
+            <header>
+                <h1 class="logo">STEM<span>ANACE</span></h1>
+                <p class="tagline">FORMULA RECOGNITION INTERFACE</p>
+            </header>
             
-            <div class="ego-stats">
-                <div class="stat-item">SYSTEM PEAK: <span id="high-score">0</span></div>
-                <div class="stat-item">TOTAL FAILURES: <span id="total-fails">0</span></div>
+            <div class="dashboard">
+                <div class="stat-card">
+                    <div class="stat-label">System Peak</div>
+                    <div id="high-score" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Neural Fails</div>
+                    <div id="total-fails" class="stat-value">0</div>
+                </div>
             </div>
 
             <div class="nav-grid">
-                <button class="nav-btn hazard-btn" onclick="showScreen('screen-chapters')">PROVE YOUR WORTH</button>
-                <button class="nav-btn vault-btn" onclick="showScreen('screen-learn')">THE VAULT</button>
+                <button class="primary-btn" onclick="showScreen('screen-chapters')">PROVE PROFICIENCY</button>
+                <button class="secondary-btn" onclick="showScreen('screen-learn')">ACCESS VAULT</button>
             </div>
         </div>
 
         <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">[ RETREAT ]</button>
-            <h2 class="title">SELECT TARGET</h2>
+            <button class="back-link" onclick="showScreen('screen-home')">← RETREAT</button>
+            <h2 class="vault-header">SELECT DOMAIN</h2>
             <div class="nav-grid">
-                <button class="chap-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="chap-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
             </div>
         </div>
 
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-chapters')">[ BACK ]</button>
-            <h2 class="title">THREAT LEVEL</h2>
+            <h2 class="vault-header">STRESS CALIBRATION</h2>
             <div class="nav-grid">
-                <button class="diff-btn easy" onclick="selectDifficulty(30)">MEDIOCRE (30s)</button>
-                <button class="diff-btn medium" onclick="selectDifficulty(15)">STRESSED (15s)</button>
-                <button class="diff-btn hard" onclick="selectDifficulty(8)">EGO CRUSHER (8s)</button>
+                <button class="primary-btn" onclick="selectDifficulty(30)">RELAXED (30s)</button>
+                <button class="primary-btn" onclick="selectDifficulty(15)">STRESSED (15s)</button>
+                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
         </div>
 
-        <!-- STUDY VAULT -->
+        <!-- VAULT (STUDY) -->
         <div id="screen-learn" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">[ EXIT_VAULT ]</button>
-            <h2 class="title">NEURAL UPLOAD</h2>
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+            <h2 class="vault-header">FORMULA DATABASE</h2>
             <div id="vault-content"></div>
         </div>
 
-        <!-- GAME ARENA -->
+        <!-- ARENA (GAME) -->
         <div id="screen-game" class="screen hidden">
-            <div class="game-hud">
-                <div class="hud-stat">VITALITY: <span id="lives">❤️❤️❤️</span></div>
-                <div class="hud-stat">EFFICIENCY: <span id="efficiency">100%</span></div>
+            <div class="arena-hud">
+                <div>VITALITY: <span id="lives">❤️❤️❤️</span></div>
+                <div>EFFICIENCY: <span id="efficiency">100%</span></div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div class="hud-stat" style="font-size: 0.7rem; margin-bottom: 5px;">COMBO: <span id="streak">0</span></div>
             <div id="formula-display"></div>
             <div id="options-grid"></div>
         </div>
 
-        <!-- ROAST & CORRECTION MODAL -->
+        <!-- ROAST/CORRECTION POPUP -->
         <div id="roast-popup" class="overlay hidden">
-            <div class="modal failure-border">
-                <div class="judgment-header">INFERIOR LOGIC</div>
+            <div class="modal">
+                <div class="modal-header">CRITICAL LOGIC ERROR</div>
                 <p id="roast-message"></p>
                 <div class="correction-zone">
-                    <span class="label">LEARN THIS, AMATEUR:</span>
+                    <span class="correction-label">REQUIRED IDENTITY</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="modal-btn" onclick="resumeAfterRoast()">I'M SORRY, CONTINUE</button>
+                <button class="accent-btn" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE ERROR</button>
             </div>
         </div>
 
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
-            <h1 class="failure-msg">FLATLINED</h1>
-            <p id="final-roast" class="roast-sub"></p>
-            <div class="final-stat">FINAL COMBO: <span id="final-streak">0</span></div>
+            <h2 class="modal-header" style="font-size: 3rem;">FAILURE</h2>
+            <p id="final-roast" style="margin-bottom: 2rem;"></p>
+            <div class="stat-card" style="margin-bottom: 2rem;">
+                <div class="stat-label">Final Streak</div>
+                <div id="final-streak" class="stat-value">0</div>
+            </div>
             <div class="nav-grid">
-                <button class="nav-btn hazard-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
-                <button class="nav-btn vault-btn" onclick="showScreen('screen-home')">HOME</button>
+                <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
+                <button class="secondary-btn" onclick="showScreen('screen-home')">MAIN MENU</button>
             </div>
         </div>
     </div>
