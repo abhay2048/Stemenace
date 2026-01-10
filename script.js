@@ -26,13 +26,14 @@ async function init() {
         document.getElementById('high-score').innerText = highScore;
         document.getElementById('total-fails').innerText = totalFails;
         showScreen('screen-home');
-    } catch (e) { console.error("STEMANACE Init Failure."); }
+    } catch (e) {
+        console.error("Initialization Failed.");
+    }
 }
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
-    document.getElementById('red-alert').classList.add('hidden');
     if (timerId) clearInterval(timerId);
     if (id === 'screen-learn') populateVault();
 }
@@ -56,14 +57,10 @@ function startGame() {
 
 function updateHUD() {
     document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives));
-    document.getElementById('streak').innerText = score;
 }
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
-    document.getElementById('red-alert').classList.add('hidden');
-    document.querySelector('.app-container').classList.remove('panic');
-
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     
@@ -77,29 +74,22 @@ function nextRound() {
         grid.appendChild(btn);
     });
 
-    MathJax.typesetPromise();
+    if (window.MathJax) MathJax.typesetPromise();
     resetTimer();
 }
 
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
-    bar.classList.remove('timer-low');
-    
     timerId = setInterval(() => {
         timeLeft -= 0.1;
         const ratio = timeLeft / timeLimit;
         bar.style.width = (ratio * 100) + "%";
-
         document.getElementById('efficiency').innerText = Math.round(ratio * 100) + "%";
 
-        if (ratio < 0.25) {
-            bar.classList.add('timer-low');
-            document.getElementById('red-alert').classList.remove('hidden');
-            document.querySelector('.app-container').classList.add('panic');
+        if (timeLeft <= 0) {
+            handleWrong();
         }
-
-        if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
@@ -111,7 +101,6 @@ function handleChoice(choice) {
             localStorage.setItem('stemanaceScore', highScore);
             document.getElementById('high-score').innerText = highScore;
         }
-        updateHUD();
         nextRound();
     } else {
         handleWrong();
@@ -124,28 +113,27 @@ function handleWrong() {
     totalFails++;
     localStorage.setItem('stemanaceFails', totalFails);
     document.getElementById('total-fails').innerText = totalFails;
-    updateHUD();
+    
+    document.querySelector('.app-container').classList.add('shake');
+    setTimeout(() => document.querySelector('.app-container').classList.remove('shake'), 400);
 
-    const container = document.querySelector('.app-container');
-    container.style.animation = "shake 0.2s ease-in-out 0s 2";
-
-    const roast = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "DATA_ERROR";
-    document.getElementById('roast-message').innerText = roast;
+    const msg = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "DATA_ERROR";
+    document.getElementById('roast-message').innerText = msg;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     
     document.getElementById('roast-popup').classList.remove('hidden');
-    MathJax.typesetPromise();
+    if (window.MathJax) MathJax.typesetPromise();
 }
 
 function resumeAfterRoast() {
     document.getElementById('roast-popup').classList.add('hidden');
-    if (lives <= 0) endGame(); else nextRound();
-}
-
-function endGame() {
-    document.getElementById('final-streak').innerText = score;
-    document.getElementById('final-roast').innerText = "DISAPPOINTING. RETURN TO THE VAULT.";
-    showScreen('screen-over');
+    if (lives <= 0) {
+        document.getElementById('final-streak').innerText = score;
+        document.getElementById('final-roast').innerText = "CALIBRATION_FAILED. RETURN TO THE VAULT.";
+        showScreen('screen-over');
+    } else {
+        nextRound();
+    }
 }
 
 function populateVault() {
@@ -158,7 +146,7 @@ function populateVault() {
 
     let html = "";
     for (const chap in grouped) {
-        html += `<h3 class="chap-header">${chap.toUpperCase()}</h3>`;
+        html += `<h3 class="vault-header">${chap.toUpperCase()}</h3>`;
         html += `<table class="v-table"><tbody>`;
         grouped[chap].forEach(q => {
             html += `<tr><td>\\(${q.q}\\)</td><td class="v-ans">\\(${q.correct}\\)</td></tr>`;
@@ -166,7 +154,7 @@ function populateVault() {
         html += `</tbody></table>`;
     }
     list.innerHTML = html;
-    MathJax.typesetPromise();
+    if (window.MathJax) MathJax.typesetPromise();
 }
 
 init();
