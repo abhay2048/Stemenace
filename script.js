@@ -27,7 +27,7 @@ async function init() {
         document.getElementById('total-fails').innerText = totalFails;
         showScreen('screen-home');
     } catch (e) {
-        console.error("BOOT_ERROR: Neural database offline.");
+        console.error("BOOT_ERROR: Critical database failure.");
     }
 }
 
@@ -64,7 +64,8 @@ function updateHUD() {
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('red-alert').classList.add('hidden');
-    document.querySelector('.screen').classList.remove('panic');
+    document.querySelector('#screen-game').classList.remove('panic');
+    document.getElementById('timer-fill').style.background = "";
 
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -89,11 +90,12 @@ function resetTimer() {
     
     timerId = setInterval(() => {
         timeLeft -= 0.1;
-        const ratio = timeLeft / timeLimit;
-        bar.style.width = (ratio * 100) + "%";
-        document.getElementById('efficiency').innerText = Math.round(ratio * 100) + "%";
+        const ratio = (timeLeft / timeLimit) * 100;
+        bar.style.width = ratio + "%";
+        document.getElementById('efficiency').innerText = Math.round(ratio) + "%";
 
-        if (ratio < 0.25) {
+        if (timeLeft < 3 || ratio < 25) {
+            bar.style.background = "var(--accent-500)";
             document.getElementById('red-alert').classList.remove('hidden');
             document.querySelector('#screen-game').classList.add('panic');
         }
@@ -125,10 +127,12 @@ function handleWrong() {
     document.getElementById('total-fails').innerText = totalFails;
     updateHUD();
 
-    document.querySelector('.app-container').style.transform = "scale(0.95)";
-    setTimeout(() => document.querySelector('.app-container').style.transform = "scale(1)", 150);
+    // Subtle scale feedback for depth
+    const container = document.querySelector('.app-container');
+    container.style.transform = "scale(0.98)";
+    setTimeout(() => container.style.transform = "scale(1)", 150);
 
-    const msg = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "DATA_ERROR";
+    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "DATA_ERROR";
     document.getElementById('roast-message').innerText = msg;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     
