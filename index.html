@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Neural Arena</title>
-    <!-- MathJax for high-fidelity formula rendering -->
+    <title>STEMANACE | Neural Calibrator</title>
+    <!-- MathJax for sharp formula rendering -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,32 +16,32 @@
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <header>
-                <div class="status-bar">SYSTEM_READY // AUTH_VERIFIED</div>
+                <div class="status-bar">SIMULATION_READY // PRESTIGE_MODE</div>
                 <h1 class="logo" data-text="STEMANACE">STEM<span>ANACE</span></h1>
-                <p class="tagline">NEURAL ARCHITECTURE CALIBRATION</p>
+                <p class="tagline">HIGHER-ORDER NEURAL DRILL</p>
             </header>
             
             <div class="dashboard">
                 <div class="stat-card">
-                    <div class="stat-label">SYSTEM_PEAK</div>
+                    <div class="stat-label">PEAK_STREAK</div>
                     <div id="high-score" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">NEURAL_FAILS</div>
+                    <div class="stat-label">TOTAL_RELAPSES</div>
                     <div id="total-fails" class="stat-value">0</div>
                 </div>
             </div>
 
             <div class="nav-grid">
-                <button class="primary-btn" onclick="showScreen('screen-chapters')">PROVE PROFICIENCY</button>
-                <button class="secondary-btn" onclick="showScreen('screen-learn')">ACCESS VAULT</button>
+                <button class="primary-btn" onclick="showScreen('screen-chapters')">BEGIN CALIBRATION</button>
+                <button class="secondary-btn" onclick="showScreen('screen-learn')">THE VAULT</button>
             </div>
         </div>
 
         <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← TERMINATE_SESSION</button>
-            <h2 class="vault-header">SELECT_TARGET_DOMAIN</h2>
+            <button class="back-link" onclick="showScreen('screen-home')">← ABORT_SESSION</button>
+            <h2 class="vault-header">TARGET_DOMAIN</h2>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                 <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
@@ -51,10 +51,10 @@
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2 class="vault-header">STRESS_CALIBRATION</h2>
+            <h2 class="vault-header">STRESS_TOLERANCE</h2>
             <div class="nav-grid">
-                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE (30s)</button>
-                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
+                <button class="diff-btn easy" onclick="selectDifficulty(30)">STABLE (30s)</button>
+                <button class="diff-btn medium" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
                 <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
         </div>
@@ -62,7 +62,7 @@
         <!-- VAULT (STUDY) -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
-            <h2 class="vault-header">NEURAL_DATABASE</h2>
+            <h2 class="vault-header">NEURAL_LIBRARY</h2>
             <div id="vault-content"></div>
         </div>
 
@@ -79,22 +79,22 @@
                 </div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div class="hud-label" style="text-align:center">COMBO_STREAK: <span id="streak" style="color:var(--primary-500)">0</span></div>
+            <div class="hud-label" style="text-align:center">CURRENT_COMBO: <span id="streak" style="color:var(--text)">0</span></div>
             
             <div id="formula-display"></div>
             <div id="options-grid"></div>
         </div>
 
-        <!-- ROAST/CORRECTION MODAL -->
+        <!-- ROAST/CORRECTION POPUP -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
-                <div class="modal-header">CRITICAL_LOGIC_ERROR</div>
+                <div class="modal-header">NEURAL_DISCREPANCY</div>
                 <p id="roast-message"></p>
                 <div class="correction-zone">
                     <span class="correction-label">REQUIRED_IDENTITY</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="accent-btn" style="width:100%" onclick="resumeAfterRoast()">RECALIBRATE NEURONS</button>
+                <button class="primary-btn" style="width:100%" onclick="resumeAfterRoast()">RETRY_CALIBRATION</button>
             </div>
         </div>
 
@@ -102,13 +102,13 @@
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
             <p id="final-roast" class="roast-sub"></p>
-            <div class="stat-card" style="margin-bottom: 2rem; border-color: var(--accent-500);">
-                <div class="stat-label">FINAL_COMBO</div>
-                <div id="final-streak" class="stat-value" style="color: var(--accent-500);">0</div>
+            <div class="stat-card" style="margin-bottom: 2rem; border-color: var(--accent);">
+                <div class="stat-label">FINAL_STREAK</div>
+                <div id="final-streak" class="stat-value" style="color: var(--accent);">0</div>
             </div>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
-                <button class="secondary-btn" onclick="showScreen('screen-home')">RETURN_HOME</button>
+                <button class="secondary-btn" onclick="showScreen('screen-home')">MAIN_MENU</button>
             </div>
         </div>
     </div>
