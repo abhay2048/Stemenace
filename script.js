@@ -13,8 +13,8 @@ let timeLeft = 30;
 async function init() {
     try {
         const mathRes = await fetch('mathformula.txt');
-        const mathText = await mathRes.text();
-        allQuestions = mathText.split('\n').filter(l => l.includes('::')).map(line => {
+        const mathData = await mathRes.text();
+        allQuestions = mathData.split('\n').filter(l => l.includes('::')).map(line => {
             const p = line.split('::').map(s => s.trim());
             return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
         });
@@ -95,7 +95,7 @@ function resetTimer() {
         document.getElementById('efficiency').innerText = Math.round(ratio) + "%";
 
         if (timeLeft < 3 || ratio < 25) {
-            bar.style.background = "var(--accent-500)";
+            bar.style.background = "var(--text)";
             document.getElementById('red-alert').classList.remove('hidden');
             document.querySelector('#screen-game').classList.add('panic');
         }
@@ -127,12 +127,12 @@ function handleWrong() {
     document.getElementById('total-fails').innerText = totalFails;
     updateHUD();
 
-    // Subtle scale feedback for depth
+    // Visual feedback for depth
     const container = document.querySelector('.app-container');
-    container.style.transform = "scale(0.98)";
+    container.style.transform = "scale(0.97)";
     setTimeout(() => container.style.transform = "scale(1)", 150);
 
-    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "DATA_ERROR";
+    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "LOGIC_ERROR";
     document.getElementById('roast-message').innerText = msg;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     
