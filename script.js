@@ -6,30 +6,34 @@ let neuralDebt = [];
 let currentQ = null;
 let score = 0;
 let lives = 3;
-
-// --- 2. DATA REPAIR SYSTEM (Prevents the 'total' of undefined error) ---
-let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
-let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
-let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
-
-let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || {};
-
-// This ensures that even if your save data is old/broken, it gets fixed instantly
-function sanitizeStorage() {
-    const requiredChapters = ['global', 'calculus', 'trigonometry'];
-    requiredChapters.forEach(chap => {
-        if (!correctHistory[chap]) {
-            correctHistory[chap] = { correct: 0, total: 0 };
-        }
-    });
-    localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
-}
-sanitizeStorage();
-
 let timerId = null;
 let timeLimit = 30;
 let timeLeft = 30;
 let isMuted = false;
+
+// --- 2. THE "NUCLEAR" STORAGE RESET ---
+// This block ensures the game structure is PERFECT before anything else runs
+let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
+let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
+let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
+
+let correctHistory;
+try {
+    const rawHistory = localStorage.getItem('stemanaceHistory');
+    correctHistory = JSON.parse(rawHistory) || {};
+    // If these specific keys don't exist, the game crashes. Let's force them.
+    if (!correctHistory.global) correctHistory.global = { correct: 0, total: 0 };
+    if (!correctHistory.calculus) correctHistory.calculus = { correct: 0, total: 0 };
+    if (!correctHistory.trigonometry) correctHistory.trigonometry = { correct: 0, total: 0 };
+} catch (e) {
+    // If the data is so broken it won't even parse, wipe it clean
+    correctHistory = {
+        global: { correct: 0, total: 0 },
+        calculus: { correct: 0, total: 0 },
+        trigonometry: { correct: 0, total: 0 }
+    };
+}
+localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
 
 // --- 3. AUDIO SYSTEM ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -38,14 +42,14 @@ function playProceduralSound(f, t, d, v = 0.1) {
     try {
         const o = audioCtx.createOscillator();
         const g = audioCtx.createGain();
-        osc.type = t;
-        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-        gain.gain.setValueAtTime(v, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + d);
+        o.type = t;
+        o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g);
+        g.connect(audioCtx.destination);
+        o.start();
+        o.stop(audioCtx.currentTime + d);
     } catch(e) {}
 }
 const uiClick = () => playProceduralSound(600, 'sine', 0.1);
@@ -60,26 +64,32 @@ function toggleMute() {
 
 // --- 4. INITIALIZATION ---
 async function init() {
+    // 1. Load backup data immediately so buttons work even if fetch fails
+    allQuestions = [
+        { chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] },
+        { chapter: "trigonometry", q: "\\sin^2 x + \\cos^2 x", correct: "1", options: ["1", "0", "\\tan x", "-1"] }
+    ];
+    roasts = ["Neural drift identified.", "Pattern mismatch detected."];
+
     try {
         const res = await fetch('mathformula.txt');
-        if (!res.ok) throw new Error("404");
-        const text = await res.text();
-        allQuestions = text.split('\n').filter(l => l.includes('::')).map(line => {
-            const p = line.split('::').map(s => s.trim());
-            return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
-        });
+        if (res.ok) {
+            const text = await res.text();
+            const parsed = text.split('\n').filter(l => l.includes('::')).map(line => {
+                const p = line.split('::').map(s => s.trim());
+                return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
+            });
+            if (parsed.length > 0) allQuestions = parsed;
+        }
 
         const roastRes = await fetch('roast.txt');
-        const roastText = await roastRes.text();
-        roasts = roastText.split('\n').filter(l => l.trim() !== "");
-
+        if (roastRes.ok) {
+            const roastText = await roastRes.text();
+            const parsedRoasts = roastText.split('\n').filter(l => l.trim() !== "");
+            if (parsedRoasts.length > 0) roasts = parsedRoasts;
+        }
     } catch (e) {
-        console.warn("Files not found. Loading local emergency backup...");
-        allQuestions = [
-            { chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] },
-            { chapter: "trigonometry", q: "\\sin^2 x + \\cos^2 x", correct: "1", options: ["1", "0", "\\tan x", "-1"] }
-        ];
-        roasts = ["Neural link unstable. Manual override required."];
+        console.warn("Server Database Offline. Using Neural Backup.");
     }
 
     updateHomeDashboard();
@@ -87,20 +97,20 @@ async function init() {
 }
 
 function updateHomeDashboard() {
-    document.getElementById('high-score').innerText = highScore;
-    document.getElementById('total-drills').innerText = totalDrills;
+    // Use Optional Chaining (?.) to prevent crashes if stats are somehow missing
+    document.getElementById('high-score').innerText = highScore || 0;
+    document.getElementById('total-drills').innerText = totalDrills || 0;
     
-    const getRank = (s) => {
-        if (s >= 76) return "SINGULARITY";
-        if (s >= 51) return "NEURAL ACE";
-        if (s >= 31) return "ARCHITECT";
-        if (s >= 16) return "OPERATOR";
-        if (s >= 6) return "VARIABLE";
-        return "CONSTANT";
-    };
-    document.getElementById('current-rank').innerText = getRank(highScore);
+    const s = highScore || 0;
+    let rankName = "CONSTANT";
+    if (s >= 76) rankName = "SINGULARITY";
+    else if (s >= 51) rankName = "NEURAL ACE";
+    else if (s >= 31) rankName = "ARCHITECT";
+    else if (s >= 16) rankName = "OPERATOR";
+    else if (s >= 6) rankName = "VARIABLE";
     
-    // SAFE ACCESS using Optional Chaining
+    document.getElementById('current-rank').innerText = rankName;
+    
     const total = correctHistory?.global?.total || 0;
     const correct = correctHistory?.global?.correct || 0;
     const prof = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -111,7 +121,9 @@ function updateHomeDashboard() {
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
-    if (target) target.classList.remove('hidden');
+    if (target) {
+        target.classList.remove('hidden');
+    }
     
     if (id === 'screen-diagnostics') populateDiagnostics();
     if (id === 'screen-learn') populateVault();
@@ -120,14 +132,18 @@ function showScreen(id) {
 
 function selectChapter(chap) {
     filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap);
-    if (filteredQuestions.length === 0) filteredQuestions = allQuestions; 
+    // If someone clicks a chapter that isn't in the .txt yet, give them everything
+    if(filteredQuestions.length === 0) filteredQuestions = allQuestions; 
     showScreen('screen-difficulty');
 }
 
 function selectDifficulty(sec) {
-    timeLimit = sec; lives = 3; score = 0; neuralDebt = [];
-    updateHUD(); 
-    showScreen('screen-game'); 
+    timeLimit = sec;
+    lives = 3;
+    score = 0;
+    neuralDebt = [];
+    updateHUD();
+    showScreen('screen-game');
     nextRound();
 }
 
@@ -142,7 +158,7 @@ function nextRound() {
     document.getElementById('red-alert').classList.add('hidden');
     document.querySelector('#screen-game').classList.remove('panic');
 
-    if (filteredQuestions.length === 0) return;
+    if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -183,7 +199,7 @@ function handleChoice(choice) {
     if (!currentQ) return;
     const isCorrect = (choice === currentQ.correct);
     
-    // Safety: ensure chapter exists in history
+    // Safety check for subject history
     if (!correctHistory[currentQ.chapter]) {
         correctHistory[currentQ.chapter] = { correct: 0, total: 0 };
     }
@@ -214,7 +230,7 @@ function handleWrong() {
     
     if (currentQ) neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
 
-    const msg = roasts.length > 0 ? roasts[Math.floor(Math.random() * roasts.length)] : "NEURAL FAILURE.";
+    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "CALIBRATION ERROR.";
     document.getElementById('roast-message').innerText = msg;
     document.getElementById('correction-display').innerHTML = currentQ ? `\\[ ${currentQ.correct} \\]` : "";
     document.getElementById('roast-popup').classList.remove('hidden');
@@ -237,29 +253,37 @@ function resumeAfterRoast() {
 }
 
 function endGame() {
-    const rankObj = RANKS.slice().reverse().find(r => score >= r.threshold);
+    const rankObj = getRankInfo(score);
     document.getElementById('final-streak').innerText = score;
     const badge = document.getElementById('final-rank');
-    badge.innerText = rankObj.name;
-    badge.style.backgroundColor = rankObj.color;
+    if (badge) {
+        badge.innerText = rankObj.name;
+        badge.style.backgroundColor = rankObj.color;
+    }
     
-    document.getElementById('debt-list').innerHTML = neuralDebt.length > 0 ? 
-        neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><span style="color:var(--text)">\\(${d.a}\\)</span></div>`).join('') :
-        "<p>Neural pathways clear.</p>";
+    const debtEl = document.getElementById('debt-list');
+    if (debtEl) {
+        debtEl.innerHTML = neuralDebt.length > 0 ? 
+            neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><span style="color:var(--text)">\\(${d.a}\\)</span></div>`).join('') :
+            "<p>System Optimized. No debt.</p>";
+    }
     
     if (window.MathJax) MathJax.typesetPromise();
     showScreen('screen-over');
     updateHomeDashboard();
 }
 
-const RANKS = [
-    { name: "CONSTANT", threshold: 0, color: "#64748b" },
-    { name: "VARIABLE", threshold: 6, color: "#10b981" },
-    { name: "OPERATOR", threshold: 16, color: "#38bdf8" },
-    { name: "ARCHITECT", threshold: 31, color: "#f59e0b" },
-    { name: "NEURAL ACE", threshold: 51, color: "#ae133f" },
-    { name: "SINGULARITY", threshold: 76, color: "#6a162c" }
-];
+function getRankInfo(s) {
+    const RANKS = [
+        { name: "CONSTANT", threshold: 0, color: "#64748b" },
+        { name: "VARIABLE", threshold: 6, color: "#10b981" },
+        { name: "OPERATOR", threshold: 16, color: "#38bdf8" },
+        { name: "ARCHITECT", threshold: 31, color: "#f59e0b" },
+        { name: "NEURAL ACE", threshold: 51, color: "#ae133f" },
+        { name: "SINGULARITY", threshold: 76, color: "#6a162c" }
+    ];
+    return [...RANKS].reverse().find(r => s >= r.threshold);
+}
 
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
@@ -269,8 +293,8 @@ function populateDiagnostics() {
     };
     
     container.innerHTML = `
-        <div class="diag-card"><span class="diag-title">CALCULUS_PROFICIENCY</span><div class="diag-subject">${getP('calculus')}%</div><div class="diag-bar-bg"><div class="diag-bar-fill" style="width:${getP('calculus')}%"></div></div></div>
-        <div class="diag-card"><span class="diag-title">TRIG_PROFICIENCY</span><div class="diag-subject">${getP('trigonometry')}%</div><div class="diag-bar-bg"><div class="diag-bar-fill" style="width:${getP('trigonometry')}%"></div></div></div>
+        <div class="diag-card"><span class="diag-title">CALCULUS_STABILITY</span><div class="diag-subject">${getP('calculus')}%</div><div class="diag-bar-bg"><div class="diag-bar-fill" style="width:${getP('calculus')}%"></div></div></div>
+        <div class="diag-card"><span class="diag-title">TRIG_STABILITY</span><div class="diag-subject">${getP('trigonometry')}%</div><div class="diag-bar-bg"><div class="diag-bar-fill" style="width:${getP('trigonometry')}%"></div></div></div>
     `;
 }
 
@@ -289,10 +313,11 @@ function populateVault() {
 }
 
 function shareResult() {
-    const r = RANKS.slice().reverse().find(rank => score >= rank.threshold).name;
-    const text = `SYSTEM REPORT: Streak [${score}] // Rank [${r}] on STEMANACE. Can you reach SINGULARITY? ${window.location.href}`;
-    if (navigator.share) navigator.share({ title: 'STEMANACE', text: text, url: window.location.href });
-    else alert("Copied: " + text);
+    const rankInfo = getRankInfo(score);
+    const text = `SYSTEM REPORT: I cleared the STEMANACE Arena with a streak of ${score}.\nNEURAL TIER: [${rankInfo.name}]\n\nCan you beat me? ${window.location.href}`;
+    if (navigator.share) navigator.share({ title: 'STEMANACE Performance', text: text, url: window.location.href });
+    else alert("Copied to clipboard!");
 }
 
+// Run init
 init();
