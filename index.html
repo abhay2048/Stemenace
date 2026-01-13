@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    <!-- MathJax for sharp formula rendering -->
+    <!-- MathJax for High-Fidelity Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,8 +16,8 @@
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <header>
-                <div class="status-bar">SIMULATION_READY // PRESTIGE_MODE</div>
-                <h1 class="logo" data-text="STEMANACE">STEM<span>ANACE</span></h1>
+                <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // AUTH_OK</div>
+                <h1 class="logo">STEM<span>ANACE</span></h1>
                 <p class="tagline">HIGHER-ORDER NEURAL DRILL</p>
             </header>
             
@@ -27,35 +27,36 @@
                     <div id="high-score" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">TOTAL_RELAPSES</div>
+                    <div class="stat-label">TOTAL_FAILURES</div>
                     <div id="total-fails" class="stat-value">0</div>
                 </div>
             </div>
 
             <div class="nav-grid">
-                <button class="primary-btn" onclick="showScreen('screen-chapters')">BEGIN CALIBRATION</button>
-                <button class="secondary-btn" onclick="showScreen('screen-learn')">THE VAULT</button>
+                <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
+                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
             </div>
         </div>
 
-        <!-- CHAPTER SELECTION -->
+        <!-- SUBJECT SELECTION -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← ABORT_SESSION</button>
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT_SESSION</button>
             <h2 class="vault-header">TARGET_DOMAIN</h2>
             <div class="nav-grid">
-                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+                <button class="primary-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="primary-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
             </div>
         </div>
 
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2 class="vault-header">STRESS_TOLERANCE</h2>
+            <h2 class="vault-header">STRESS_CALIBRATION</h2>
             <div class="nav-grid">
-                <button class="diff-btn easy" onclick="selectDifficulty(30)">STABLE (30s)</button>
-                <button class="diff-btn medium" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
-                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
+                <button class="diff-btn easy" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
+                <button class="diff-btn medium" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
+                <button class="accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
         </div>
 
@@ -79,13 +80,13 @@
                 </div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div class="hud-label" style="text-align:center">CURRENT_COMBO: <span id="streak" style="color:var(--text)">0</span></div>
+            <div class="hud-label" style="text-align:center">COMBO: <span id="streak" style="color:var(--text)">0</span></div>
             
             <div id="formula-display"></div>
             <div id="options-grid"></div>
         </div>
 
-        <!-- ROAST/CORRECTION POPUP -->
+        <!-- JUDGMENT MODAL -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">NEURAL_DISCREPANCY</div>
@@ -101,14 +102,14 @@
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
-            <p id="final-roast" class="roast-sub"></p>
-            <div class="stat-card" style="margin-bottom: 2rem; border-color: var(--accent);">
-                <div class="stat-label">FINAL_STREAK</div>
-                <div id="final-streak" class="stat-value" style="color: var(--accent);">0</div>
+            <div class="final-card">
+                <div id="final-rank" class="rank-badge">CONSTANT</div>
+                <p id="final-roast" class="roast-sub"></p>
+                <div class="final-stat">STREAK: <span id="final-streak">0</span></div>
             </div>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
-                <button class="secondary-btn" onclick="showScreen('screen-home')">MAIN_MENU</button>
+                <button class="share-btn" onclick="shareResult()">SHARE_REPORT</button>
             </div>
         </div>
     </div>
