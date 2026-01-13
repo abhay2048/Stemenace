@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    <!-- MathJax for High-Fidelity Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,7 +15,7 @@
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <header>
-                <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // AUTH_OK</div>
+                <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROFICIENCY: <span id="global-proficiency">0%</span></div>
                 <h1 class="logo">STEM<span>ANACE</span></h1>
                 <p class="tagline">HIGHER-ORDER NEURAL DRILL</p>
             </header>
@@ -52,7 +51,7 @@
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2 class="vault-header">STRESS_CALIBRATION</h2>
+            <h2 class="vault-header">STRESS_TOLERANCE</h2>
             <div class="nav-grid">
                 <button class="diff-btn easy" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
                 <button class="diff-btn medium" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
@@ -105,7 +104,12 @@
             <div class="final-card">
                 <div id="final-rank" class="rank-badge">CONSTANT</div>
                 <p id="final-roast" class="roast-sub"></p>
-                <div class="final-stat">STREAK: <span id="final-streak">0</span></div>
+                
+                <!-- REVISION SECTION -->
+                <div class="revision-box">
+                    <span class="revision-title">NEURAL_DEBT (Missed Formulas)</span>
+                    <div id="debt-list"></div>
+                </div>
             </div>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
