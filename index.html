@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    <!-- MathJax for High-Fidelity Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,12 +12,13 @@
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
+        
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <header>
-                <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // AUTH_OK</div>
+                <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROFICIENCY: <span id="global-proficiency">0%</span></div>
                 <h1 class="logo">STEM<span>ANACE</span></h1>
-                <p class="tagline">HIGHER-ORDER NEURAL DRILL</p>
+                <p class="tagline">NEURAL ARCHITECTURE CALIBRATION</p>
             </header>
             
             <div class="dashboard">
@@ -27,14 +27,15 @@
                     <div id="high-score" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">TOTAL_FAILURES</div>
-                    <div id="total-fails" class="stat-value">0</div>
+                    <div class="stat-label">DRILLS_RUN</div>
+                    <div id="total-drills" class="stat-value">0</div>
                 </div>
             </div>
 
             <div class="nav-grid">
                 <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
                 <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
+                <button class="secondary-btn diag-btn" onclick="uiClick(); showScreen('screen-diagnostics')">NEURAL_DIAGNOSTICS</button>
                 <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
             </div>
         </div>
@@ -52,7 +53,7 @@
         <!-- DIFFICULTY SELECTOR -->
         <div id="screen-difficulty" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-chapters')">← BACK</button>
-            <h2 class="vault-header">STRESS_CALIBRATION</h2>
+            <h2 class="vault-header">STRESS_TOLERANCE</h2>
             <div class="nav-grid">
                 <button class="diff-btn easy" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
                 <button class="diff-btn medium" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
@@ -60,11 +61,18 @@
             </div>
         </div>
 
-        <!-- VAULT (STUDY) -->
+        <!-- VAULT (ACTIVE RECALL) -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
             <h2 class="vault-header">NEURAL_LIBRARY</h2>
             <div id="vault-content"></div>
+        </div>
+
+        <!-- DIAGNOSTICS -->
+        <div id="screen-diagnostics" class="screen hidden">
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT_LAB</button>
+            <h2 class="vault-header">DIAGNOSTIC_REPORT</h2>
+            <div id="diagnostic-results"></div>
         </div>
 
         <!-- ARENA (GAME) -->
@@ -81,7 +89,6 @@
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
             <div class="hud-label" style="text-align:center">COMBO: <span id="streak" style="color:var(--text)">0</span></div>
-            
             <div id="formula-display"></div>
             <div id="options-grid"></div>
         </div>
@@ -105,7 +112,10 @@
             <div class="final-card">
                 <div id="final-rank" class="rank-badge">CONSTANT</div>
                 <p id="final-roast" class="roast-sub"></p>
-                <div class="final-stat">STREAK: <span id="final-streak">0</span></div>
+                <div class="revision-box">
+                    <span class="revision-title">NEURAL_DEBT (Missed Formulas)</span>
+                    <div id="debt-list"></div>
+                </div>
             </div>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
