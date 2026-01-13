@@ -4,31 +4,68 @@ let roasts = [];
 let currentQ = null;
 let score = 0;
 let lives = 3;
-let highScore = localStorage.getItem('stemanaceScore') || 0;
+let highScore = localStorage.getItem('stemanaceHS') || 0;
 let totalFails = localStorage.getItem('stemanaceFails') || 0;
 let timerId = null;
 let timeLimit = 30;
 let timeLeft = 30;
+let isMuted = false;
 
+// --- AUDIO ENGINE ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playProceduralSound(f, t, d, v = 0.1) {
+    if (isMuted) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
+}
+const uiClick = () => playProceduralSound(600, 'sine', 0.1);
+const successSound = () => { playProceduralSound(1000, 'sine', 0.2, 0.05); setTimeout(() => playProceduralSound(1300, 'sine', 0.2, 0.05), 50); };
+const failSound = () => playProceduralSound(150, 'sawtooth', 0.4, 0.15);
+const tickSound = () => playProceduralSound(1800, 'sine', 0.05, 0.02);
+
+function toggleMute() {
+    isMuted = !isMuted;
+    document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO_OFF" : "🔊 AUDIO_ON";
+}
+
+// --- RANKING LOGIC ---
+const RANKS = [
+    { name: "CONSTANT", threshold: 0, color: "#64748b" },
+    { name: "VARIABLE", threshold: 6, color: "#10b981" },
+    { name: "OPERATOR", threshold: 16, color: "#38bdf8" },
+    { name: "ARCHITECT", threshold: 31, color: "#f59e0b" },
+    { name: "NEURAL ACE", threshold: 51, color: "#ae133f" },
+    { name: "SINGULARITY", threshold: 76, color: "#6a162c" }
+];
+
+function getRank(s) {
+    return [...RANKS].reverse().find(r => s >= r.threshold);
+}
+
+// --- CORE LOGIC ---
 async function init() {
     try {
-        const mathRes = await fetch('mathformula.txt');
-        const mathData = await mathRes.text();
-        allQuestions = mathData.split('\n').filter(l => l.includes('::')).map(line => {
+        const res = await fetch('mathformula.txt');
+        const text = await res.text();
+        allQuestions = text.split('\n').filter(l => l.includes('::')).map(line => {
             const p = line.split('::').map(s => s.trim());
             return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
         });
 
         const roastRes = await fetch('roast.txt');
-        const roastData = await roastRes.text();
-        roasts = roastData.split('\n').filter(l => l.trim() !== "");
+        const roastText = await roastRes.text();
+        roasts = roastText.split('\n').filter(l => l.trim() !== "");
 
         document.getElementById('high-score').innerText = highScore;
         document.getElementById('total-fails').innerText = totalFails;
+        document.getElementById('current-rank').innerText = getRank(highScore).name;
         showScreen('screen-home');
-    } catch (e) {
-        console.error("BOOT_ERROR: Critical database failure.");
-    }
+    } catch (e) { console.error("STEMANACE Initialization Error."); }
 }
 
 function showScreen(id) {
@@ -76,42 +113,37 @@ function nextRound() {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerHTML = `\\( ${opt} \\)`;
-        btn.onclick = () => handleChoice(opt);
+        btn.onclick = () => { uiClick(); handleChoice(opt); };
         grid.appendChild(btn);
     });
 
-    if (window.MathJax) MathJax.typesetPromise();
+    MathJax.typesetPromise();
     resetTimer();
 }
 
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
-    
     timerId = setInterval(() => {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         bar.style.width = ratio + "%";
         document.getElementById('efficiency').innerText = Math.round(ratio) + "%";
 
-        if (timeLeft < 3 || ratio < 25) {
-            bar.style.background = "var(--text)";
+        if (timeLeft < 2.5) {
+            if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
             document.getElementById('red-alert').classList.remove('hidden');
             document.querySelector('#screen-game').classList.add('panic');
+            bar.style.background = "var(--text)";
         }
-
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) {
+        successSound();
         score++;
-        if (score > highScore) {
-            highScore = score;
-            localStorage.setItem('stemanaceScore', highScore);
-            document.getElementById('high-score').innerText = highScore;
-        }
         updateHUD();
         nextRound();
     } else {
@@ -120,6 +152,7 @@ function handleChoice(choice) {
 }
 
 function handleWrong() {
+    failSound();
     clearInterval(timerId);
     lives--;
     totalFails++;
@@ -127,27 +160,45 @@ function handleWrong() {
     document.getElementById('total-fails').innerText = totalFails;
     updateHUD();
 
-    // Visual feedback for depth
     const container = document.querySelector('.app-container');
     container.style.transform = "scale(0.97)";
     setTimeout(() => container.style.transform = "scale(1)", 150);
 
-    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "LOGIC_ERROR";
+    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "NEURAL_LINK_BROKEN";
     document.getElementById('roast-message').innerText = msg;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     
     document.getElementById('roast-popup').classList.remove('hidden');
-    if (window.MathJax) MathJax.typesetPromise();
+    MathJax.typesetPromise();
 }
 
 function resumeAfterRoast() {
     document.getElementById('roast-popup').classList.add('hidden');
     if (lives <= 0) {
-        document.getElementById('final-streak').innerText = score;
-        document.getElementById('final-roast').innerText = "DISAPPOINTING. RETURN TO THE VAULT.";
-        showScreen('screen-over');
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('stemanaceHS', highScore);
+        }
+        endGame();
+    } else nextRound();
+}
+
+function endGame() {
+    const rankObj = getRank(score);
+    document.getElementById('final-streak').innerText = score;
+    document.getElementById('final-rank').innerText = rankObj.name;
+    document.getElementById('final-rank').style.backgroundColor = rankObj.color;
+    document.getElementById('final-roast').innerText = "Simulation Terminated. Efficiency below threshold.";
+    showScreen('screen-over');
+}
+
+function shareResult() {
+    const rank = getRank(score).name;
+    const text = `SYSTEM REPORT: I cleared the STEMANACE Arena with a streak of ${score}.\n\nNEURAL TIER: [${rank}]\n\nCan you beat me? Attempt here: ${window.location.href}`;
+    if (navigator.share) {
+        navigator.share({ title: 'STEMANACE Performance Report', text: text, url: window.location.href });
     } else {
-        nextRound();
+        alert("Report Copied:\n\n" + text);
     }
 }
 
@@ -169,7 +220,7 @@ function populateVault() {
         html += `</tbody></table>`;
     }
     list.innerHTML = html;
-    if (window.MathJax) MathJax.typesetPromise();
+    MathJax.typesetPromise();
 }
 
 init();
