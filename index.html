@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
+    <!-- MathJax for high-fidelity formula rendering -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -35,7 +36,7 @@
             <div class="nav-grid">
                 <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
                 <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
-                <button class="secondary-btn diag-btn" onclick="uiClick(); showScreen('screen-diagnostics')">NEURAL_DIAGNOSTICS</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')" style="border-color: var(--text); color: var(--text)">NEURAL_DIAGNOSTICS</button>
                 <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
             </div>
         </div>
@@ -61,7 +62,7 @@
             </div>
         </div>
 
-        <!-- VAULT (ACTIVE RECALL) -->
+        <!-- VAULT (STUDY) -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
             <h2 class="vault-header">NEURAL_LIBRARY</h2>
@@ -93,7 +94,7 @@
             <div id="options-grid"></div>
         </div>
 
-        <!-- JUDGMENT MODAL -->
+        <!-- ROAST/CORRECTION MODAL -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">NEURAL_DISCREPANCY</div>
@@ -102,7 +103,7 @@
                     <span class="correction-label">REQUIRED_IDENTITY</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="primary-btn" style="width:100%" onclick="resumeAfterRoast()">RETRY_CALIBRATION</button>
+                <button class="primary-btn" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE_ERROR</button>
             </div>
         </div>
 
@@ -113,7 +114,7 @@
                 <div id="final-rank" class="rank-badge">CONSTANT</div>
                 <p id="final-roast" class="roast-sub"></p>
                 <div class="revision-box">
-                    <span class="revision-title">NEURAL_DEBT (Missed Formulas)</span>
+                    <span class="revision-title">NEURAL_DEBT (Revision Required)</span>
                     <div id="debt-list"></div>
                 </div>
             </div>
