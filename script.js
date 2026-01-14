@@ -1,4 +1,4 @@
-// --- GLOBAL STATE ---
+// --- 1. GLOBAL STATE & STORAGE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
@@ -6,24 +6,38 @@ let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
 let achievements = JSON.parse(localStorage.getItem('stemanaceMedals')) || { titan: false, survivor: false, singularity: false };
+
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
-// --- AUDIO ENGINE ---
+// Fix data structure integrity
+const subjects = ['global', 'calculus', 'trigonometry'];
+subjects.forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
+
+// --- 2. AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
+    try {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch(e) {}
 }
-window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
+
+window.uiClick = function() { 
+    if (audioCtx.state === 'suspended') audioCtx.resume(); 
+    playSound(600, 'sine', 0.1); 
+};
 const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 const successSound = () => playSound(1200, 'sine', 0.2, 0.05);
+const tickSound = () => playSound(1800, 'sine', 0.05, 0.02);
 
-// --- IDENTITY ---
+window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
+
+// --- 3. IDENTITY LOGIC ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
     if (val.trim().length > 1) {
@@ -38,9 +52,10 @@ window.changeCallsign = () => {
     if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
-// --- CORE LOGIC ---
+// --- 4. NAVIGATION ---
 window.showScreen = (id) => {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    const allScreens = document.querySelectorAll('.screen');
+    for (let i = 0; i < allScreens.length; i++) { allScreens[i].classList.add('hidden'); }
     const target = document.getElementById(id);
     if(target) target.classList.remove('hidden');
     if (timerId) clearInterval(timerId);
@@ -64,8 +79,10 @@ window.selectDifficulty = (sec) => {
     updateHUD(); window.showScreen('screen-game'); nextRound();
 };
 
+// --- 5. GAMEPLAY LOGIC ---
 function updateHUD() {
-    const lEl = document.getElementById('lives'), sEl = document.getElementById('streak');
+    const lEl = document.getElementById('lives');
+    const sEl = document.getElementById('streak');
     if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
     if(sEl) sEl.innerText = score;
 }
@@ -73,7 +90,9 @@ function updateHUD() {
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('red-alert').classList.add('hidden');
-    document.querySelector('.arena-screen')?.classList.remove('panic');
+    const arena = document.querySelector('.arena-screen');
+    if(arena) arena.classList.remove('panic');
+    
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
@@ -102,27 +121,34 @@ function resetTimer() {
         if (bar) bar.style.width = ratio + "%";
         const eff = document.getElementById('efficiency');
         if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
-        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.screen:not(.hidden)')?.classList.add('panic'); }
+        if (timeLeft < 3) { 
+            if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
+            document.getElementById('red-alert').classList.remove('hidden'); 
+            document.querySelector('.screen:not(.hidden)')?.classList.add('panic'); 
+        }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) { 
-        score++; 
-        successSound(); 
+        score++; successSound();
+        correctHistory.global.correct++;
+        correctHistory[currentQ.chapter].correct++;
         if (score % 10 === 0 && lives < 3) lives++;
         checkAchievements();
-        updateHUD(); 
-        nextRound(); 
+        updateHUD(); nextRound(); 
     }
     else handleWrong();
 }
 
 function handleWrong() {
-    lives--; updateHUD(); clearInterval(timerId); failSound();
+    failSound(); lives--; updateHUD(); clearInterval(timerId);
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
+    correctHistory.global.total++;
+    correctHistory[currentQ.chapter].total++;
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
+    localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
     document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE";
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
@@ -147,34 +173,23 @@ function checkAchievements() {
 }
 
 function endGame() {
-    const badge = document.getElementById('final-rank-badge');
-    if(badge) {
-        if(score > 75) badge.innerText = "SINGULARITY";
-        else if(score > 50) badge.innerText = "NEURAL ACE";
-        else if(score > 30) badge.innerText = "ARCHITECT";
-        else if(score > 15) badge.innerText = "OPERATOR";
-        else if(score > 5) badge.innerText = "VARIABLE";
-        else badge.innerText = "CONSTANT";
-    }
     document.getElementById('final-streak').innerText = score;
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    const badge = document.getElementById('final-rank-badge');
+    const r = score > 75 ? "SINGULARITY" : score > 50 ? "NEURAL ACE" : score > 30 ? "ARCHITECT" : score > 15 ? "OPERATOR" : score > 5 ? "VARIABLE" : "CONSTANT";
+    if(badge) badge.innerText = r;
+    const dList = document.getElementById('debt-list');
+    if(dList) dList.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     window.MathJax.typesetPromise();
-    showScreen('screen-over');
+    window.showScreen('screen-over');
     updateHomeDashboard();
 }
 
 function updateHomeDashboard() {
-    const hs = document.getElementById('high-score');
-    if(hs) hs.innerText = highScore;
-    const call = document.getElementById('user-callsign');
-    if(call) call.innerText = callsign;
-    const disp = document.getElementById('display-callsign');
-    if(disp) disp.innerText = callsign;
-    
-    const profEl = document.getElementById('global-proficiency');
-    const totalHits = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
-    profEl.innerText = totalHits > 0 ? Math.min(100, Math.round((highScore / 20) * 100)) + "%" : "0%";
-    
+    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    const r = highScore > 75 ? "SINGULARITY" : highScore > 50 ? "NEURAL ACE" : highScore > 30 ? "ARCHITECT" : highScore > 15 ? "OPERATOR" : highScore > 5 ? "VARIABLE" : "CONSTANT";
+    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign); safeSet('current-rank', r);
+    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
+    safeSet('global-proficiency', prof + "%");
     const pBtn = document.getElementById('priority-btn');
     if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
     updateAchievementRack();
@@ -183,76 +198,62 @@ function updateHomeDashboard() {
 function updateAchievementRack() {
     const rack = document.getElementById('achievement-rack');
     if (!rack) return;
-    const medals = [
-        { id: 'titan', icon: '💎' }, { id: 'survivor', icon: '🛡️' }, { id: 'singularity', icon: '🌌' }
-    ];
+    const medals = [{ id: 'titan', icon: '💎' }, { id: 'survivor', icon: '🛡️' }, { id: 'singularity', icon: '🌌' }];
     rack.innerHTML = medals.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
 }
 
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
     const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
-    let html = `<h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
+    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_RUNS</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${totalDrills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
     if (sortedFails.length === 0) html += `<p>Integrity: 100%.</p>`;
-    else sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><span>\\(${f}\\)</span><b>FAIL_COUNT: ${c}</b></div>`; });
+    else sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge"><span>${c}</span></div></div>`; });
     container.innerHTML = html;
     window.MathJax.typesetPromise();
 }
 
 function populateVault() {
     const list = document.getElementById('vault-content');
-    if (!list) return;
-
     const grouped = {};
-    allQuestions.forEach(q => {
-        if(!grouped[q.chapter]) grouped[q.chapter] = [];
-        grouped[q.chapter].push(q);
-    });
-
-    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px; font-weight:bold;'>[ ACTIVE_RECALL_MODE: TAP TO DE-BLUR ]</p>";
-    
+    allQuestions.forEach(q => { if(!grouped[q.chapter]) grouped[q.chapter] = []; grouped[q.chapter].push(q); });
+    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px'>TAP CARDS TO REVEAL</p>";
     for (const c in grouped) {
-        html += `<h3 class="vault-header">${c.toUpperCase()} UNIT</h3>`;
-        grouped[c].forEach(q => {
-            html += `
-                <div class="vault-card" onclick="this.classList.toggle('revealed'); window.uiClick();">
-                    <div class="vault-q">\\(${q.q}\\)</div>
-                    <div class="vault-a">\\(${q.correct}\\)</div>
-                </div>
-            `;
-        });
+        html += `<h3 class="vault-header">${c.toUpperCase()}</h3>`;
+        grouped[c].forEach(q => { html += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><span class="vault-q">\\(${q.q}\\)</span><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
     }
-    
-    list.innerHTML = html;
-
-    // Force MathJax to process the newly added cards
-    if (window.MathJax) {
-        window.MathJax.typesetPromise();
-    }
+    if (list) list.innerHTML = html;
+    window.MathJax.typesetPromise();
 }
 
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
-
 window.shareResult = () => {
-    const text = `SYSTEM REPORT: I cleared STEMANACE Arena with a streak of ${score}.\nCan you beat me? ${window.location.href}`;
-    if (navigator.share) navigator.share({ title: 'STEMANACE', text: text, url: window.location.href }); else alert("Copied!");
+    const t = `SYSTEM REPORT: Streak [${score}] on STEMANACE Arena. Challenge me: ${window.location.href}`;
+    if (navigator.share) navigator.share({ title: 'STEMANACE Report', text: t, url: window.location.href }); else alert("Copied!");
 };
 
 async function init() {
+    // Hardcoded safety defaults
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
+    roasts = ["Neural mismatch detected.", "Cognitive pattern error."];
     try {
         const res = await fetch('mathformula.txt');
         if (res.ok) {
             const text = await res.text();
-            allQuestions = text.split('\n').filter(l => l.includes('::')).map(line => {
-                const p = line.split('::').map(s => s.trim());
-                return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
-            });
+            const lines = text.split('\n');
+            const parsed = [];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes('::')) {
+                    const p = lines[i].split('::');
+                    parsed.push({ chapter: p[0].trim(), q: p[1].trim(), correct: p[2].trim(), options: [p[2].trim(), p[3].trim(), p[4].trim(), p[5].trim()] });
+                }
+            }
+            if (parsed.length > 0) allQuestions = parsed;
         }
         const rRes = await fetch('roast.txt');
-        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
+        if (rRes.ok) {
+            const rText = await rRes.text();
+            roasts = rText.split('\n').filter(l => l.trim() !== "");
+        }
     } catch (e) {}
-    if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
+    if (!callsign) window.showScreen('screen-login'); else { updateHomeDashboard(); window.showScreen('screen-home'); }
 }
 init();
-
