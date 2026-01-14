@@ -1,4 +1,4 @@
-// --- 1. GLOBAL STATE & STORAGE ---
+// --- 1. GLOBAL STATE ---
 let allQuestions = [];
 let filteredQuestions = [];
 let roasts = [];
@@ -6,14 +6,15 @@ let neuralDebt = [];
 let currentQ = null;
 let score = 0;
 let lives = 3;
-let callsign = localStorage.getItem('stemanaceCallsign') || "GUEST_OPERATOR";
+let callsign = localStorage.getItem('stemanaceCallsign') || "";
 
+// --- 2. STORAGE MANAGEMENT ---
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
 let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
-let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || {};
+let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
 
-// Data integrity fix
+// Fix potentially broken storage
 const subjects = ['global', 'calculus', 'trigonometry'];
 subjects.forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
 
@@ -22,7 +23,7 @@ let timeLimit = 30;
 let timeLeft = 30;
 let isMuted = false;
 
-// --- 2. AUDIO ENGINE ---
+// --- 3. AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playProceduralSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
@@ -43,27 +44,26 @@ const tickSound = () => playProceduralSound(1800, 'sine', 0.05, 0.02);
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO_OFF" : "🔊 AUDIO_ON"; };
 
-// --- 3. IDENTITY LOGIC ---
+// --- 4. IDENTITY MANAGEMENT ---
+window.submitLogin = function() {
+    const input = document.getElementById('callsign-input').value;
+    if (input && input.trim().length > 1) {
+        callsign = input.trim().toUpperCase();
+        localStorage.setItem('stemanaceCallsign', callsign);
+        uiClick();
+        updateHomeDashboard();
+        showScreen('screen-home');
+    } else { alert("INVALID_OPERATOR_ID"); }
+};
+
 window.changeCallsign = function() {
-    const newName = prompt("ENTER NEW NEURAL CALLSIGN (MAX 15 CHARS):");
-    if (newName && newName.trim().length > 0 && newName.length < 16) {
+    const newName = prompt("RE-INITIALIZE IDENTITY (MAX 15 CHARS):");
+    if (newName && newName.trim().length > 1) {
         callsign = newName.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
         updateHomeDashboard();
-        uiClick();
     }
 };
-
-// --- 4. RANKING SYSTEM ---
-const RANKS = [
-    { name: "CONSTANT", threshold: 0, color: "#64748b" },
-    { name: "VARIABLE", threshold: 6, color: "#10b981" },
-    { name: "OPERATOR", threshold: 16, color: "#38bdf8" },
-    { name: "ARCHITECT", threshold: 31, color: "#f59e0b" },
-    { name: "NEURAL ACE", threshold: 51, color: "#ae133f" },
-    { name: "SINGULARITY", threshold: 76, color: "#6a162c" }
-];
-function getRankInfo(s) { return [...RANKS].reverse().find(rank => s >= rank.threshold); }
 
 // --- 5. INITIALIZATION ---
 async function init() {
@@ -75,37 +75,35 @@ async function init() {
         const res = await fetch('mathformula.txt');
         if (res.ok) {
             const text = await res.text();
-            const parsed = text.split('\n').filter(l => l.includes('::')).map(line => {
+            allQuestions = text.split('\n').filter(l => l.includes('::')).map(line => {
                 const p = line.split('::').map(s => s.trim());
                 return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
             });
-            if (parsed.length > 0) allQuestions = parsed;
         }
-        const roastRes = await fetch('roast.txt');
-        if (roastRes.ok) {
-            const rText = await roastRes.text();
+        const rRes = await fetch('roast.txt');
+        if (rRes.ok) {
+            const rText = await rRes.text();
             roasts = rText.split('\n').filter(l => l.trim() !== "");
         }
-    } catch (e) { console.warn("Fetch failed, using backup dataset."); }
+    } catch (e) { console.warn("Fetch failed, using local backup."); }
 
-    updateHomeDashboard();
-    showScreen('screen-home');
+    if (!callsign) { showScreen('screen-login'); } else { updateHomeDashboard(); showScreen('screen-home'); }
 }
 
 function updateHomeDashboard() {
-    document.getElementById('high-score').innerText = highScore;
-    document.getElementById('total-drills').innerText = totalDrills;
-    document.getElementById('display-callsign').innerText = callsign;
-    document.getElementById('user-callsign').innerText = callsign;
-    document.getElementById('current-rank').innerText = getRankInfo(highScore).name;
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    set('high-score', highScore);
+    set('total-drills', totalDrills);
+    set('display-callsign', callsign);
+    set('user-callsign', callsign);
+    set('current-rank', getRankInfo(highScore).name);
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    document.getElementById('global-proficiency').innerText = prof + "%";
-
-    // Show Priority button only if there are failed formulas
-    const failedCount = Object.keys(formulaAnalytics).length;
-    document.getElementById('priority-btn').style.display = failedCount > 0 ? 'block' : 'none';
+    set('global-proficiency', prof + "%");
+    const pBtn = document.getElementById('priority-btn');
+    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
 }
 
+// --- 6. NAVIGATION & GAMEPLAY ---
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
@@ -121,16 +119,10 @@ window.selectChapter = (chap) => {
     showScreen('screen-difficulty');
 };
 
-// NEW: Priority Drill logic
 window.selectPriorityDrill = function() {
-    const failedFormulaQs = Object.keys(formulaAnalytics);
-    filteredQuestions = allQuestions.filter(q => failedFormulaQs.includes(q.q));
-    
-    // Sort so most failed formulas appear first
-    filteredQuestions.sort((a, b) => (formulaAnalytics[b.q] || 0) - (formulaAnalytics[a.q] || 0));
-    
+    const failedQs = Object.keys(formulaAnalytics);
+    filteredQuestions = allQuestions.filter(q => failedQs.includes(q.q));
     showScreen('screen-difficulty');
-    uiClick();
 };
 
 window.selectDifficulty = (sec) => {
@@ -139,8 +131,9 @@ window.selectDifficulty = (sec) => {
 };
 
 function updateHUD() {
-    document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives));
-    document.getElementById('streak').innerText = score;
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    set('lives', "❤️".repeat(Math.max(0, lives)));
+    set('streak', score);
 }
 
 function nextRound() {
@@ -148,10 +141,8 @@ function nextRound() {
     document.getElementById('red-alert').classList.add('hidden');
     document.querySelector('#screen-game').classList.remove('panic');
     document.getElementById('timer-fill').style.background = "";
-
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
-    
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
@@ -162,7 +153,7 @@ function nextRound() {
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    if (window.MathJax) MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
     resetTimer();
 }
 
@@ -173,14 +164,12 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
-        const effEl = document.getElementById('efficiency');
-        if (effEl) effEl.innerText = Math.max(0, Math.round(ratio)) + "%";
-
+        const eff = document.getElementById('efficiency');
+        if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
         if (timeLeft < 3) {
             if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
             document.getElementById('red-alert').classList.remove('hidden');
             document.querySelector('#screen-game').classList.add('panic');
-            if (bar) bar.style.background = "var(--text)";
         }
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -192,32 +181,26 @@ function handleChoice(choice) {
     correctHistory.global.total++;
     if (!correctHistory[currentQ.chapter]) correctHistory[currentQ.chapter] = {correct:0, total:0};
     correctHistory[currentQ.chapter].total++;
-
     if (isCorrect) {
         successSound(); score++;
         correctHistory.global.correct++;
         correctHistory[currentQ.chapter].correct++;
         localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
         updateHUD(); nextRound();
-    } else {
-        handleWrong();
-    }
+    } else { handleWrong(); }
 }
 
 function handleWrong() {
     failSound(); clearInterval(timerId); lives--;
     updateHUD(); 
-    
     const fID = currentQ ? currentQ.q : "unknown";
     formulaAnalytics[fID] = (formulaAnalytics[fID] || 0) + 1;
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     if (currentQ) neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
-
-    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "NEURAL FAILURE.";
-    document.getElementById('roast-message').innerText = msg;
+    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "NEURAL FAILURE.";
     document.getElementById('correction-display').innerHTML = currentQ ? `\\[ ${currentQ.correct} \\]` : "";
     document.getElementById('roast-popup').classList.remove('hidden');
-    if (window.MathJax) MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.resumeAfterRoast = () => {
@@ -231,37 +214,41 @@ window.resumeAfterRoast = () => {
 
 function endGame() {
     const rInfo = getRankInfo(score);
-    document.getElementById('final-streak').innerText = score;
-    const b = document.getElementById('final-rank');
-    if (b) { b.innerText = rInfo.name; b.style.backgroundColor = rInfo.color; }
-    
-    document.getElementById('debt-list').innerHTML = neuralDebt.length > 0 ? 
-        neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><span style="font-weight:bold">\\(${d.a}\\)</span></div>`).join('') :
-        "<p>No debt incurred.</p>";
-    
-    if (window.MathJax) MathJax.typesetPromise();
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    set('final-streak', score);
+    const badge = document.getElementById('final-rank');
+    if (badge) { badge.innerText = rInfo.name; badge.style.backgroundColor = rInfo.color; }
+    const debtEl = document.getElementById('debt-list');
+    if (debtEl) {
+        debtEl.innerHTML = neuralDebt.length > 0 ? 
+            neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><span style="font-weight:bold">\\(${d.a}\\)</span></div>`).join('') :
+            "<p>Debt clear. Brain optimal.</p>";
+    }
+    if (window.MathJax) window.MathJax.typesetPromise();
     showScreen('screen-over');
     updateHomeDashboard();
 }
 
+function getRankInfo(s) {
+    const r = [
+        { name: "CONSTANT", threshold: 0, color: "#64748b" },
+        { name: "VARIABLE", threshold: 6, color: "#10b981" },
+        { name: "OPERATOR", threshold: 16, color: "#38bdf8" },
+        { name: "ARCHITECT", threshold: 31, color: "#f59e0b" },
+        { name: "NEURAL ACE", threshold: 51, color: "#ae133f" },
+        { name: "SINGULARITY", threshold: 76, color: "#6a162c" }
+    ];
+    return r.slice().reverse().find(rank => s >= rank.threshold);
+}
+
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
-    const drills = localStorage.getItem('stemanaceDrills') || 0;
     const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
-
-    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_RUNS_COMPLETED</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${drills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG (Sorted by frequency)</h3>`;
-
-    if (sortedFails.length === 0) {
-        html += `<p style="opacity:0.5; margin-top:20px;">No distortions detected. Cognitive integrity: 100%.</p>`;
-    } else {
-        html += `<div class="fail-log-container">`;
-        sortedFails.forEach(([formula, count]) => {
-            html += `<div class="fail-log-item"><div class="fail-formula">\\(${formula}\\)</div><div class="fail-count-badge"><span class="hud-label" style="margin:0; font-size:0.5rem">FAIL_COUNT</span><span class="fail-number">${count}</span></div></div>`;
-        });
-        html += `</div>`;
-    }
+    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_RUNS</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${totalDrills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG (Sorted)</h3>`;
+    if (sortedFails.length === 0) { html += `<p style="opacity:0.5">Integrity: 100%.</p>`; }
+    else { sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge"><span class="fail-number">${c}</span></div></div>`; }); }
     container.innerHTML = html;
-    if (window.MathJax) MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 function populateVault() {
@@ -273,11 +260,11 @@ function populateVault() {
         grouped[c].forEach(q => { html += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><span class="vault-q">\\(${q.q}\\)</span><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
     }
     if (list) list.innerHTML = html;
-    if (window.MathJax) MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.shareResult = () => {
-    const t = `[SYSTEM REPORT] OPERATOR: ${callsign} // STREAK: ${score} // RANK: [${getRankInfo(score).name}]. Can you beat me? ${window.location.href}`;
+    const t = `STEMANACE Report: Combo ${score} // Tier [${getRankInfo(score).name}]. ${window.location.href}`;
     if (navigator.share) navigator.share({ title: 'STEMANACE', text: t, url: window.location.href }); else alert("Copied!");
 };
 
