@@ -4,11 +4,11 @@ let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
 let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
-let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
+let timerId = null, timeLimit = 30, timeLeft = 30;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d, v = 0.1) {
-    if (isMuted || audioCtx.state === 'suspended') return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
     g.gain.setValueAtTime(v, audioCtx.currentTime);
@@ -16,12 +16,12 @@ function playSound(f, t, d, v = 0.1) {
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(audioCtx.currentTime + d);
 }
-window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
+window.uiClick = () => playSound(600, 'sine', 0.1);
 const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
-    if (val.trim().length > 1) {
+    if (val && val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
         updateHomeDashboard(); showScreen('screen-home');
@@ -75,7 +75,8 @@ function nextRound() {
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
     
-    const opts = JSON.parse(JSON.stringify(currentQ.options)).sort(() => 0.5 - Math.random());
+    // Sort options randomly without placeholders
+    let opts = JSON.parse(JSON.stringify(currentQ.options)).sort(() => 0.5 - Math.random());
     opts.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
@@ -127,9 +128,9 @@ window.resumeAfterRoast = () => {
 };
 
 function endGame() {
+    document.getElementById('final-streak').innerText = score;
     const b = document.getElementById('final-rank-badge');
     if(b) b.innerText = score > 50 ? "SINGULARITY" : "CONSTANT";
-    document.getElementById('final-streak').innerText = score;
     document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     window.MathJax.typesetPromise();
     showScreen('screen-over');
