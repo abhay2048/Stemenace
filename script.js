@@ -78,10 +78,13 @@ function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('red-alert').classList.add('hidden');
     document.querySelector('.arena-screen').classList.remove('panic');
-    if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
+    
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
+    // Set Question
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    
+    // Build Buttons
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
     [...currentQ.options].sort(() => Math.random() - 0.5).forEach(opt => {
@@ -91,10 +94,13 @@ function nextRound() {
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    if(window.MathJax) MathJax.typesetPromise();
+
+    // CRITICAL: This tells MathJax to look at the new content and fit it
+    if (window.MathJax) {
+        window.MathJax.typesetPromise();
+    }
     resetTimer();
 }
-
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
@@ -191,3 +197,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
 }
 init();
+
