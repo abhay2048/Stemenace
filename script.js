@@ -1,14 +1,17 @@
+// --- GLOBAL STATE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
 let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
-let timerId = null, timeLimit = 30, timeLeft = 30;
+let achievements = JSON.parse(localStorage.getItem('stemanaceMedals')) || { titan: false, survivor: false, singularity: false };
+let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
+// --- AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d, v = 0.1) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (isMuted || audioCtx.state === 'suspended') return;
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
     g.gain.setValueAtTime(v, audioCtx.currentTime);
@@ -16,12 +19,14 @@ function playSound(f, t, d, v = 0.1) {
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(audioCtx.currentTime + d);
 }
-window.uiClick = () => playSound(600, 'sine', 0.1);
+window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
 const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
+const successSound = () => playSound(1200, 'sine', 0.2, 0.05);
 
+// --- IDENTITY ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
-    if (val && val.trim().length > 1) {
+    if (val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
         updateHomeDashboard(); showScreen('screen-home');
@@ -33,6 +38,7 @@ window.changeCallsign = () => {
     if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
+// --- CORE LOGIC ---
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
@@ -75,7 +81,6 @@ function nextRound() {
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
     
-    // Sort options randomly without placeholders
     let opts = JSON.parse(JSON.stringify(currentQ.options)).sort(() => 0.5 - Math.random());
     opts.forEach(opt => {
         const btn = document.createElement('button');
@@ -103,7 +108,14 @@ function resetTimer() {
 }
 
 function handleChoice(choice) {
-    if (choice === currentQ.correct) { score++; updateHUD(); nextRound(); }
+    if (choice === currentQ.correct) { 
+        score++; 
+        successSound(); 
+        if (score % 10 === 0 && lives < 3) lives++;
+        checkAchievements();
+        updateHUD(); 
+        nextRound(); 
+    }
     else handleWrong();
 }
 
@@ -127,10 +139,24 @@ window.resumeAfterRoast = () => {
     } else nextRound();
 };
 
+function checkAchievements() {
+    if (score >= 76) achievements.singularity = true;
+    if (currentQ.chapter === 'calculus' && score >= 20) achievements.titan = true;
+    if (lives === 1 && score >= 15) achievements.survivor = true;
+    localStorage.setItem('stemanaceMedals', JSON.stringify(achievements));
+}
+
 function endGame() {
+    const badge = document.getElementById('final-rank-badge');
+    if(badge) {
+        if(score > 75) badge.innerText = "SINGULARITY";
+        else if(score > 50) badge.innerText = "NEURAL ACE";
+        else if(score > 30) badge.innerText = "ARCHITECT";
+        else if(score > 15) badge.innerText = "OPERATOR";
+        else if(score > 5) badge.innerText = "VARIABLE";
+        else badge.innerText = "CONSTANT";
+    }
     document.getElementById('final-streak').innerText = score;
-    const b = document.getElementById('final-rank-badge');
-    if(b) b.innerText = score > 50 ? "SINGULARITY" : "CONSTANT";
     document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     window.MathJax.typesetPromise();
     showScreen('screen-over');
@@ -138,8 +164,29 @@ function endGame() {
 }
 
 function updateHomeDashboard() {
-    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign);
+    const hs = document.getElementById('high-score');
+    if(hs) hs.innerText = highScore;
+    const call = document.getElementById('user-callsign');
+    if(call) call.innerText = callsign;
+    const disp = document.getElementById('display-callsign');
+    if(disp) disp.innerText = callsign;
+    
+    const profEl = document.getElementById('global-proficiency');
+    const totalHits = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
+    profEl.innerText = totalHits > 0 ? Math.min(100, Math.round((highScore / 20) * 100)) + "%" : "0%";
+    
+    const pBtn = document.getElementById('priority-btn');
+    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    updateAchievementRack();
+}
+
+function updateAchievementRack() {
+    const rack = document.getElementById('achievement-rack');
+    if (!rack) return;
+    const medals = [
+        { id: 'titan', icon: '💎' }, { id: 'survivor', icon: '🛡️' }, { id: 'singularity', icon: '🌌' }
+    ];
+    rack.innerHTML = medals.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
 }
 
 function populateDiagnostics() {
@@ -156,7 +203,7 @@ function populateVault() {
     const list = document.getElementById('vault-content');
     const grouped = {};
     allQuestions.forEach(q => { if(!grouped[q.chapter]) grouped[q.chapter] = []; grouped[q.chapter].push(q); });
-    let html = "";
+    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px'>TAP TO REVEAL</p>";
     for (const c in grouped) {
         html += `<h3 class="vault-header">${c.toUpperCase()}</h3>`;
         grouped[c].forEach(q => { html += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><span class="vault-q">\\(${q.q}\\)</span><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
@@ -164,6 +211,13 @@ function populateVault() {
     if (list) list.innerHTML = html;
     window.MathJax.typesetPromise();
 }
+
+window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
+
+window.shareResult = () => {
+    const text = `SYSTEM REPORT: I cleared STEMANACE Arena with a streak of ${score}.\nCan you beat me? ${window.location.href}`;
+    if (navigator.share) navigator.share({ title: 'STEMANACE', text: text, url: window.location.href }); else alert("Copied!");
+};
 
 async function init() {
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
