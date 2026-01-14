@@ -14,19 +14,12 @@ body {
     font-family: 'Inter', system-ui, sans-serif;
     margin: 0; display: flex; justify-content: center; align-items: center; 
     min-height: 100dvh; overflow: hidden;
+    background-image: radial-gradient(circle at 0% 0%, var(--secondary) 0%, transparent 25%),
+                      radial-gradient(circle at 100% 100%, var(--primary) 0%, transparent 25%);
 }
 
-.scanlines {
-    position: fixed; inset: 0; pointer-events: none; z-index: 1000;
-    background: linear-gradient(rgba(174, 19, 63, 0) 50%, rgba(106, 22, 44, 0.02) 50%);
-    background-size: 100% 4px;
-}
-
-#red-alert {
-    position: fixed; inset: 0; pointer-events: none; z-index: 99;
-    background: radial-gradient(circle, transparent 40%, rgba(174, 19, 63, 0.1) 100%);
-    animation: pulse 0.6s infinite alternate;
-}
+.scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(174, 19, 63, 0) 50%, rgba(106, 22, 44, 0.02) 50%); background-size: 100% 4px; }
+#red-alert { position: fixed; inset: 0; pointer-events: none; z-index: 99; background: radial-gradient(circle, transparent 40%, rgba(174, 19, 63, 0.12) 100%); animation: pulse 0.6s infinite alternate; }
 @keyframes pulse { from { opacity: 0; } to { opacity: 1; } }
 
 .app-container { width: 95%; max-width: 750px; height: 90dvh; display: flex; flex-direction: column; transition: transform 0.2s ease; }
@@ -40,7 +33,7 @@ body {
 
 .hidden { display: none !important; }
 
-/* Dashboard & Branding */
+/* Dashboard */
 .logo { font-size: 3rem; font-weight: 800; letter-spacing: -2px; color: var(--accent); margin: 0; }
 .logo span { color: var(--text); font-weight: 300; }
 .tagline { font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; opacity: 0.6; margin-top: 5px; }
@@ -48,7 +41,7 @@ body {
 
 .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--primary); border-radius: 1rem; overflow: hidden; margin: 1.5rem 0; border: 1px solid var(--primary); }
 .stat-card { background: var(--white); padding: 1.2rem; }
-.stat-label { font-size: 0.55rem; color: var(--accent); font-weight: 800; opacity: 0.6; }
+.stat-label { font-size: 0.55rem; color: var(--accent); font-weight: 800; opacity: 0.6; text-transform: uppercase; }
 .stat-value { font-size: 1.5rem; font-weight: 900; font-family: monospace; }
 
 /* Buttons */
@@ -60,12 +53,13 @@ button { padding: 1rem; border-radius: 0.8rem; font-weight: 800; cursor: pointer
 .diff-btn { background: var(--background); color: var(--accent); border: 1px solid var(--primary); }
 .share-btn { background: var(--text); color: white; margin-top: 10px; }
 .mute-toggle { background: none; border: 1px solid var(--primary); color: var(--accent); font-size: 0.6rem; align-self: center; margin-top: 10px; width: fit-content; padding: 5px 10px; }
+button:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
-.back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.5rem; left: 1.5rem; font-weight: bold; }
+.back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.5rem; left: 1.5rem; font-weight: bold; cursor: pointer; border: none; }
 
-/* Arena UX */
+/* Arena */
 .arena-hud { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-family: monospace; }
-.hud-label { font-size: 0.6rem; color: var(--accent); font-weight: 800; display: block; }
+.hud-label { font-size: 0.6rem; color: var(--accent); font-weight: 800; display: block; text-transform: uppercase; }
 .hud-val { font-weight: 900; font-size: 1.1rem; }
 .timer-rail { background: var(--background); height: 8px; border-radius: 4px; margin-bottom: 2rem; overflow: hidden; border: 1px solid var(--primary); }
 #timer-fill { background: linear-gradient(90deg, var(--text), var(--secondary)); height: 100%; transition: width 0.1s linear; }
@@ -74,29 +68,24 @@ button { padding: 1rem; border-radius: 0.8rem; font-weight: 800; cursor: pointer
 
 #options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 .opt-btn { background: var(--white); border: 2px solid var(--primary); min-height: 100px; color: var(--text); border-radius: 1rem; }
-.opt-btn:hover { border-color: var(--accent); background: var(--background); }
 
-/* Diagnostics & Vault Cards */
+/* Vault & Diag */
 .vault-card { background: var(--white); border: 1px solid var(--primary); border-radius: 1rem; margin-bottom: 1rem; padding: 1.2rem; cursor: pointer; text-align: left; }
-.vault-q { font-size: 1.1rem; color: var(--accent); display: block; }
 .vault-a { filter: blur(8px); opacity: 0.2; transition: 0.3s; border-top: 1px dashed var(--primary); padding-top: 10px; margin-top: 10px; }
 .vault-card.revealed .vault-a { filter: blur(0); opacity: 1; color: var(--text); }
 
 .diag-card { background: var(--background); padding: 1.2rem; border-radius: 1rem; margin-bottom: 1rem; border: 1px solid var(--primary); text-align: left; }
-.diag-title { font-size: 0.6rem; font-weight: 900; color: var(--accent); letter-spacing: 1px; display: block; }
-.diag-subject { font-size: 1.2rem; font-weight: 800; margin: 5px 0; }
-.diag-bar-bg { background: var(--white); height: 6px; border-radius: 3px; overflow: hidden; margin: 8px 0; border: 1px solid var(--primary); }
+.diag-bar-bg { background: var(--white); height: 6px; border-radius: 3px; border: 1px solid var(--primary); overflow: hidden; }
 .diag-bar-fill { background: var(--text); height: 100%; transition: width 1s; }
 
-/* Revision Box */
+/* Revision */
 .revision-box { margin-top: 1.2rem; background: var(--background); padding: 1rem; border-radius: 1rem; border: 1px dashed var(--text); text-align: left; max-height: 180px; overflow-y: auto; }
-.debt-item { font-size: 0.8rem; border-bottom: 1px solid var(--primary); padding: 8px 0; display: flex; justify-content: space-between; }
+.debt-item { font-size: 0.8rem; border-bottom: 1px solid var(--primary); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
 
 @media (max-width: 600px) {
     #options-grid { grid-template-columns: 1fr; }
     .logo { font-size: 2.2rem; }
     .screen { padding: 1.2rem; }
-    #formula-display { font-size: 1.5rem; }
 }
 @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(6px,0); } 75% { transform: translate(-6px,0); } }
-.panic { animation: shake 0.15s infinite; }
+.panic { animation: shake 0.15s infinite; border-color: var(--text) !important; }
