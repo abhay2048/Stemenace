@@ -1,4 +1,4 @@
-:root {
+v:root {
     --text: #ae133f;
     --background: #faefef;
     --primary: #ef8fa7;
@@ -25,22 +25,22 @@ body {
 
 .screen {
     background: var(--white); padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--primary);
-    box-shadow: 0 15px 35px var(--shadow), inset 0 1px 0 var(--white);
-    height: 100%; display: flex; flex-direction: column; text-align: center; box-sizing: border-box; overflow-y: auto;
+    box-shadow: 0 15px 35px var(--shadow); height: 100%; display: flex; flex-direction: column; 
+    text-align: center; box-sizing: border-box; overflow-y: auto;
 }
 
 .hidden { display: none !important; }
 
-/* Branding & Dashboard */
+/* Dashboard & Branding */
 .logo { font-size: 3rem; font-weight: 800; letter-spacing: -2px; color: var(--accent); margin: 0; }
 .logo span { color: var(--text); font-weight: 300; }
 .tagline { font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; opacity: 0.6; margin-top: 5px; }
-.status-bar { font-family: monospace; font-size: 0.6rem; color: var(--accent); letter-spacing: 1px; font-weight: 700; }
+.status-bar { font-family: monospace; font-size: 0.6rem; color: var(--accent); letter-spacing: 1px; font-weight: 700; border-bottom: 1px solid var(--primary); padding-bottom: 5px; margin-bottom: 10px; }
 
 .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--primary); border-radius: 1rem; overflow: hidden; margin: 1.5rem 0; border: 1px solid var(--primary); }
-.stat-card { background: var(--white); padding: 1.2rem; }
-.stat-label { font-size: 0.55rem; color: var(--accent); font-weight: 800; opacity: 0.6; text-transform: uppercase; }
-.stat-value { font-size: 1.5rem; font-weight: 900; font-family: monospace; }
+.stat-card { background: var(--white); padding: 1rem; }
+.stat-label { font-size: 0.5rem; color: var(--accent); font-weight: 800; opacity: 0.6; text-transform: uppercase; }
+.stat-value { font-size: 1.3rem; font-weight: 900; font-family: monospace; }
 
 /* Buttons */
 .nav-grid { display: grid; gap: 0.8rem; max-width: 400px; margin: 0 auto; width: 100%; }
@@ -50,25 +50,25 @@ button { padding: 1rem; border-radius: 0.8rem; font-weight: 800; cursor: pointer
 .accent-btn { background: var(--text); color: var(--white); }
 .diff-btn { background: var(--background); color: var(--accent); border: 1px solid var(--primary); }
 .share-btn { background: var(--text); color: white; margin-top: 10px; }
-.mute-toggle { background: none; border: 1px solid var(--primary); color: var(--accent); font-size: 0.6rem; align-self: center; margin-top: 10px; width: fit-content; padding: 5px 10px; }
-button:hover { transform: translateY(-3px); filter: brightness(1.1); }
+.mute-toggle { background: none; border: 1px solid var(--primary); color: var(--accent); font-size: 0.6rem; align-self: center; margin-top: 10px; padding: 5px 10px; width: fit-content; }
 
+button:hover { transform: translateY(-3px); filter: brightness(1.1); }
 .back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.5rem; left: 1.5rem; font-weight: bold; border: none; cursor: pointer; }
 
 /* Arena UX */
 .arena-hud { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-family: monospace; }
 .hud-label { font-size: 0.6rem; color: var(--accent); font-weight: 800; display: block; text-transform: uppercase; }
 .hud-val { font-weight: 900; font-size: 1.1rem; }
-.timer-rail { background: var(--background); height: 8px; border-radius: 4px; margin-bottom: 2rem; overflow: hidden; border: 1px solid var(--primary); }
+.timer-rail { background: var(--background); height: 8px; border-radius: 4px; margin-bottom: 1.5rem; overflow: hidden; border: 1px solid var(--primary); }
 #timer-fill { background: linear-gradient(90deg, var(--text), var(--secondary)); height: 100%; transition: width 0.1s linear; }
 
 #formula-display { font-size: 2.2rem; min-height: 150px; display: flex; align-items: center; justify-content: center; background: var(--background); border-radius: 1.2rem; margin-bottom: 2rem; border: 1px solid var(--primary); }
 
 #options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-.opt-btn { background: var(--white); border: 2px solid var(--primary); min-height: 110px; color: var(--text); border-radius: 1rem; }
+.opt-btn { background: var(--white); border: 2px solid var(--primary); min-height: 100px; color: var(--text); border-radius: 1rem; }
 
 /* Diagnostic Reporting UI */
-.diag-summary-header { background: var(--background); padding: 1.5rem; border-radius: 1rem; border: 2px solid var(--primary); margin-bottom: 1.5rem; box-shadow: inset 0 0 15px var(--shadow); }
+.diag-summary-header { background: var(--background); padding: 1.5rem; border-radius: 1rem; border: 2px solid var(--primary); margin-bottom: 1.5rem; }
 .fail-log-item { background: var(--white); border: 1px solid var(--primary); border-radius: 1rem; padding: 1.2rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
 .fail-formula { font-size: 1rem; color: var(--accent); flex: 1; text-align: left; }
 .fail-count-badge { background: var(--background); padding: 8px; border-radius: 8px; border: 1px solid var(--text); text-align: center; min-width: 50px; }
