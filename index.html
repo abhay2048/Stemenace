@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    <!-- Prevent Favicon 404 -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    
-    <!-- MathJax Configuration for Automatic Line Breaking -->
     <script>
         window.MathJax = {
             tex: {
@@ -34,7 +31,6 @@
 
     <div class="app-container">
         
-        <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -46,7 +42,6 @@
             </div>
         </div>
 
-        <!-- HOME SCREEN -->
         <div id="screen-home" class="screen hidden">
             <header class="home-header">
                 <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROF: <span id="global-proficiency">0%</span></div>
@@ -56,7 +51,7 @@
             <div class="dashboard">
                 <div class="stat-card clickable" onclick="changeCallsign()">
                     <div class="stat-label">NEURAL_ID</div>
-                    <div id="user-callsign" class="stat-value-sm">---</div>
+                    <div id="user-callsign" class="stat-value-sm">UNINITIALIZED</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">SYSTEM_PEAK</div>
@@ -73,7 +68,6 @@
             </div>
         </div>
 
-        <!-- ARENA SCREEN -->
         <div id="screen-game" class="screen arena-screen hidden">
             <div class="arena-hud">
                 <div class="hud-item">VIT: <span id="lives">❤️❤️❤️</span></div>
@@ -89,7 +83,6 @@
             <div id="options-grid"></div>
         </div>
 
-        <!-- SUBJECT SELECTION -->
         <div id="screen-chapters" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
             <h2 class="vault-header">TARGET_DOMAIN</h2>
@@ -100,17 +93,15 @@
             </div>
         </div>
 
-        <!-- DIFFICULTY SELECTION -->
         <div id="screen-difficulty" class="screen hidden">
             <h2 class="vault-header">STRESS_LEVEL</h2>
             <div class="nav-grid">
-                <button class="primary-btn" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
-                <button class="primary-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
-                <button class="accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
+                <button class="primary-btn" onclick="uiClick(); selectDifficulty(30)">STABLE</button>
+                <button class="primary-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE</button>
+                <button class="accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL</button>
             </div>
         </div>
 
-        <!-- ROAST POPUP -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">NEURAL_DISCREPANCY</div>
@@ -123,26 +114,23 @@
             </div>
         </div>
 
-        <!-- VAULT -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
             <div id="vault-content"></div>
         </div>
 
-        <!-- DIAGNOSTICS -->
         <div id="screen-diagnostics" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
             <div id="diagnostic-results"></div>
         </div>
 
-        <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
             <div id="final-rank-badge" class="rank-badge">CONSTANT</div>
             <div class="revision-box"><div id="debt-list"></div></div>
             <div class="nav-grid" style="margin-top:auto">
-                <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
-                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
+                <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
+                <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
             </div>
             <div class="final-stat" style="margin-top:10px">STREAK: <span id="final-streak">0</span></div>
         </div>
