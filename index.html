@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <!-- MathJax Configuration for Wrapping and Auto-Scaling -->
     <script>
         window.MathJax = {
             tex: {
@@ -31,6 +32,7 @@
 
     <div class="app-container">
         
+        <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -42,6 +44,7 @@
             </div>
         </div>
 
+        <!-- HOME SCREEN -->
         <div id="screen-home" class="screen hidden">
             <header class="home-header">
                 <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROF: <span id="global-proficiency">0%</span></div>
@@ -68,6 +71,7 @@
             </div>
         </div>
 
+        <!-- ARENA -->
         <div id="screen-game" class="screen arena-screen hidden">
             <div class="arena-hud">
                 <div class="hud-item">VIT: <span id="lives">❤️❤️❤️</span></div>
@@ -83,25 +87,7 @@
             <div id="options-grid"></div>
         </div>
 
-        <div id="screen-chapters" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
-            <h2 class="vault-header">TARGET_DOMAIN</h2>
-            <div class="nav-grid">
-                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
-                <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
-            </div>
-        </div>
-
-        <div id="screen-difficulty" class="screen hidden">
-            <h2 class="vault-header">STRESS_LEVEL</h2>
-            <div class="nav-grid">
-                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE (30s)</button>
-                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
-                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
-            </div>
-        </div>
-
+        <!-- ROAST MODAL -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">NEURAL_DISCREPANCY</div>
@@ -114,9 +100,7 @@
             </div>
         </div>
 
-        <div id="screen-learn" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">← BACK</button><div id="vault-content"></div></div>
-        <div id="screen-diagnostics" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">← BACK</button><div id="diagnostic-results"></div></div>
-
+        <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
             <div id="final-rank-badge" class="rank-badge">CONSTANT</div>
@@ -127,6 +111,29 @@
             </div>
             <div class="final-stat" style="margin-top:10px">STREAK: <span id="final-streak">0</span></div>
         </div>
+
+        <!-- MENU SCREENS -->
+        <div id="screen-chapters" class="screen hidden">
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+            <h2 class="vault-header">TARGET_DOMAIN</h2>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+                <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
+            </div>
+        </div>
+
+        <div id="screen-difficulty" class="screen hidden">
+            <h2 class="vault-header">STRESS</h2>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE</button>
+                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE</button>
+                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL</button>
+            </div>
+        </div>
+
+        <div id="screen-learn" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="vault-content"></div></div>
+        <div id="screen-diagnostics" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="diagnostic-results"></div></div>
     </div>
     <script src="script.js"></script>
 </body>
