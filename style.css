@@ -11,7 +11,7 @@ body {
                       radial-gradient(circle at 80% 80%, var(--primary) 0%, transparent 40%);
 }
 
-.app-container { width: 100%; max-width: 800px; height: 95dvh; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; }
+.app-container { width: 100%; max-width: 800px; height: 95dvh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
 
 .screen {
     background: var(--white); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid var(--primary);
@@ -21,67 +21,53 @@ body {
 
 .hidden { display: none !important; }
 
-/* THE FIX: REMOVED ALL ELLIPSIS AND ENABLED WRAPPING */
-
+/* THE FORMULA CHAMBER - DYNAMIC SCALING */
 #formula-chamber {
-    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex: 1.3; display: flex; align-items: center; justify-content: center;
     background: var(--background); border-radius: 1.2rem; margin-bottom: 10px;
     border: 1px solid var(--primary); padding: 15px; overflow-y: auto;
 }
 
+/* THE FIX: Wrap long math into two lines automatically */
 #formula-display mjx-container {
-    font-size: clamp(1rem, 4vw, 2.2rem) !important;
+    font-size: clamp(1rem, 4vw, 2.4rem) !important;
     max-width: 100% !important;
-    white-space: normal !important; /* Forces formula to break into two lines */
+    white-space: normal !important; 
     display: block !important;
     margin: 0 auto !important;
-    text-overflow: clip !important; /* No more dots */
 }
 
 #options-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
-    margin-top: auto; flex-shrink: 0;
+    display: grid; grid-template-columns: 1fr 1fr; /* Laptop Default */
+    gap: 10px; margin-top: auto; flex-shrink: 0;
 }
 
 @media (max-width: 600px) {
-    #options-grid { grid-template-columns: 1fr; }
-    .screen { padding: 1rem; }
+    #options-grid { grid-template-columns: 1fr; } /* Mobile vertical stack */
+    .screen { padding: 1.2rem; }
+    #formula-display mjx-container { font-size: 1.2rem !important; }
 }
 
 .opt-btn {
     background: var(--white); border: 1px solid var(--primary); border-radius: 1rem;
-    color: var(--text); padding: 10px; font-weight: 800; min-height: 55px; /* Minimum height ensures it never disappears */
+    color: var(--text); padding: 12px 5px; min-height: 60px; font-weight: 800;
     display: flex; align-items: center; justify-content: center; transition: 0.2s;
-    overflow: hidden;
 }
 
+/* THE FIX: Force Math within buttons to wrap and stay small */
 .opt-btn mjx-container {
-    font-size: clamp(0.7rem, 3.5vw, 1.1rem) !important;
-    white-space: normal !important; /* Allows multi-line math */
+    font-size: clamp(0.75rem, 3.5vw, 1.1rem) !important;
+    white-space: normal !important;
     max-width: 100% !important;
 }
 
-.opt-btn:hover { background: var(--background); border-color: var(--accent); }
+.opt-btn:hover { background: var(--background); border-color: var(--accent); transform: translateY(-2px); }
 
-/* MODALS */
-.overlay { position: fixed; inset: 0; background: rgba(106, 22, 44, 0.4); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 10px; }
-.modal { background: var(--white); border: 2px solid var(--accent); border-radius: 2rem; padding: 1.5rem; width: 95%; max-width: 480px; text-align: center; max-height: 85dvh; overflow-y: auto; }
-
-.correction-zone { 
-    background: var(--background); padding: 1rem; border-radius: 1rem; 
-    margin: 1rem 0; border: 1px solid var(--primary); 
-    overflow-x: hidden; 
-    overflow-y: auto;
-    min-height: 80px;
-}
-.correction-zone mjx-container { 
-    font-size: 1.2rem !important; 
-    white-space: normal !important; /* Ensures the answer doesn't cut off */
-}
-
-/* UI Essentials */
+/* Dashboard UI */
 .logo { font-size: 3rem; margin: 0; color: var(--accent); letter-spacing: -2px; }
 .logo-med { font-size: 2rem; margin: 0; color: var(--accent); }
+.logo span { font-weight: 200; }
+.tagline { font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; margin-bottom: 1.5rem; }
 .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
 .stat-card { background: var(--background); padding: 10px; border-radius: 1rem; border: 1px solid var(--primary); }
 .stat-value-sm { font-size: 1.1rem; font-weight: 900; font-family: monospace; }
@@ -95,8 +81,6 @@ body {
 #timer-fill { background: var(--text); height: 100%; transition: width 0.1s linear; }
 
 #vault-content, #diagnostic-results, .revision-box { flex: 1; overflow-y: auto; text-align: left; }
-.fail-log-item { background: var(--background); padding: 1rem; border-radius: 0.8rem; margin-bottom: 0.5rem; border: 1px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-
 .rank-badge { padding: 5px 15px; background: var(--accent); color: white; border-radius: 4px; display: inline-block; font-size: 0.8rem; font-weight: 900; }
 .back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.2rem; left: 1.2rem; font-weight: 900; border: none; cursor: pointer; }
 
