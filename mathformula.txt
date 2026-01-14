@@ -22,7 +22,7 @@ trigonometry :: \sin 2\theta \text{ (in } \tan) :: \frac{2\tan\theta}{1+\tan^2\t
 trigonometry :: \cos 2\theta \text{ (in } \sin) :: 1 - 2\sin^2\theta :: 2\cos^2\theta - 1 :: \cos^2\theta - \sin^2\theta :: 1 - \sin^2\theta
 trigonometry :: \sin 3\theta :: 3\sin\theta - 4\sin^3\theta :: 4\sin^3\theta - 3\sin\theta :: 3\cos\theta - 4\cos^3\theta :: 3\sin\theta + 4\sin^3\theta
 trigonometry :: \cos 3\theta :: 4\cos^3\theta - 3\cos\theta :: 3\cos^3\theta - 4\cos\theta :: 3\cos\theta - 4\cos^3\theta :: 4\sin^3\theta - 3\sin\theta
-trigonometry :: \sin 15^\circ :: \frac{\sqrt{6}-\sqrt{2}}{4} :: \frac{\sqrt{6}+\sqrt{2}}{4} :: \frac{\sqrt{3}-1}{2\sqrt{2}} :: \frac{\sqrt{5}-1}{4}
+trigonometry :: \tan 15^\circ :: 2-\sqrt{3} :: 2+\sqrt{3} :: \sqrt{3}-2 :: \frac{\sqrt{3}}{2}
 trigonometry :: \sin 18^\circ :: \frac{\sqrt{5}-1}{4} :: \frac{\sqrt{5}+1}{4} :: \frac{\sqrt{10-2\sqrt{5}}}{4} :: \frac{\sqrt{6}-\sqrt{2}}{4}
 calculus :: \int \tan x \, dx :: \log|\sec x|+C :: \log|\sin x|+C :: -\log|\sec x|+C :: \log|\cos x|+C
 calculus :: \int \sec x \, dx :: \log|\sec x + \tan x|+C :: \log|\sec x - \tan x|+C :: \log|\tan x|+C :: \sec x \tan x + C
@@ -33,10 +33,10 @@ calculus :: \int \frac{dx}{a^2+x^2} :: \frac{1}{a}\tan^{-1}\frac{x}{a}+C :: \tan
 calculus :: \int \frac{dx}{|x|\sqrt{x^2-a^2}} :: \frac{1}{a}\sec^{-1}\frac{x}{a}+C :: \sec^{-1}\frac{x}{a}+C :: \frac{1}{a}\cos^{-1}\frac{x}{a}+C :: \frac{1}{a}\tan^{-1}\frac{x}{a}+C
 calculus :: \int \frac{dx}{\sqrt{x^2+a^2}} :: \log|x+\sqrt{x^2+a^2}|+C :: \log|x-\sqrt{x^2+a^2}|+C :: \sin^{-1}\frac{x}{a}+C :: \frac{1}{a}\log|x+\sqrt{x^2+a^2}|+C
 calculus :: \int \frac{dx}{\sqrt{x^2-a^2}} :: \log|x+\sqrt{x^2-a^2}|+C :: \log|x-\sqrt{x^2-a^2}|+C :: \frac{1}{a}\log|x+\sqrt{x^2-a^2}|+C :: \sec^{-1}\frac{x}{a}+C
-calculus :: \int \frac{dx}{a^2-x^2} :: \frac{1}{2a}\log|\frac{a+x}{a-x}|+C :: \frac{1}{2a}\log|\frac{x-a}{x+a}|+C :: \frac{1}{a}\log|\frac{a+x}{a-x}|+C :: \frac{1}{2a}\log|\frac{a-x}{a+x}|+C
-calculus :: \int \frac{dx}{x^2-a^2} :: \frac{1}{2a}\log|\frac{x-a}{x+a}|+C :: \frac{1}{2a}\log|\frac{x+a}{x-a}|+C :: \frac{1}{a}\log|\frac{x-a}{x+a}|+C :: \frac{1}{2a}\log|\frac{a-x}{a+x}|+C
+calculus :: \int \frac{dx}{a^2-x^2} :: \frac{1}{2a}\log\left|\frac{a+x}{a-x}\right|+C :: \frac{1}{2a}\log\left|\frac{x-a}{x+a}\right|+C :: \frac{1}{a}\log\left|\frac{a+x}{a-x}\right|+C :: \frac{1}{2a}\log\left|\frac{a-x}{a+x}\right|+C
+calculus :: \int \frac{dx}{x^2-a^2} :: \frac{1}{2a}\log\left|\frac{x-a}{x+a}\right|+C :: \frac{1}{2a}\log\left|\frac{x+a}{x-a}\right|+C :: \frac{1}{a}\log\left|\frac{x-a}{x+a}\right|+C :: \frac{1}{2a}\log\left|\frac{a-x}{a+x}\right|+C
 calculus :: \int \sqrt{a^2-x^2} \, dx :: \frac{x}{2}\sqrt{a^2-x^2}+\frac{a^2}{2}\sin^{-1}\frac{x}{a}+C :: \frac{x}{2}\sqrt{a^2-x^2}-\frac{a^2}{2}\sin^{-1}\frac{x}{a}+C :: x\sqrt{a^2-x^2}+a^2\sin^{-1}\frac{x}{a}+C :: \frac{1}{2}\sin^{-1}\frac{x}{a}+C
-calculus :: \int \sqrt{x^2+a^2} \, dx :: \frac{x}{2}\sqrt{x^2+a^2}+\frac{a^2}{2}\log|x+\sqrt{x^2+a^2}|+C :: \frac{x}{2}\sqrt{x^2+a^2}-\frac{a^2}{2}\log|x+\sqrt{x^2+a^2}|+C :: x\sqrt{x^2+a^2}+a^2\log|x+\dots|+C :: \frac{a^2}{2}\log|x+\dots|+C
+calculus :: \int \sqrt{x^2+a^2} \, dx :: \frac{x}{2}\sqrt{x^2+a^2}+\frac{a^2}{2}\log|x+\sqrt{x^2+a^2}|+C :: \frac{x}{2}\sqrt{x^2+a^2}-\frac{a^2}{2}\log|x+\sqrt{x^2+a^2}|+C :: x\sqrt{x^2+a^2}+a^2\log|x+\sqrt{x^2+a^2}|+C :: \frac{a^2}{2}\log|x+\sqrt{x^2+a^2}|+C
 calculus :: \int \sqrt{x^2-a^2} \, dx :: \frac{x}{2}\sqrt{x^2-a^2}-\frac{a^2}{2}\log|x+\sqrt{x^2-a^2}|+C :: \frac{x}{2}\sqrt{x^2-a^2}+\frac{a^2}{2}\log|x+\sqrt{x^2-a^2}|+C :: \frac{x}{2}\sqrt{x^2-a^2}-\frac{a^2}{2}\sin^{-1}\frac{x}{a}+C :: \frac{x}{2}\sqrt{x^2-a^2}+C
 calculus :: \int_{-a}^{a} f(x) \, dx \text{ (if } f \text{ is odd)} :: 0 :: 2\int_{0}^{a} f(x) \, dx :: f(a)-f(-a) :: 2f(a)
 calculus :: \int_{-a}^{a} f(x) \, dx \text{ (if } f \text{ is even)} :: 2\int_{0}^{a} f(x) \, dx :: 0 :: \int_{0}^{a} f(x) \, dx :: f(a)+f(-a)
