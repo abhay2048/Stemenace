@@ -10,20 +10,18 @@
     <!-- MathJax Configuration for Automatic Scaling and Line Wrapping -->
     <script>
         window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            options: {
-                enableMenu: false
-            },
-            chtml: {
-                displayAlign: 'center',
-                displayIndent: '0',
-                linebreaks: { automatic: true, width: 'container' }
-            }
-        };
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        options: {
+            enableMenu: false
+        },
+        chtml: {
+            displayAlign: 'left', // Better for card layout
+            linebreaks: { automatic: true, width: 'container' }
+        }
+    };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
@@ -156,3 +154,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
