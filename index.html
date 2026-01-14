@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
+    <!-- Favicon Fix -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
@@ -13,20 +14,17 @@
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
-        
-        <!-- 1. LOGIN SCREEN -->
+        <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
-            <div class="brand">
-                <h1 class="logo">STEM<span>ANACE</span></h1>
-                <p class="tagline">IDENTITY_VERIFICATION_REQUIRED</p>
-            </div>
+            <h1 class="logo">STEM<span>ANACE</span></h1>
+            <p class="tagline">IDENTITY_VERIFICATION_REQUIRED</p>
             <div class="login-box">
-                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
+                <input type="text" id="callsign-input" placeholder="OPERATOR_NAME" maxlength="15">
                 <button class="primary-btn" onclick="submitLogin()">INITIALIZE</button>
             </div>
         </div>
 
-        <!-- 2. HOME SCREEN -->
+        <!-- HOME SCREEN -->
         <div id="screen-home" class="screen hidden">
             <header>
                 <div class="status-bar">OP: <span id="display-callsign">---</span> // RANK: <span id="current-rank">CONSTANT</span></div>
@@ -41,24 +39,16 @@
                     <div class="stat-label">PROFICIENCY</div>
                     <div id="global-proficiency" class="stat-value-sm">0%</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">SYSTEM_PEAK</div>
-                    <div id="high-score" class="stat-value-sm">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">TOTAL_RUNS</div>
-                    <div id="total-drills" class="stat-value-sm">0</div>
-                </div>
             </div>
             <div class="nav-grid">
-                <button class="primary-btn" onclick="showScreen('screen-chapters')">ENTER ARENA</button>
-                <button class="secondary-btn" onclick="showScreen('screen-learn')">THE VAULT</button>
-                <button class="secondary-btn" onclick="showScreen('screen-diagnostics')">DIAGNOSTICS</button>
+                <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">DIAGNOSTICS</button>
                 <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
             </div>
         </div>
 
-        <!-- 3. ARENA -->
+        <!-- ARENA -->
         <div id="screen-game" class="screen arena-screen hidden">
             <div class="arena-hud">
                 <div class="hud-item">VIT: <span id="lives">❤️❤️❤️</span></div>
@@ -70,26 +60,7 @@
             <div id="options-grid"></div>
         </div>
 
-        <!-- 4. CHAPTERS & DIFFICULTY -->
-        <div id="screen-chapters" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
-            <h2 class="vault-header">TARGET_DOMAIN</h2>
-            <div class="nav-grid">
-                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
-                <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
-            </div>
-        </div>
-        <div id="screen-difficulty" class="screen hidden">
-            <h2 class="vault-header">STRESS_LEVEL</h2>
-            <div class="nav-grid">
-                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE</button>
-                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE</button>
-                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL</button>
-            </div>
-        </div>
-
-        <!-- 5. OVERLAYS -->
+        <!-- ROAST MODAL (Fix for the wide-stretch issue) -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">NEURAL_DISCREPANCY</div>
@@ -99,6 +70,7 @@
             </div>
         </div>
 
+        <!-- RESULT SCREENS -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
             <div id="final-rank-badge" class="rank-badge">CONSTANT</div>
@@ -107,10 +79,26 @@
                 <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
                 <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
             </div>
-            <div class="final-stat" style="margin-top:10px">STREAK: <span id="final-streak">0</span></div>
         </div>
 
-        <!-- 6. LEARN & DIAG -->
+        <div id="screen-chapters" class="screen hidden">
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+            <h2 class="vault-header">DOMAIN</h2>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+            </div>
+        </div>
+
+        <div id="screen-difficulty" class="screen hidden">
+            <h2 class="vault-header">STRESS</h2>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE</button>
+                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE</button>
+                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL</button>
+            </div>
+        </div>
+
         <div id="screen-learn" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="vault-content"></div></div>
         <div id="screen-diagnostics" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="diagnostic-results"></div></div>
     </div>
