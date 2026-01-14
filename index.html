@@ -51,7 +51,7 @@
             <div class="dashboard">
                 <div class="stat-card clickable" onclick="changeCallsign()">
                     <div class="stat-label">NEURAL_ID</div>
-                    <div id="user-callsign" class="stat-value-sm">UNINITIALIZED</div>
+                    <div id="user-callsign" class="stat-value-sm">---</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">SYSTEM_PEAK</div>
@@ -87,8 +87,8 @@
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
             <h2 class="vault-header">TARGET_DOMAIN</h2>
             <div class="nav-grid">
-                <button class="primary-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="primary-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
+                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
                 <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
             </div>
         </div>
@@ -96,9 +96,9 @@
         <div id="screen-difficulty" class="screen hidden">
             <h2 class="vault-header">STRESS_LEVEL</h2>
             <div class="nav-grid">
-                <button class="primary-btn" onclick="uiClick(); selectDifficulty(30)">STABLE</button>
-                <button class="primary-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE</button>
-                <button class="accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL</button>
+                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE (30s)</button>
+                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
+                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
         </div>
 
@@ -114,15 +114,8 @@
             </div>
         </div>
 
-        <div id="screen-learn" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-            <div id="vault-content"></div>
-        </div>
-
-        <div id="screen-diagnostics" class="screen hidden">
-            <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-            <div id="diagnostic-results"></div>
-        </div>
+        <div id="screen-learn" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">← BACK</button><div id="vault-content"></div></div>
+        <div id="screen-diagnostics" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">← BACK</button><div id="diagnostic-results"></div></div>
 
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
