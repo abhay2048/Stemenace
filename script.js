@@ -5,49 +5,34 @@ let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
 let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
-let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
+let timerId = null, timeLimit = 30, timeLeft = 30;
 
-// --- AUDIO ENGINE ---
+// --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d, v = 0.1) {
-    if (isMuted || audioCtx.state === 'suspended') return;
-    try {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e) {}
-}
-
-// Global UI Sound & Fix for mobile audio suspension
-window.uiClick = function() { 
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    playSound(600, 'sine', 0.1); 
-};
-const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
-
-// --- UTILS ---
-function safeSet(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = val;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
+window.uiClick = () => playSound(600, 'sine', 0.1);
+const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 
 // --- LOGIC ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
-    if (val && val.trim().length > 1) {
+    if (val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
-        window.uiClick();
-        updateHomeDashboard(); 
-        window.showScreen('screen-home');
+        updateHomeDashboard(); showScreen('screen-home');
     }
 };
 
 window.changeCallsign = () => {
-    const n = prompt("ENTER CALLSIGN:");
+    const n = prompt("RE-INITIALIZE IDENTITY:");
     if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
@@ -77,9 +62,9 @@ window.selectDifficulty = (sec) => {
 };
 
 function updateHUD() {
-    const lEl = document.getElementById('lives');
-    if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives)); // SAFETY: Math.max prevents negative repeat
-    safeSet('streak', score);
+    const lEl = document.getElementById('lives'), sEl = document.getElementById('streak');
+    if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
+    if(sEl) sEl.innerText = score;
 }
 
 function nextRound() {
@@ -96,10 +81,10 @@ function nextRound() {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerHTML = `\\( ${opt} \\)`;
-        btn.onclick = () => { window.uiClick(); handleChoice(opt); };
+        btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    if(window.MathJax) MathJax.typesetPromise();
+    if(window.MathJax) window.MathJax.typesetPromise();
     resetTimer();
 }
 
@@ -110,11 +95,9 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
-        safeSet('efficiency', Math.max(0, Math.round(ratio)) + "%");
-        if (timeLeft < 3) { 
-            document.getElementById('red-alert').classList.remove('hidden'); 
-            document.querySelector('.arena-screen').classList.add('panic'); 
-        }
+        const eff = document.getElementById('efficiency');
+        if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
+        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.arena-screen').classList.add('panic'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
@@ -139,7 +122,7 @@ function handleWrong() {
     document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE";
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
-    if(window.MathJax) MathJax.typesetPromise();
+    if(window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.resumeAfterRoast = () => {
@@ -152,54 +135,23 @@ window.resumeAfterRoast = () => {
 };
 
 function endGame() {
-    const r = [...RANKS].reverse().find(rank => score >= rank.t);
-    safeSet('final-streak', score);
-    const b = document.getElementById('final-rank-badge');
-    if(b) { b.innerText = r.n; b.style.backgroundColor = r.c; }
-    
+    document.getElementById('final-streak').innerText = score;
     const dList = document.getElementById('debt-list');
-    if(dList) dList.innerHTML = neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><b>\\(${d.a}\\)</b></div>`).join('');
-    
-    if(window.MathJax) MathJax.typesetPromise();
-    window.showScreen('screen-over');
+    if(dList) dList.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    if(window.MathJax) window.MathJax.typesetPromise();
+    showScreen('screen-over');
     updateHomeDashboard();
 }
 
-const RANKS = [{n:"CONSTANT",t:0,c:"#64748b"},{n:"VARIABLE",t:6,c:"#10b981"},{n:"OPERATOR",t:16,c:"#38bdf8"},{n:"ARCHITECT",t:31,c:"#f59e0b"},{n:"NEURAL ACE",t:51,c:"#ae133f"},{n:"SINGULARITY",t:76,c:"#6a162c"}];
 function updateHomeDashboard() {
-    const r = [...RANKS].reverse().find(rank => highScore >= rank.t);
-    safeSet('high-score', highScore); 
-    safeSet('user-callsign', callsign); 
-    safeSet('display-callsign', callsign); 
-    safeSet('current-rank', r.n);
-    safeSet('total-drills', totalDrills);
-    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    safeSet('global-proficiency', prof + "%");
+    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign);
+    const total = correctHistory.global.total || 0;
+    const correct = correctHistory.global.correct || 0;
+    safeSet('global-proficiency', (total > 0 ? Math.round((correct/total)*100) : 0) + "%");
+    const pBtn = document.getElementById('priority-btn');
+    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
 }
-
-function populateDiagnostics() {
-    const container = document.getElementById('diagnostic-results');
-    const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
-    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_SESSIONS</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${totalDrills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
-    if (sortedFails.length === 0) { html += `<p style="opacity:0.5">Integrity: 100%.</p>`; }
-    else { sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge"><span class="fail-number">${c}</span></div></div>`; }); }
-    container.innerHTML = html;
-    if (window.MathJax) MathJax.typesetPromise();
-}
-
-function populateVault() {
-    const list = document.getElementById('vault-content');
-    const grouped = allQuestions.reduce((acc, q) => { (acc[q.chapter] = acc[q.chapter] || []).push(q); return acc; }, {});
-    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px'>TAP TO REVEAL</p>";
-    for (const c in grouped) {
-        html += `<h3 class="vault-header">${c.toUpperCase()}</h3>`;
-        grouped[c].forEach(q => { html += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><span class="vault-q">\\(${q.q}\\)</span><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
-    }
-    if (list) list.innerHTML = html;
-    if (window.MathJax) MathJax.typesetPromise();
-}
-
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO_OFF" : "🔊 AUDIO_ON"; };
 
 async function init() {
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
@@ -215,6 +167,6 @@ async function init() {
         const rRes = await fetch('roast.txt');
         if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
     } catch (e) {}
-    if (!callsign) window.showScreen('screen-login'); else { updateHomeDashboard(); window.showScreen('screen-home'); }
+    if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
 }
 init();
