@@ -63,24 +63,77 @@ body {
 .opt-btn:hover { background: var(--background); border-color: var(--accent); transform: translateY(-2px); }
 
 /* FLASHCARDS IN VAULT */
+/* --- NEURAL LIBRARY (VAULT) MOBILE FIX --- */
 .vault-card {
     background: var(--background);
     border: 1px solid var(--primary);
     border-radius: 1rem;
     margin-bottom: 1rem;
-    padding: 1.5rem;
+    padding: 1.2rem;
     cursor: pointer;
     transition: 0.3s;
-    text-align: center;
+    text-align: left; /* Align left for better formula start visibility */
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Keep everything inside the card */
 }
-.vault-card:hover { border-color: var(--accent); transform: scale(1.02); }
-.vault-q { font-size: 1.2rem; color: var(--accent); margin-bottom: 10px; display: block; font-weight: 800; }
-.vault-a { 
-    filter: blur(10px); opacity: 0.1; transition: 0.4s; 
-    border-top: 1px dashed var(--primary); padding-top: 10px; margin-top: 10px;
-}
-.vault-card.revealed .vault-a { filter: blur(0); opacity: 1; color: var(--text); }
 
+/* Question Area in Card */
+.vault-q {
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-weight: 800;
+    margin-bottom: 5px;
+    width: 100%;
+    overflow-x: auto; /* ALLOW SWIPE IF TOO LONG */
+    white-space: nowrap;
+}
+
+/* Answer Area in Card */
+.vault-a {
+    filter: blur(12px);
+    opacity: 0.15;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-top: 1px dashed var(--primary);
+    padding-top: 10px;
+    margin-top: 10px;
+    width: 100%;
+    overflow-x: auto; /* ALLOW SWIPE IF TOO LONG */
+}
+
+/* When Tapped/Revealed */
+.vault-card.revealed .vault-a {
+    filter: blur(0);
+    opacity: 1;
+    color: var(--text);
+}
+
+/* FORCE MATHJAX TO SCALE DOWN INSIDE CARDS */
+.vault-card mjx-container {
+    font-size: clamp(0.8rem, 3.5vw, 1.2rem) !important; /* Dynamically shrink math */
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Horizontal scrollbar styling for long formulas */
+.vault-q::-webkit-scrollbar, .vault-a::-webkit-scrollbar {
+    height: 3px;
+}
+.vault-q::-webkit-scrollbar-thumb, .vault-a::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+/* Adjust Subject Headers */
+.vault-header {
+    color: var(--accent);
+    border-bottom: 2px solid var(--primary);
+    margin: 2rem 0 1rem 0;
+    font-size: 1.2rem;
+    text-align: left;
+}
 /* MEDALS */
 .achievement-rack { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
 .medal { font-size: 1.2rem; opacity: 0.1; filter: grayscale(1); transition: 0.5s; }
@@ -121,3 +174,4 @@ body {
 .scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(174, 19, 63, 0) 50%, rgba(106, 22, 44, 0.02) 50%); background-size: 100% 4px; }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
 .panic { animation: shake 0.15s infinite; }
+
