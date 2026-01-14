@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    <!-- MathJax for high-fidelity formula rendering -->
+    <!-- Prevent Favicon 404 -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <!-- MathJax for rendering math -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -36,7 +38,7 @@
             <div class="nav-grid">
                 <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
                 <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
-                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')" style="border-color: var(--text); color: var(--text)">NEURAL_DIAGNOSTICS</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">NEURAL_DIAGNOSTICS</button>
                 <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
             </div>
         </div>
@@ -62,7 +64,7 @@
             </div>
         </div>
 
-        <!-- VAULT (STUDY) -->
+        <!-- VAULT -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
             <h2 class="vault-header">NEURAL_LIBRARY</h2>
@@ -76,7 +78,7 @@
             <div id="diagnostic-results"></div>
         </div>
 
-        <!-- ARENA (GAME) -->
+        <!-- ARENA -->
         <div id="screen-game" class="screen hidden">
             <div class="arena-hud">
                 <div class="hud-group">
@@ -89,12 +91,12 @@
                 </div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div class="hud-label" style="text-align:center">COMBO: <span id="streak" style="color:var(--text)">0</span></div>
+            <div class="hud-label" style="text-align:center">COMBO: <span id="streak">0</span></div>
             <div id="formula-display"></div>
             <div id="options-grid"></div>
         </div>
 
-        <!-- ROAST/CORRECTION MODAL -->
+        <!-- ROAST POPUP -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">NEURAL_DISCREPANCY</div>
@@ -103,7 +105,7 @@
                     <span class="correction-label">REQUIRED_IDENTITY</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="primary-btn" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE_ERROR</button>
+                <button class="primary-btn" style="width:100%" onclick="resumeAfterRoast()">GOT IT</button>
             </div>
         </div>
 
@@ -114,9 +116,10 @@
                 <div id="final-rank" class="rank-badge">CONSTANT</div>
                 <p id="final-roast" class="roast-sub"></p>
                 <div class="revision-box">
-                    <span class="revision-title">NEURAL_DEBT (Revision Required)</span>
+                    <span class="revision-title">NEURAL_DEBT (Missed Formulas)</span>
                     <div id="debt-list"></div>
                 </div>
+                <div class="final-stat">STREAK: <span id="final-streak">0</span></div>
             </div>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
