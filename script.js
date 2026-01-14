@@ -201,15 +201,34 @@ function populateDiagnostics() {
 
 function populateVault() {
     const list = document.getElementById('vault-content');
+    if (!list) return;
+
     const grouped = {};
-    allQuestions.forEach(q => { if(!grouped[q.chapter]) grouped[q.chapter] = []; grouped[q.chapter].push(q); });
-    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px'>TAP TO REVEAL</p>";
+    allQuestions.forEach(q => {
+        if(!grouped[q.chapter]) grouped[q.chapter] = [];
+        grouped[q.chapter].push(q);
+    });
+
+    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px; font-weight:bold;'>[ ACTIVE_RECALL_MODE: TAP TO DE-BLUR ]</p>";
+    
     for (const c in grouped) {
-        html += `<h3 class="vault-header">${c.toUpperCase()}</h3>`;
-        grouped[c].forEach(q => { html += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><span class="vault-q">\\(${q.q}\\)</span><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
+        html += `<h3 class="vault-header">${c.toUpperCase()} UNIT</h3>`;
+        grouped[c].forEach(q => {
+            html += `
+                <div class="vault-card" onclick="this.classList.toggle('revealed'); window.uiClick();">
+                    <div class="vault-q">\\(${q.q}\\)</div>
+                    <div class="vault-a">\\(${q.correct}\\)</div>
+                </div>
+            `;
+        });
     }
-    if (list) list.innerHTML = html;
-    window.MathJax.typesetPromise();
+    
+    list.innerHTML = html;
+
+    // Force MathJax to process the newly added cards
+    if (window.MathJax) {
+        window.MathJax.typesetPromise();
+    }
 }
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
@@ -236,3 +255,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
 }
 init();
+
