@@ -1,127 +1,48 @@
-// --- 1. CONFIGURATION ---
-let allQuestions = [];
-let filteredQuestions = [];
-let roasts = [];
-let neuralDebt = [];
-let currentQ = null;
-let score = 0;
-let lives = 3;
-let callsign = localStorage.getItem('stemanaceCallsign') || "";
-
-// Storage Init
+// --- STATE ---
+let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
+let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
 let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
+let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
-let timerId = null;
-let timeLimit = 30;
-let timeLeft = 30;
-let isMuted = false;
-
-// --- 2. AUDIO ---
+// --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playProceduralSound(f, t, d, v = 0.1) {
+function playSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
-    try {
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e) {}
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
+window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
+const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 
-// Global functions for HTML
-window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playProceduralSound(600, 'sine', 0.1); };
-const successSound = () => playProceduralSound(1200, 'sine', 0.2, 0.05);
-const failSound = () => { playProceduralSound(100, 'sine', 0.4, 0.4); playProceduralSound(50, 'sine', 0.4, 0.4); };
-const tickSound = () => playProceduralSound(1800, 'sine', 0.05, 0.02);
-
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO_OFF" : "🔊 AUDIO_ON"; };
-
-// --- 3. SAFETY UTILS ---
-function safeSet(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = val;
-}
-
-// --- 4. IDENTITY ---
+// --- LOGIC ---
 window.submitLogin = () => {
-    const input = document.getElementById('callsign-input').value;
-    if (input && input.trim().length > 1) {
-        callsign = input.trim().toUpperCase();
+    const val = document.getElementById('callsign-input').value;
+    if (val.trim().length > 1) {
+        callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
-        window.uiClick();
-        updateHomeDashboard();
-        window.showScreen('screen-home');
-    } else {
-        alert("INVALID_OPERATOR_ID");
+        updateHomeDashboard(); window.showScreen('screen-home');
     }
 };
 
 window.changeCallsign = () => {
-    const newName = prompt("RE-INITIALIZE IDENTITY:");
-    if (newName && newName.trim().length > 1) {
-        callsign = newName.trim().toUpperCase();
-        localStorage.setItem('stemanaceCallsign', callsign);
-        updateHomeDashboard();
-    }
+    const n = prompt("ENTER CALLSIGN:");
+    if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
-
-// --- 5. CORE LOGIC ---
-async function init() {
-    allQuestions = [
-        { chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] },
-        { chapter: "trigonometry", q: "\\sin^2 x + \\cos^2 x", correct: "1", options: ["1", "0", "\\tan x", "-1"] }
-    ];
-    try {
-        const res = await fetch('mathformula.txt');
-        if (res.ok) {
-            const text = await res.text();
-            const parsed = text.split('\n').filter(l => l.includes('::')).map(line => {
-                const p = line.split('::').map(s => s.trim());
-                return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
-            });
-            if (parsed.length > 0) allQuestions = parsed;
-        }
-        const rRes = await fetch('roast.txt');
-        if (rRes.ok) {
-            const rText = await rRes.text();
-            roasts = rText.split('\n').filter(l => l.trim() !== "");
-        }
-    } catch (e) { console.warn("Fetch failed."); }
-
-    if (!callsign) {
-        window.showScreen('screen-login');
-    } else {
-        updateHomeDashboard();
-        window.showScreen('screen-home');
-    }
-}
-
-function updateHomeDashboard() {
-    safeSet('high-score', highScore);
-    safeSet('display-callsign', callsign);
-    safeSet('user-callsign', callsign);
-    safeSet('current-rank', getRankInfo(highScore).name);
-    
-    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    safeSet('global-proficiency', prof + "%");
-
-    const pBtn = document.getElementById('priority-btn');
-    if (pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
-}
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
-    if (target) target.classList.remove('hidden');
+    if(target) target.classList.remove('hidden');
+    if (timerId) clearInterval(timerId);
     if (id === 'screen-diagnostics') populateDiagnostics();
     if (id === 'screen-learn') populateVault();
-    if (timerId) clearInterval(timerId);
 };
 
 window.selectChapter = (chap) => {
@@ -141,14 +62,15 @@ window.selectDifficulty = (sec) => {
 };
 
 function updateHUD() {
-    safeSet('lives', "❤️".repeat(Math.max(0, lives)));
-    safeSet('streak', score);
+    const l = document.getElementById('lives'), s = document.getElementById('streak');
+    if(l) l.innerText = "❤️".repeat(lives);
+    if(s) s.innerText = score;
 }
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('red-alert').classList.add('hidden');
-    document.querySelector('#screen-game').classList.remove('panic');
+    document.querySelector('.arena-screen').classList.remove('panic');
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
@@ -162,7 +84,7 @@ function nextRound() {
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    if (window.MathJax) window.MathJax.typesetPromise();
+    if(window.MathJax) MathJax.typesetPromise();
     resetTimer();
 }
 
@@ -173,42 +95,34 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
-        safeSet('efficiency', Math.max(0, Math.round(ratio)) + "%");
-        if (timeLeft < 3) {
-            if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
-            document.getElementById('red-alert').classList.remove('hidden');
-            document.querySelector('#screen-game').classList.add('panic');
-        }
+        const eff = document.getElementById('efficiency');
+        if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
+        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.arena-screen').classList.add('panic'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(choice) {
-    if (!currentQ) return;
     const isCorrect = (choice === currentQ.correct);
+    if (!correctHistory[currentQ.chapter]) correctHistory[currentQ.chapter] = {correct:0,total:0};
     correctHistory.global.total++;
-    if (!correctHistory[currentQ.chapter]) correctHistory[currentQ.chapter] = {correct:0, total:0};
     correctHistory[currentQ.chapter].total++;
     if (isCorrect) {
-        successSound(); score++;
-        correctHistory.global.correct++;
-        correctHistory[currentQ.chapter].correct++;
+        score++; correctHistory.global.correct++; correctHistory[currentQ.chapter].correct++;
         localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
         updateHUD(); nextRound();
-    } else { handleWrong(); }
+    } else handleWrong();
 }
 
 function handleWrong() {
-    failSound(); clearInterval(timerId); lives--;
-    updateHUD(); 
-    const fID = currentQ ? currentQ.q : "unknown";
-    formulaAnalytics[fID] = (formulaAnalytics[fID] || 0) + 1;
+    failSound(); lives--; updateHUD(); clearInterval(timerId);
+    formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
-    if (currentQ) neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
-    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE.";
-    document.getElementById('correction-display').innerHTML = currentQ ? `\\[ ${currentQ.correct} \\]` : "";
+    neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
+    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE";
+    document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
-    if (window.MathJax) window.MathJax.typesetPromise();
+    if(window.MathJax) MathJax.typesetPromise();
 }
 
 window.resumeAfterRoast = () => {
@@ -221,58 +135,44 @@ window.resumeAfterRoast = () => {
 };
 
 function endGame() {
-    const rInfo = getRankInfo(score);
-    safeSet('final-streak', score);
+    const rank = [...RANKS].reverse().find(r => score >= r.t);
+    document.getElementById('final-streak').innerText = score;
     const b = document.getElementById('final-rank');
-    if (b) { b.innerText = rInfo.name; b.style.backgroundColor = rInfo.color; }
-    const debtEl = document.getElementById('debt-list');
-    if (debtEl) {
-        debtEl.innerHTML = neuralDebt.length > 0 ? 
-            neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><span style="font-weight:bold">\\(${d.a}\\)</span></div>`).join('') :
-            "<p>Debt clear.</p>";
-    }
-    if (window.MathJax) window.MathJax.typesetPromise();
+    if(b) { b.innerText = rank.n; b.style.backgroundColor = rank.c; }
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><b>\\(${d.a}\\)</b></div>`).join('');
+    if(window.MathJax) MathJax.typesetPromise();
     window.showScreen('screen-over');
     updateHomeDashboard();
 }
 
-function getRankInfo(s) {
-    const r = [
-        { name: "CONSTANT", threshold: 0, color: "#64748b" },
-        { name: "VARIABLE", threshold: 6, color: "#10b981" },
-        { name: "OPERATOR", threshold: 16, color: "#38bdf8" },
-        { name: "ARCHITECT", threshold: 31, color: "#f59e0b" },
-        { name: "NEURAL ACE", threshold: 51, color: "#ae133f" },
-        { name: "SINGULARITY", threshold: 76, color: "#6a162c" }
-    ];
-    return r.slice().reverse().find(rank => s >= rank.threshold);
+const RANKS = [{n:"CONSTANT",t:0,c:"#64748b"},{n:"VARIABLE",t:6,c:"#10b981"},{n:"OPERATOR",t:16,c:"#38bdf8"},{n:"ARCHITECT",t:31,c:"#f59e0b"},{n:"NEURAL ACE",t:51,c:"#ae133f"},{n:"SINGULARITY",t:76,c:"#6a162c"}];
+function updateHomeDashboard() {
+    const rank = [...RANKS].reverse().find(r => highScore >= r.t);
+    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('current-rank', rank.n);
+    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
+    safeSet('global-proficiency', prof + "%");
+    const pBtn = document.getElementById('priority-btn');
+    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
 }
 
-function populateDiagnostics() {
-    const container = document.getElementById('diagnostic-results');
-    const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
-    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_SESSIONS</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${totalDrills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
-    if (sortedFails.length === 0) { html += `<p style="opacity:0.5">Integrity: 100%.</p>`; }
-    else { sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge"><span class="fail-number">${c}</span></div></div>`; }); }
-    container.innerHTML = html;
-    if (window.MathJax) window.MathJax.typesetPromise();
+async function init() {
+    allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
+    try {
+        const res = await fetch('mathformula.txt');
+        if (res.ok) {
+            const text = await res.text();
+            allQuestions = text.split('\n').filter(l => l.includes('::')).map(line => {
+                const p = line.split('::').map(s => s.trim());
+                return { chapter: p[0], q: p[1], correct: p[2], options: [p[2], p[3], p[4], p[5]] };
+            });
+        }
+        const rRes = await fetch('roast.txt');
+        if (rRes.ok) {
+            const rText = await rRes.text();
+            roasts = rText.split('\n').filter(l => l.trim() !== "");
+        }
+    } catch (e) {}
+    if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
 }
-
-function populateVault() {
-    const list = document.getElementById('vault-content');
-    const grouped = allQuestions.reduce((acc, q) => { (acc[q.chapter] = acc[q.chapter] || []).push(q); return acc; }, {});
-    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px'>TAP TO REVEAL</p>";
-    for (const c in grouped) {
-        html += `<h3 class="vault-header">${c.toUpperCase()}</h3>`;
-        grouped[c].forEach(q => { html += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><span class="vault-q">\\(${q.q}\\)</span><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
-    }
-    if (list) list.innerHTML = html;
-    if (window.MathJax) window.MathJax.typesetPromise();
-}
-
-window.shareResult = () => {
-    const t = `SYSTEM REPORT: I cleared STEMANACE Arena with a streak of ${score}.\nCan you beat me? ${window.location.href}`;
-    if (navigator.share) navigator.share({ title: 'STEMANACE', text: t, url: window.location.href }); else alert("Copied!");
-};
-
 init();
