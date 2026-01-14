@@ -1,3 +1,4 @@
+// --- GLOBAL STATE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
@@ -6,25 +7,35 @@ let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytic
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
+// --- AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
+    try {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch(e) {}
 }
-
 window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
 const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 
+// --- HELPERS ---
+function safeSet(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+}
+
+// --- IDENTITY ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
-    if (val.trim().length > 1) {
+    if (val && val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
+        window.uiClick();
         updateHomeDashboard(); showScreen('screen-home');
     }
 };
@@ -34,6 +45,7 @@ window.changeCallsign = () => {
     if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
+// --- CORE LOGIC ---
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
@@ -62,8 +74,7 @@ window.selectDifficulty = (sec) => {
 function updateHUD() {
     const lEl = document.getElementById('lives');
     if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
-    const sEl = document.getElementById('streak');
-    if(sEl) sEl.innerText = score;
+    safeSet('streak', score);
 }
 
 function nextRound() {
@@ -94,9 +105,8 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
-        const eff = document.getElementById('efficiency');
-        if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
-        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.screen:not(.hidden)').classList.add('panic'); }
+        safeSet('efficiency', Math.max(0, Math.round(ratio)) + "%");
+        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.arena-screen')?.classList.add('panic'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
@@ -134,18 +144,21 @@ window.resumeAfterRoast = () => {
 };
 
 function endGame() {
-    document.getElementById('final-streak').innerText = score;
+    safeSet('final-streak', score);
     const b = document.getElementById('final-rank-badge');
-    if(b) b.innerText = score > 50 ? "SINGULARITY" : "CONSTANT";
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    const r = score > 50 ? "SINGULARITY" : "CONSTANT";
+    if(b) b.innerText = r;
+    const dList = document.getElementById('debt-list');
+    if(dList) dList.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     window.MathJax.typesetPromise();
-    showScreen('screen-over');
+    window.showScreen('screen-over');
     updateHomeDashboard();
 }
 
 function updateHomeDashboard() {
-    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign);
+    safeSet('high-score', highScore);
+    safeSet('user-callsign', callsign);
+    safeSet('display-callsign', callsign);
     safeSet('total-drills', totalDrills);
     const total = correctHistory.global.total || 0;
     const correct = correctHistory.global.correct || 0;
@@ -157,7 +170,7 @@ function updateHomeDashboard() {
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
     const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
-    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_SESSIONS</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${totalDrills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
+    let html = `<h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
     if (sortedFails.length === 0) html += `<p>Integrity: 100%.</p>`;
     else sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><span>\\(${f}\\)</span><b>FAIL_COUNT: ${c}</b></div>`; });
     container.innerHTML = html;
@@ -197,6 +210,6 @@ async function init() {
         const rRes = await fetch('roast.txt');
         if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
     } catch (e) {}
-    if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
+    if (!callsign) window.showScreen('screen-login'); else { updateHomeDashboard(); window.showScreen('screen-home'); }
 }
 init();
