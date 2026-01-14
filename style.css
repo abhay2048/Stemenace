@@ -21,29 +21,32 @@ body {
 
 .hidden { display: none !important; }
 
+/* THE ARENA FIX: FLEX-SHRINKING CONTENT */
 #formula-chamber {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    background: var(--background); border-radius: 1.2rem; margin-bottom: 10px;
+    flex: 1.5; display: flex; align-items: center; justify-content: center;
+    background: var(--background); border-radius: 1.2rem; margin-bottom: 1rem;
     border: 1px solid var(--primary); padding: 15px; overflow: hidden;
 }
 
+/* Formula Shrink & Wrap Logic */
 #formula-display mjx-container {
-    font-size: clamp(1rem, 4.5vw, 2.5rem) !important;
+    font-size: clamp(1rem, 4vw, 2.4rem) !important;
     max-width: 100% !important;
-    white-space: normal !important;
+    white-space: normal !important; 
     display: block !important;
     margin: 0 auto !important;
 }
 
 #options-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
-    margin-top: auto; flex-shrink: 0;
+    display: grid; grid-template-columns: 1fr 1fr; /* Laptop Default */
+    gap: 10px; margin-top: auto; flex-shrink: 0;
 }
 
 @media (max-width: 600px) {
-    #options-grid { grid-template-columns: 1fr; }
+    #options-grid { grid-template-columns: 1fr; } /* Mobile vertical stack */
     .screen { padding: 1.2rem; }
     .logo { font-size: 2.2rem; }
+    #formula-display mjx-container { font-size: 1.2rem !important; }
 }
 
 .opt-btn {
@@ -53,24 +56,23 @@ body {
 }
 
 .opt-btn mjx-container {
-    font-size: clamp(0.7rem, 3.5vw, 1.1rem) !important;
+    font-size: clamp(0.75rem, 3.5vw, 1.1rem) !important;
     white-space: normal !important;
-    max-width: 100% !important;
 }
 
 .opt-btn:hover { background: var(--background); border-color: var(--accent); transform: translateY(-2px); }
 
+/* MODALS */
 .overlay { position: fixed; inset: 0; background: rgba(106, 22, 44, 0.4); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 10px; }
 .modal { background: var(--white); border: 2px solid var(--accent); border-radius: 2rem; padding: 1.5rem; width: 90%; max-width: 480px; text-align: center; max-height: 85dvh; overflow-y: auto; display: flex; flex-direction: column; }
-.correction-zone { background: var(--background); padding: 1rem; border-radius: 1rem; margin: 1rem 0; border: 1px solid var(--primary); overflow-x: hidden; }
+.correction-zone { background: var(--background); padding: 1rem; border-radius: 1rem; margin: 1rem 0; border: 1px solid var(--primary); overflow-x: auto; }
 .correction-zone mjx-container { font-size: 1.2rem !important; white-space: normal !important; }
-.correction-label { font-size: 0.6rem; font-weight: 900; color: var(--accent); display: block; margin-bottom: 5px; }
 
+/* Dashboard UI */
 .logo { font-size: 3rem; margin: 0; color: var(--accent); letter-spacing: -2px; }
 .logo-med { font-size: 2rem; margin: 0; color: var(--accent); }
 .logo span { font-weight: 200; }
 .tagline { font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; margin-bottom: 1.5rem; }
-.status-bar { font-family: monospace; font-size: 0.6rem; margin-bottom: 10px; font-weight: bold; }
 .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
 .stat-card { background: var(--background); padding: 10px; border-radius: 1rem; border: 1px solid var(--primary); }
 .stat-value-sm { font-size: 1.1rem; font-weight: 900; font-family: monospace; }
@@ -85,9 +87,9 @@ body {
 #timer-fill { background: var(--text); height: 100%; transition: width 0.1s linear; }
 
 #vault-content, #diagnostic-results, .revision-box { flex: 1; overflow-y: auto; text-align: left; }
-.revision-box { background: var(--background); padding: 10px; border-radius: 0.5rem; font-size: 0.75rem; margin: 10px 0; border: 1px dashed var(--primary); }
-.rank-badge { padding: 5px 15px; background: var(--accent); color: white; border-radius: 4px; display: inline-block; font-size: 0.8rem; font-weight: 900; }
-.back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.2rem; left: 1.2rem; font-weight: 900; border: none; cursor: pointer; }
+.vault-card { background: var(--background); border: 1px solid var(--primary); border-radius: 1rem; margin-bottom: 0.8rem; padding: 1.2rem; cursor: pointer; }
+.vault-a { filter: blur(8px); opacity: 0.2; transition: 0.3s; margin-top: 10px; border-top: 1px dashed var(--primary); padding-top: 10px; }
+.vault-card.revealed .vault-a { filter: blur(0); opacity: 1; }
 
 .scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(174, 19, 63, 0) 50%, rgba(106, 22, 44, 0.02) 50%); background-size: 100% 4px; }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
