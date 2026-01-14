@@ -48,17 +48,19 @@
             <header class="home-header">
                 <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROF: <span id="global-proficiency">0%</span></div>
                 <h1 class="logo-med">STEM<span>ANACE</span></h1>
+                <div id="achievement-rack" class="achievement-rack"></div>
             </header>
             
             <div class="dashboard">
                 <div class="stat-card clickable" onclick="changeCallsign()">
                     <div class="stat-label">NEURAL_ID</div>
-                    <div id="user-callsign" class="stat-value-sm">UNINITIALIZED</div>
+                    <div id="user-callsign" class="stat-value-sm">---</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">SYSTEM_PEAK</div>
                     <div id="high-score" class="stat-value-sm">0</div>
                 </div>
+                <div id="total-drills" style="display:none">0</div>
             </div>
 
             <div class="nav-grid">
@@ -85,14 +87,14 @@
             <div id="options-grid"></div>
         </div>
 
-        <!-- SUBJECT SELECTION -->
+        <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
             <h2 class="vault-header">TARGET_DOMAIN</h2>
             <div class="nav-grid">
                 <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                 <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
-                <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
+                <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
             </div>
         </div>
 
@@ -115,19 +117,21 @@
                     <span class="correction-label">REQUIRED_IDENTITY</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="primary-btn" style="width:100%; min-height: 50px;" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
+                <button class="primary-btn" style="width:100%" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
             </div>
         </div>
 
-        <!-- VAULT -->
+        <!-- VAULT (FLASHCARDS) -->
         <div id="screen-learn" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
+            <h2 class="vault-header">NEURAL_LIBRARY</h2>
             <div id="vault-content"></div>
         </div>
 
         <!-- DIAGNOSTICS -->
         <div id="screen-diagnostics" class="screen hidden">
             <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
+            <h2 class="vault-header">DIAGNOSTIC_REPORT</h2>
             <div id="diagnostic-results"></div>
         </div>
 
