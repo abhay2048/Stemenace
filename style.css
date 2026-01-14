@@ -9,10 +9,9 @@
 }
 
 body {
-    background-color: var(--background);
-    color: var(--text);
-    font-family: 'Inter', system-ui, sans-serif;
-    margin: 0; display: flex; justify-content: center; align-items: center; 
+    background-color: var(--background); color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif; margin: 0;
+    display: flex; justify-content: center; align-items: center; 
     min-height: 100dvh; overflow: hidden;
     background-image: radial-gradient(circle at 0% 0%, var(--secondary) 0%, transparent 25%),
                       radial-gradient(circle at 100% 100%, var(--primary) 0%, transparent 25%);
@@ -25,19 +24,18 @@ body {
 .app-container { width: 95%; max-width: 750px; height: 90dvh; display: flex; flex-direction: column; transition: transform 0.2s ease; }
 
 .screen {
-    background: var(--white);
-    padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--primary);
-    box-shadow: 0 15px 35px var(--shadow);
+    background: var(--white); padding: 2rem; border-radius: 1.5rem; border: 1px solid var(--primary);
+    box-shadow: 0 15px 35px var(--shadow), inset 0 1px 0 var(--white);
     height: 100%; display: flex; flex-direction: column; text-align: center; box-sizing: border-box; overflow-y: auto;
 }
 
 .hidden { display: none !important; }
 
-/* Dashboard */
+/* Branding & Dashboard */
 .logo { font-size: 3rem; font-weight: 800; letter-spacing: -2px; color: var(--accent); margin: 0; }
 .logo span { color: var(--text); font-weight: 300; }
 .tagline { font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; opacity: 0.6; margin-top: 5px; }
-.status-bar { font-family: monospace; font-size: 0.6rem; color: var(--accent); letter-spacing: 1px; font-weight: 700; margin-bottom: 5px; }
+.status-bar { font-family: monospace; font-size: 0.6rem; color: var(--accent); letter-spacing: 1px; font-weight: 700; }
 
 .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--primary); border-radius: 1rem; overflow: hidden; margin: 1.5rem 0; border: 1px solid var(--primary); }
 .stat-card { background: var(--white); padding: 1.2rem; }
@@ -55,7 +53,7 @@ button { padding: 1rem; border-radius: 0.8rem; font-weight: 800; cursor: pointer
 .mute-toggle { background: none; border: 1px solid var(--primary); color: var(--accent); font-size: 0.6rem; align-self: center; margin-top: 10px; width: fit-content; padding: 5px 10px; }
 button:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
-.back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.5rem; left: 1.5rem; font-weight: bold; cursor: pointer; border: none; }
+.back-link { background: none; color: var(--accent); font-size: 0.7rem; position: absolute; top: 1.5rem; left: 1.5rem; font-weight: bold; border: none; cursor: pointer; }
 
 /* Arena UX */
 .arena-hud { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-family: monospace; }
@@ -69,19 +67,20 @@ button:hover { transform: translateY(-3px); filter: brightness(1.1); }
 #options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 .opt-btn { background: var(--white); border: 2px solid var(--primary); min-height: 110px; color: var(--text); border-radius: 1rem; }
 
-/* Vault & Diag */
+/* Diagnostic Reporting UI */
+.diag-summary-header { background: var(--background); padding: 1.5rem; border-radius: 1rem; border: 2px solid var(--primary); margin-bottom: 1.5rem; box-shadow: inset 0 0 15px var(--shadow); }
+.fail-log-item { background: var(--white); border: 1px solid var(--primary); border-radius: 1rem; padding: 1.2rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+.fail-formula { font-size: 1rem; color: var(--accent); flex: 1; text-align: left; }
+.fail-count-badge { background: var(--background); padding: 8px; border-radius: 8px; border: 1px solid var(--text); text-align: center; min-width: 50px; }
+.fail-number { display: block; font-size: 1.2rem; font-weight: 900; color: var(--text); font-family: monospace; }
+
+/* Vault & Revision */
 .vault-card { background: var(--white); border: 1px solid var(--primary); border-radius: 1rem; margin-bottom: 1rem; padding: 1.2rem; cursor: pointer; text-align: left; }
 .vault-a { filter: blur(8px); opacity: 0.2; transition: 0.3s; border-top: 1px dashed var(--primary); padding-top: 10px; margin-top: 10px; }
 .vault-card.revealed .vault-a { filter: blur(0); opacity: 1; color: var(--text); }
-
-.diag-card { background: var(--background); padding: 1.2rem; border-radius: 1rem; margin-bottom: 1rem; border: 1px solid var(--primary); text-align: left; }
-.diag-bar-bg { background: var(--white); height: 6px; border-radius: 3px; border: 1px solid var(--primary); overflow: hidden; }
-.diag-bar-fill { background: var(--text); height: 100%; transition: width 1s; }
-
-/* Revision */
 .revision-box { margin-top: 1.2rem; background: var(--background); padding: 1rem; border-radius: 1rem; border: 1px dashed var(--text); text-align: left; max-height: 180px; overflow-y: auto; }
 .debt-item { font-size: 0.8rem; border-bottom: 1px solid var(--primary); padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
-.rank-badge { padding: 8px 20px; border-radius: 4px; font-family: monospace; font-weight: 900; letter-spacing: 2px; color: white; margin-bottom: 1rem; box-shadow: 0 4px 10px var(--shadow); }
+.rank-badge { padding: 8px 20px; border-radius: 4px; font-family: monospace; font-weight: 900; letter-spacing: 2px; color: white; margin-bottom: 1rem; }
 
 @media (max-width: 600px) {
     #options-grid { grid-template-columns: 1fr; }
