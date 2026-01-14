@@ -1,45 +1,17 @@
-// --- STATE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
-let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
-let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
+let timerId = null, timeLimit = 30, timeLeft = 30;
 
-// --- AUDIO ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(f, t, d, v = 0.1) {
-    if (isMuted || audioCtx.state === 'suspended') return;
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
-}
-window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
-const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
-
-// --- UTILS ---
-function safeSet(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = val;
-}
-
-// --- LOGIC ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
-    if (val.trim().length > 1) {
+    if (val && val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
-        updateHomeDashboard(); window.showScreen('screen-home');
+        updateHomeDashboard(); showScreen('screen-home');
     }
-};
-
-window.changeCallsign = () => {
-    const n = prompt("ENTER CALLSIGN:");
-    if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
 window.showScreen = (id) => {
@@ -56,12 +28,6 @@ window.selectChapter = (chap) => {
     window.showScreen('screen-difficulty');
 };
 
-window.selectPriorityDrill = () => {
-    const failedIds = Object.keys(formulaAnalytics);
-    filteredQuestions = allQuestions.filter(q => failedIds.includes(q.q));
-    window.showScreen('screen-difficulty');
-};
-
 window.selectDifficulty = (sec) => {
     timeLimit = sec; lives = 3; score = 0; neuralDebt = [];
     updateHUD(); window.showScreen('screen-game'); nextRound();
@@ -69,22 +35,19 @@ window.selectDifficulty = (sec) => {
 
 function updateHUD() {
     const lEl = document.getElementById('lives');
-    // FIX: Math.max ensures we never repeat a negative number
     if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
-    safeSet('streak', score);
+    const sEl = document.getElementById('streak');
+    if(sEl) sEl.innerText = score;
 }
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('red-alert').classList.add('hidden');
     document.querySelector('.arena-screen').classList.remove('panic');
-    
+    if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
-    // Set Question
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    
-    // Build Buttons
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
     [...currentQ.options].sort(() => Math.random() - 0.5).forEach(opt => {
@@ -94,13 +57,10 @@ function nextRound() {
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-
-    // CRITICAL: This tells MathJax to look at the new content and fit it
-    if (window.MathJax) {
-        window.MathJax.typesetPromise();
-    }
+    if(window.MathJax) MathJax.typesetPromise();
     resetTimer();
 }
+
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
@@ -108,7 +68,8 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
-        safeSet('efficiency', Math.max(0, Math.round(ratio)) + "%");
+        const eff = document.getElementById('efficiency');
+        if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
         if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.arena-screen').classList.add('panic'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -127,9 +88,7 @@ function handleChoice(choice) {
 }
 
 function handleWrong() {
-    failSound(); lives--; // Life is removed here
-    updateHUD(); 
-    clearInterval(timerId);
+    lives--; updateHUD(); clearInterval(timerId);
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
@@ -141,40 +100,30 @@ function handleWrong() {
 
 window.resumeAfterRoast = () => {
     document.getElementById('roast-popup').classList.add('hidden');
-    // FIX: Game over logic moved here
     if (lives <= 0) {
-        totalDrills++; localStorage.setItem('stemanaceDrills', totalDrills);
         if (score > highScore) { highScore = score; localStorage.setItem('stemanaceHS', highScore); }
         endGame();
     } else nextRound();
 };
 
 function endGame() {
-    const rank = [...RANKS].reverse().find(r => score >= r.t);
-    safeSet('final-streak', score);
+    document.getElementById('final-streak').innerText = score;
     const b = document.getElementById('final-rank-badge');
-    if(b) { b.innerText = rank.n; b.style.backgroundColor = rank.c; }
-    
-    const dList = document.getElementById('debt-list');
-    if(dList) dList.innerHTML = neuralDebt.map(d => `<div class="debt-item"><span>\\(${d.q}\\)</span><b>\\(${d.a}\\)</b></div>`).join('');
-    
+    if(b) b.innerText = score > 50 ? "SINGULARITY" : "CONSTANT";
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div>\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     if(window.MathJax) MathJax.typesetPromise();
-    window.showScreen('screen-over');
+    showScreen('screen-over');
     updateHomeDashboard();
 }
 
-const RANKS = [{n:"CONSTANT",t:0,c:"#64748b"},{n:"VARIABLE",t:6,c:"#10b981"},{n:"OPERATOR",t:16,c:"#38bdf8"},{n:"ARCHITECT",t:31,c:"#f59e0b"},{n:"NEURAL ACE",t:51,c:"#ae133f"},{n:"SINGULARITY",t:76,c:"#6a162c"}];
 function updateHomeDashboard() {
-    const r = [...RANKS].reverse().find(rank => highScore >= rank.t);
-    safeSet('high-score', highScore); 
-    safeSet('user-callsign', callsign); 
-    safeSet('display-callsign', callsign); 
-    safeSet('current-rank', r.n);
-    safeSet('total-drills', totalDrills);
-    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    safeSet('global-proficiency', prof + "%");
-    const pBtn = document.getElementById('priority-btn');
-    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    safeSet('high-score', highScore);
+    safeSet('user-callsign', callsign);
+    safeSet('display-callsign', callsign);
+    const total = correctHistory.global.total || 0;
+    const correct = correctHistory.global.correct || 0;
+    safeSet('global-proficiency', (total > 0 ? Math.round((correct/total)*100) : 0) + "%");
 }
 
 async function init() {
@@ -189,12 +138,8 @@ async function init() {
             });
         }
         const rRes = await fetch('roast.txt');
-        if (rRes.ok) {
-            const rText = await rRes.text();
-            roasts = rText.split('\n').filter(l => l.trim() !== "");
-        }
+        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
     } catch (e) {}
     if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
 }
 init();
-
