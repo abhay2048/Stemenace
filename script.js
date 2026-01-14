@@ -1,3 +1,4 @@
+// --- STATE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
@@ -6,6 +7,7 @@ let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytic
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
+// --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
@@ -19,6 +21,13 @@ function playSound(f, t, d, v = 0.1) {
 window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
 const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 
+// --- HELPERS ---
+function safeSet(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+}
+
+// --- CORE ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
     if (val.trim().length > 1) {
@@ -29,7 +38,7 @@ window.submitLogin = () => {
 };
 
 window.changeCallsign = () => {
-    const n = prompt("ENTER CALLSIGN:");
+    const n = prompt("RE-INITIALIZE IDENTITY:");
     if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
@@ -92,8 +101,7 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
-        const eff = document.getElementById('efficiency');
-        if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
+        safeSet('efficiency', Math.max(0, Math.round(ratio)) + "%");
         if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.screen:not(.hidden)').classList.add('panic'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -132,18 +140,21 @@ window.resumeAfterRoast = () => {
 };
 
 function endGame() {
-    document.getElementById('final-streak').innerText = score;
+    safeSet('final-streak', score);
     const b = document.getElementById('final-rank-badge');
-    if(b) b.innerText = score > 50 ? "SINGULARITY" : "CONSTANT";
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    const r = score > 50 ? "SINGULARITY" : "CONSTANT";
+    if(b) b.innerText = r;
+    const dList = document.getElementById('debt-list');
+    if(dList) dList.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     window.MathJax.typesetPromise();
-    showScreen('screen-over');
+    window.showScreen('screen-over');
     updateHomeDashboard();
 }
 
 function updateHomeDashboard() {
     const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
     safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign);
+    safeSet('total-drills', totalDrills);
     const total = correctHistory.global.total || 0;
     const correct = correctHistory.global.correct || 0;
     safeSet('global-proficiency', (total > 0 ? Math.round((correct/total)*100) : 0) + "%");
@@ -174,11 +185,6 @@ function populateVault() {
 }
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO_OFF" : "🔊 AUDIO_ON"; };
-
-window.shareResult = () => {
-    const text = `SYSTEM REPORT: I cleared STEMANACE Arena with a streak of ${score}.\nCan you beat me? ${window.location.href}`;
-    if (navigator.share) navigator.share({ title: 'STEMANACE', text: text, url: window.location.href }); else alert("Copied!");
-};
 
 async function init() {
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
