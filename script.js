@@ -24,7 +24,7 @@ const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine'
 // --- LOGIC ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
-    if (val.trim().length > 1) {
+    if (val && val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
         updateHomeDashboard(); showScreen('screen-home');
@@ -32,7 +32,7 @@ window.submitLogin = () => {
 };
 
 window.changeCallsign = () => {
-    const n = prompt("RE-INITIALIZE IDENTITY:");
+    const n = prompt("ENTER CALLSIGN:");
     if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
 };
 
@@ -50,12 +50,6 @@ window.selectChapter = (chap) => {
     window.showScreen('screen-difficulty');
 };
 
-window.selectPriorityDrill = () => {
-    const failedIds = Object.keys(formulaAnalytics);
-    filteredQuestions = allQuestions.filter(q => failedIds.includes(q.q));
-    window.showScreen('screen-difficulty');
-};
-
 window.selectDifficulty = (sec) => {
     timeLimit = sec; lives = 3; score = 0; neuralDebt = [];
     updateHUD(); window.showScreen('screen-game'); nextRound();
@@ -70,7 +64,7 @@ function updateHUD() {
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('red-alert').classList.add('hidden');
-    document.querySelector('.arena-screen').classList.remove('panic');
+    document.querySelector('.arena-screen')?.classList.remove('panic');
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
@@ -84,7 +78,7 @@ function nextRound() {
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    if(window.MathJax) window.MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
     resetTimer();
 }
 
@@ -97,21 +91,14 @@ function resetTimer() {
         if (bar) bar.style.width = ratio + "%";
         const eff = document.getElementById('efficiency');
         if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
-        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.arena-screen').classList.add('panic'); }
+        if (timeLeft < 3) { document.getElementById('red-alert').classList.remove('hidden'); document.querySelector('.screen:not(.hidden)').classList.add('panic'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(choice) {
-    const isCorrect = (choice === currentQ.correct);
-    if (!correctHistory[currentQ.chapter]) correctHistory[currentQ.chapter] = {correct:0,total:0};
-    correctHistory.global.total++;
-    correctHistory[currentQ.chapter].total++;
-    if (isCorrect) {
-        score++; correctHistory.global.correct++; correctHistory[currentQ.chapter].correct++;
-        localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
-        updateHUD(); nextRound();
-    } else handleWrong();
+    if (choice === currentQ.correct) { score++; updateHUD(); nextRound(); }
+    else handleWrong();
 }
 
 function handleWrong() {
@@ -122,7 +109,7 @@ function handleWrong() {
     document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE";
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
-    if(window.MathJax) window.MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.resumeAfterRoast = () => {
@@ -136,21 +123,17 @@ window.resumeAfterRoast = () => {
 
 function endGame() {
     document.getElementById('final-streak').innerText = score;
-    const dList = document.getElementById('debt-list');
-    if(dList) dList.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--primary)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
-    if(window.MathJax) window.MathJax.typesetPromise();
+    const b = document.getElementById('final-rank-badge');
+    if(b) b.innerText = score > 50 ? "SINGULARITY" : "CONSTANT";
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div>\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    if (window.MathJax) window.MathJax.typesetPromise();
     showScreen('screen-over');
     updateHomeDashboard();
 }
 
 function updateHomeDashboard() {
-    const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign);
-    const total = correctHistory.global.total || 0;
-    const correct = correctHistory.global.correct || 0;
-    safeSet('global-proficiency', (total > 0 ? Math.round((correct/total)*100) : 0) + "%");
-    const pBtn = document.getElementById('priority-btn');
-    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    document.getElementById('high-score').innerText = highScore;
+    document.getElementById('user-callsign').innerText = callsign;
 }
 
 async function init() {
