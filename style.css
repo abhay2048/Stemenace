@@ -6,34 +6,28 @@
     --primary: #ef8fa7;
     --accent: #ae133f;
     --text: #ffffff;
-    --text-dim: #a08c92;
     --radius-lg: 24px;
-    --radius-md: 12px;
-    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-    --transition: all 0.25s ease;
+    --radius-md: 16px;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    height: 100dvh;
-    display: flex; justify-content: center; align-items: center;
+    background-color: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif; margin: 0;
+    height: 100dvh; display: flex; justify-content: center; align-items: center;
     overflow: hidden;
-    background-image: 
-        radial-gradient(circle at 10% 10%, #3d0716 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, #1a050a 0%, transparent 40%);
+    background-image: radial-gradient(circle at 10% 10%, #3d0716 0%, transparent 40%),
+                      radial-gradient(circle at 90% 90%, #1a050a 0%, transparent 40%);
 }
 
-.scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(174, 19, 63, 0) 50%, rgba(106, 22, 44, 0.02) 50%); background-size: 100% 4px; }
+.scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(174,19,63,0) 50%, rgba(106,22,44,0.02) 50%); background-size: 100% 4px; }
 .hidden { display: none !important; }
 
-/* LAYOUT ARCHITECTURE */
+/* LAYOUT */
 .app-container {
-    width: 95%; max-width: 1200px; height: 90dvh;
+    width: 95%; max-width: 1200px; height: 92dvh;
     display: grid; grid-template-columns: 280px 1fr; gap: 20px;
 }
 
@@ -43,102 +37,90 @@ body {
 .main-stage {
     background: var(--surface); backdrop-filter: blur(15px);
     border: 1px solid var(--border); border-radius: var(--radius-lg);
-    position: relative; overflow: hidden; box-shadow: var(--shadow);
+    position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.8);
 }
 
-.screen { position: absolute; inset: 0; padding: 2.5rem; display: flex; flex-direction: column; overflow-y: auto; }
+.screen { position: absolute; inset: 0; padding: 2rem; display: flex; flex-direction: column; overflow-y: auto; }
 
-/* --- 🛡️ VAULT FEATURE (Blur Reveal Logic) --- */
-.vault-card {
-    background: var(--surface-bright); border: 1px solid var(--border);
-    border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem;
-    cursor: pointer; transition: var(--transition);
-}
-.vault-q { font-size: 1.1rem; color: var(--primary); font-weight: 700; margin-bottom: 10px; overflow-x: auto; }
-.vault-a { 
-    filter: blur(12px); opacity: 0.1; transition: 0.4s;
-    padding-top: 15px; border-top: 1px dashed var(--border); overflow-x: auto;
-}
-.vault-card.revealed .vault-a { filter: blur(0); opacity: 1; }
-
-/* --- ⚙️ DIAGNOSTICS FEATURE (Fail Badges) --- */
-.fail-log-item {
-    background: var(--surface-bright); border: 1px solid var(--border);
-    padding: 1rem 1.5rem; border-radius: var(--radius-md);
-    display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 8px;
-}
-.fail-formula { flex: 1; overflow-x: auto; }
-.fail-count-badge {
-    background: var(--accent); color: white; padding: 5px 12px;
-    border-radius: 8px; text-align: center; min-width: 65px;
-}
-.fail-number { display: block; font-size: 1.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
-
-/* --- 🎖️ ACHIEVEMENT FEATURE --- */
-.achievement-rack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 30px; }
-.medal { font-size: 1.5rem; filter: drop-shadow(0 0 5px var(--primary)); }
-
-/* --- 💎 ARENA HUD & TIMER --- */
-.arena-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.hud-item { background: var(--surface-bright); padding: 6px 15px; border-radius: 20px; border: 1px solid var(--border); }
-.timer-rail { height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
-#timer-fill { height: 100%; background: var(--primary); width: 100%; transition: width 0.1s linear; }
-
-/* FORMULA DISPLAY (CONVENIENCE FOR PLAYER) */
+/* 💎 THE ARENA - OPTIMIZED FOR CONVENIENCE */
 #formula-chamber { 
-    flex: 1; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); 
-    display: flex; align-items: center; justify-content: center; 
-    margin-bottom: 1.5rem; border: 1px solid var(--border); padding: 25px; 
+    height: 35%; /* Smaller than before */
+    background: rgba(0,0,0,0.25); border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.2rem; border: 1px solid var(--border); padding: 20px;
 }
+
 #formula-display mjx-container {
-    font-size: clamp(1.5rem, 5vw, 3rem) !important;
+    font-size: clamp(1.2rem, 4.5vw, 2.5rem) !important;
     filter: drop-shadow(0 0 10px var(--primary));
 }
 
-/* BUTTONS */
-.primary-btn {
-    background: var(--accent); color: white; border: none; padding: 1rem;
-    border-radius: var(--radius-md); font-weight: 800; text-transform: uppercase;
-    cursor: pointer; transition: var(--transition);
+/* 2x2 GRID - PERFECT FOR MOBILE & BOLD */
+.grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    flex: 1; /* Takes up remaining space */
 }
-.primary-btn:hover { background: #d0164c; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(174, 19, 63, 0.4); }
 
-.secondary-btn { background: var(--surface-bright); color: white; border: 1px solid var(--border); padding: 0.8rem; border-radius: var(--radius-md); cursor: pointer; }
-.full-width { width: 100%; }
+.opt-btn {
+    background: var(--surface-bright);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    padding: 10px;
+    font-size: clamp(0.85rem, 3vw, 1.1rem);
+    font-weight: 800; /* BOLDER */
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+}
 
-.opt-btn { background: var(--surface-bright); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); padding: 1.5rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
-.opt-btn:hover { background: var(--primary); color: var(--bg); transform: translateY(-3px); }
+.opt-btn:hover { background: var(--primary); color: var(--bg); transform: scale(1.02); }
+.opt-btn:active { transform: scale(0.98); }
 
-/* UI TEXT STYLING */
-.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; }
-.stat-value { font-size: 1.6rem; font-weight: 800; }
+/* MOBILE PERFECTION */
+@media (max-width: 900px) {
+    .app-container { grid-template-columns: 1fr; height: 100dvh; width: 100%; }
+    .sidebar { display: none; }
+    .main-stage { border-radius: 0; border: none; }
+    .screen { padding: 1.2rem; }
+    #formula-chamber { height: 30%; margin-bottom: 10px; }
+    .grid-2x2 { gap: 8px; }
+    .opt-btn { border-radius: 12px; } /* Slightly sharper for mobile feel */
+}
+
+/* VAULT & DIAGNOSTICS (Restored Features) */
+.vault-card { background: var(--surface-bright); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.2rem; margin-bottom: 10px; cursor: pointer; }
+.vault-a { filter: blur(12px); opacity: 0.1; transition: 0.3s; padding-top: 10px; border-top: 1px dashed var(--border); margin-top: 10px; }
+.vault-card.revealed .vault-a { filter: blur(0); opacity: 1; }
+
+.fail-log-item { background: var(--surface-bright); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.fail-count-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-weight: 900; font-family: 'JetBrains Mono'; }
+
+/* HUD & UI */
+.arena-hud { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.hud-item { background: var(--surface-bright); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 0.8rem; }
+.timer-rail { height: 5px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 15px; overflow: hidden; }
+#timer-fill { height: 100%; background: var(--primary); width: 100%; }
+
+.primary-btn { background: var(--accent); color: white; border: none; padding: 1rem; border-radius: var(--radius-md); font-weight: 800; text-transform: uppercase; cursor: pointer; }
+.secondary-btn { background: var(--surface-bright); color: white; border: 1px solid var(--border); padding: 0.8rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; }
+
+.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; }
+.stat-value { font-size: 1.4rem; font-weight: 800; }
 .highlight { color: var(--primary); }
 .logo span { color: var(--primary); }
+.achievement-rack { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 
-/* SCROLLBAR (CONVENIENCE) */
-.scroll-area { flex: 1; overflow-y: auto; padding-right: 8px; }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-/* MODALS & OVERLAYS */
+/* MODALS */
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-.modal { background: var(--bg); border: 2px solid var(--accent); border-radius: var(--radius-lg); padding: 2.5rem; max-width: 480px; width: 90%; text-align: center; }
-.correction-zone { background: var(--surface-bright); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; border: 1px solid var(--primary); overflow-x: auto; }
+.modal { background: var(--bg); border: 2px solid var(--accent); border-radius: var(--radius-lg); padding: 2rem; max-width: 400px; width: 90%; text-align: center; }
+.correction-zone { background: var(--surface-bright); padding: 1rem; border-radius: var(--radius-md); margin-top: 15px; border: 1px solid var(--primary); }
 
-/* UTILITY CLASSES */
-.centered-box { margin: auto; width: 100%; max-width: 400px; text-align: center; }
-.hero-btn { font-size: 1.2rem; padding: 1.5rem; margin-bottom: 15px; width: 100%; }
-.btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.vertical-nav { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-.back-link { position: absolute; top: 1.5rem; left: 1.5rem; color: var(--primary); font-weight: 800; cursor: pointer; background: none; border: none; font-size: 0.75rem; letter-spacing: 1px; z-index: 10; }
-.title-mt { margin-top: 40px; }
-.failure-title { font-size: 3rem; color: var(--accent); margin: 0; letter-spacing: -2px; }
-
-/* RESPONSIVE MOBILE FIX */
-@media (max-width: 900px) {
-    .app-container { grid-template-columns: 1fr; height: 95dvh; }
-    .sidebar { display: none; }
-    #options-grid { grid-template-columns: 1fr; }
-    .screen { padding: 1.5rem; }
-    #formula-chamber { padding: 15px; }
-}
+/* SCROLLBAR */
+.scroll-area { flex: 1; overflow-y: auto; padding-right: 5px; }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--accent); }
