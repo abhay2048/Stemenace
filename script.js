@@ -1,3 +1,8 @@
+/**
+ * STEMANACE NEURAL CALIBRATOR - CORE LOGIC
+ * Optimized for Professional Dashboard UI
+ */
+
 // --- STATE & DATA ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
@@ -8,11 +13,11 @@ let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { c
 let achievements = JSON.parse(localStorage.getItem('stemanaceMedals')) || { titan: false, survivor: false, singularity: false };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
-// Repair History Storage
+// Ensure history subjects exist
 const subjects = ['global', 'calculus', 'trigonometry'];
 subjects.forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
 
-// --- AUDIO ENGINE ---
+// --- AUDIO ENGINE (Procedural Audio) ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playProceduralSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
@@ -37,7 +42,7 @@ window.toggleMute = () => {
     if(btn) btn.innerText = isMuted ? "🔇 OFF" : "🔊 ON"; 
 };
 
-// --- LOGIC ---
+// --- NAVIGATION & LOGIN ---
 window.submitLogin = () => {
     const input = document.getElementById('callsign-input');
     if (!input) return;
@@ -62,14 +67,16 @@ window.changeCallsign = () => {
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
-    if(target) target.classList.remove('hidden');
+    if(target) {
+        target.classList.remove('hidden');
+        uiClick();
+    }
     if (timerId) clearInterval(timerId);
-    if (id === 'screen-diagnostics') populateDiagnostics();
-    if (id === 'screen-learn') populateVault();
 };
 
+// --- CHAPTER LOGIC ---
 window.selectChapter = (chap) => {
-    filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap);
+    filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap.toLowerCase());
     window.showScreen('screen-difficulty');
 };
 
@@ -81,9 +88,12 @@ window.selectPriorityDrill = () => {
 
 window.selectDifficulty = (sec) => {
     timeLimit = sec; lives = 3; score = 0; neuralDebt = [];
-    updateHUD(); window.showScreen('screen-game'); nextRound();
+    updateHUD(); 
+    window.showScreen('screen-game'); 
+    nextRound();
 };
 
+// --- GAMEPLAY CORE ---
 function updateHUD() {
     const lEl = document.getElementById('lives'), sEl = document.getElementById('streak');
     if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
@@ -93,40 +103,38 @@ function updateHUD() {
 function nextRound() {
     if (timerId) clearInterval(timerId);
     
+    // Reset visual alerts
     const alert = document.getElementById('red-alert');
     if(alert) alert.classList.add('hidden');
+    document.querySelectorAll('.arena-screen').forEach(el => el.classList.remove('panic'));
     
-    // Select Question
+    // Selection
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
-    // UPDATE FORMULA - Uses clear formatting for MathJax
+    // Render Formula
     const display = document.getElementById('formula-display');
-    if(display) {
-        display.innerHTML = `\\[ ${currentQ.q} \\]`;
-    }
+    if(display) display.innerHTML = `\\[ ${currentQ.q} \\]`;
     
+    // Render Options (2x2 Grid)
     const grid = document.getElementById('options-grid');
     if(!grid) return;
     grid.innerHTML = "";
     
-    // SHUFFLE OPTIONS
     const opts = [...currentQ.options].sort(() => 0.5 - Math.random());
-    
     opts.forEach(opt => {
         const btn = document.createElement('button');
-        btn.className = 'opt-btn';
-        // Wrap option in inline LaTeX
+        btn.className = 'opt-btn bold-text'; // Bold class for professional look
         btn.innerHTML = `\\( ${opt} \\)`;
-        btn.onclick = () => { uiClick(); handleChoice(opt); };
+        btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
 
-    // 🛑 CRITICAL: TELL MATHJAX TO RENDER THE NEW FORMULAS 🛑
-    if(window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([display, grid]).catch((err) => console.log(err));
+    // RE-RENDER MATHJAX (Crucial for professional math view)
+    if(window.MathJax) {
+        window.MathJax.typesetPromise([display, grid]).catch(err => console.warn(err));
     }
-
+    
     resetTimer();
 }
 
@@ -145,7 +153,6 @@ function resetTimer() {
             if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
             const alert = document.getElementById('red-alert');
             if(alert) alert.classList.remove('hidden'); 
-            document.querySelectorAll('.arena-screen').forEach(el => el.classList.add('panic')); 
         }
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -166,28 +173,35 @@ function handleWrong() {
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
     correctHistory.global.total++;
     correctHistory[currentQ.chapter].total++;
+    
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
+    
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
     
     const roastEl = document.getElementById('roast-message');
-    if(roastEl) roastEl.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE.";
+    if(roastEl) roastEl.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "NEURAL DISCONNECT.";
     
     const corrEl = document.getElementById('correction-display');
     if(corrEl) corrEl.innerHTML = `\\[ ${currentQ.correct} \\]`;
     
     const popup = document.getElementById('roast-popup');
-    if(popup) popup.classList.remove('hidden');
-    
-    if(window.MathJax) window.MathJax.typesetPromise();
+    if(popup) {
+        popup.classList.remove('hidden');
+        if(window.MathJax) window.MathJax.typesetPromise([corrEl]);
+    }
 }
 
 window.resumeAfterRoast = () => {
     const popup = document.getElementById('roast-popup');
     if(popup) popup.classList.add('hidden');
     if (lives <= 0) {
-        totalDrills++; localStorage.setItem('stemanaceDrills', totalDrills);
-        if (score > highScore) { highScore = score; localStorage.setItem('stemanaceHS', highScore); }
+        totalDrills++; 
+        localStorage.setItem('stemanaceDrills', totalDrills);
+        if (score > highScore) { 
+            highScore = score; 
+            localStorage.setItem('stemanaceHS', highScore); 
+        }
         endGame();
     } else nextRound();
 };
@@ -210,21 +224,27 @@ function endGame() {
     if(frb) frb.innerText = r.n;
     
     const dl = document.getElementById('debt-list');
-    if(dl) dl.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--border)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    if(dl) {
+        dl.innerHTML = neuralDebt.map(d => `
+            <div class="fail-log-item">
+                <div class="fail-formula">\\(${d.q}\\) &rarr; <b>\\(${d.a}\\)</b></div>
+            </div>
+        `).join('');
+        if(window.MathJax) window.MathJax.typesetPromise([dl]);
+    }
     
-    if(window.MathJax) window.MathJax.typesetPromise();
     showScreen('screen-over');
     updateHomeDashboard();
 }
 
-// --- FIXED & SAFE DASHBOARD UPDATE ---
+// --- SAFE DASHBOARD UPDATE (Fixed Line 188 Error) ---
 function updateHomeDashboard() {
     const ranks = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}];
     const rank = ranks.find(x => highScore >= x.t);
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     
-    // List of every ID that needs plain text updates
-    const textUpdates = {
+    // Map of every ID that could exist in Sidebar or Home
+    const textMap = {
         'high-score': highScore,
         'side-high-score': highScore,
         'mobile-high-score': highScore,
@@ -234,20 +254,21 @@ function updateHomeDashboard() {
         'current-rank': rank.n,
         'global-proficiency': prof + "%",
         'side-global-proficiency': prof + "%",
-        'mobile-proficiency': prof + "%"
+        'mobile-proficiency': prof + "%",
+        'total-drills': totalDrills
     };
 
-    for (const [id, value] of Object.entries(textUpdates)) {
+    // Update text elements safely
+    for (const [id, val] of Object.entries(textMap)) {
         const el = document.getElementById(id);
-        if (el) el.innerText = value;
+        if (el) el.innerText = val;
     }
     
-    // Achievement Racks (Safe Update)
+    // Achievement Medals (Safe injection)
     const meds = [{id:'titan',icon:'💎'},{id:'survivor',icon:'🛡️'},{id:'singularity',icon:'🌌'}];
-    const html = meds.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
+    const html = meds.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : 'locked'}" style="opacity: ${achievements[m.id] ? 1 : 0.2}">${m.icon}</div>`).join('');
     
-    const racks = ['side-achievement-rack', 'mobile-achievement-rack', 'achievement-rack'];
-    racks.forEach(id => {
+    ['achievement-rack', 'side-achievement-rack', 'mobile-achievement-rack'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = html;
     });
@@ -258,10 +279,11 @@ function updateHomeDashboard() {
     }
 }
 
+// --- DATA INITIALIZATION ---
 async function init() {
-    // Default question in case fetch fails
+    // Fallback data
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
-    roasts = ["TRY HARDER.", "NEURAL DISCONNECT DETECTED.", "CALIBRATION FAILED."];
+    roasts = ["NEURAL DISCONNECT.", "TRY HARDER.", "ERROR IN CALIBRATION."];
 
     try {
         const res = await fetch('mathformula.txt');
@@ -275,11 +297,10 @@ async function init() {
         const rRes = await fetch('roast.txt');
         if (rRes.ok) {
             const rText = await rRes.text();
-            const fetchedRoasts = rText.split('\n').filter(l => l.trim() !== "");
-            if(fetchedRoasts.length > 0) roasts = fetchedRoasts;
+            roasts = rText.split('\n').filter(l => l.trim() !== "");
         }
     } catch (e) {
-        console.warn("External data load failed, using defaults.");
+        console.warn("External data could not be reached. Using local fallbacks.");
     }
 
     if (!callsign) {
@@ -289,5 +310,5 @@ async function init() {
         showScreen('screen-home'); 
     }
 }
-init();
 
+init();
