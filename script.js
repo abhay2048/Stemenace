@@ -12,23 +12,6 @@ let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 const subjects = ['global', 'calculus', 'trigonometry'];
 subjects.forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
 
-
-function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = value;
-}
-
-function setHTML(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = value;
-}
-
-function setDisplay(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.style.display = value;
-}
-
-
 // --- AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playProceduralSound(f, t, d, v = 0.1) {
@@ -48,21 +31,32 @@ const failSound = () => { playProceduralSound(100, 'sine', 0.4, 0.4); playProced
 const successSound = () => playProceduralSound(1200, 'sine', 0.2, 0.05);
 const tickSound = () => playProceduralSound(1800, 'sine', 0.05, 0.02);
 
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
+window.toggleMute = () => { 
+    isMuted = !isMuted; 
+    const btn = document.getElementById('mute-btn');
+    if(btn) btn.innerText = isMuted ? "🔇 OFF" : "🔊 ON"; 
+};
 
 // --- LOGIC ---
 window.submitLogin = () => {
-    const val = document.getElementById('callsign-input').value;
+    const input = document.getElementById('callsign-input');
+    if (!input) return;
+    const val = input.value;
     if (val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
-        updateHomeDashboard(); showScreen('screen-home');
+        updateHomeDashboard(); 
+        showScreen('screen-home');
     }
 };
 
 window.changeCallsign = () => {
     const n = prompt("ENTER CALLSIGN:");
-    if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
+    if(n) { 
+        callsign = n.toUpperCase(); 
+        localStorage.setItem('stemanaceCallsign', callsign); 
+        updateHomeDashboard(); 
+    }
 };
 
 window.showScreen = (id) => {
@@ -98,16 +92,22 @@ function updateHUD() {
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
-    document.getElementById('red-alert').classList.add('hidden');
-    document.querySelector('.arena-screen')?.classList.remove('panic');
+    const alert = document.getElementById('red-alert');
+    if(alert) alert.classList.add('hidden');
+    
+    document.querySelectorAll('.arena-screen').forEach(el => el.classList.remove('panic'));
+    
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
-    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    const display = document.getElementById('formula-display');
+    if(display) display.innerHTML = `\\[ ${currentQ.q} \\]`;
+    
     const grid = document.getElementById('options-grid');
+    if(!grid) return;
     grid.innerHTML = "";
     
-    const opts = JSON.parse(JSON.stringify(currentQ.options)).sort(() => 0.5 - Math.random());
+    const opts = [...currentQ.options].sort(() => 0.5 - Math.random());
     opts.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
@@ -115,7 +115,7 @@ function nextRound() {
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    window.MathJax.typesetPromise();
+    if(window.MathJax) window.MathJax.typesetPromise();
     resetTimer();
 }
 
@@ -126,12 +126,15 @@ function resetTimer() {
         timeLeft -= 0.1;
         const ratio = (timeLeft / timeLimit) * 100;
         if (bar) bar.style.width = ratio + "%";
+        
         const eff = document.getElementById('efficiency');
         if (eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
+        
         if (timeLeft < 3) { 
             if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
-            document.getElementById('red-alert').classList.remove('hidden'); 
-            document.querySelector('.arena-screen')?.classList.add('panic'); 
+            const alert = document.getElementById('red-alert');
+            if(alert) alert.classList.remove('hidden'); 
+            document.querySelectorAll('.arena-screen').forEach(el => el.classList.add('panic')); 
         }
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -155,14 +158,22 @@ function handleWrong() {
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
-    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE.";
-    document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
-    document.getElementById('roast-popup').classList.remove('hidden');
-    window.MathJax.typesetPromise();
+    
+    const roastEl = document.getElementById('roast-message');
+    if(roastEl) roastEl.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FAILURE.";
+    
+    const corrEl = document.getElementById('correction-display');
+    if(corrEl) corrEl.innerHTML = `\\[ ${currentQ.correct} \\]`;
+    
+    const popup = document.getElementById('roast-popup');
+    if(popup) popup.classList.remove('hidden');
+    
+    if(window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.resumeAfterRoast = () => {
-    document.getElementById('roast-popup').classList.add('hidden');
+    const popup = document.getElementById('roast-popup');
+    if(popup) popup.classList.add('hidden');
     if (lives <= 0) {
         totalDrills++; localStorage.setItem('stemanaceDrills', totalDrills);
         if (score > highScore) { highScore = score; localStorage.setItem('stemanaceHS', highScore); }
@@ -178,67 +189,69 @@ function checkAchievements() {
 }
 
 function endGame() {
-    const r = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}].find(x => score >= x.t);
-    document.getElementById('final-streak').innerText = score;
-    document.getElementById('final-rank-badge').innerText = r.n;
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--border)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
-    window.MathJax.typesetPromise();
+    const ranks = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}];
+    const r = ranks.find(x => score >= x.t);
+    
+    const fs = document.getElementById('final-streak');
+    if(fs) fs.innerText = score;
+    
+    const frb = document.getElementById('final-rank-badge');
+    if(frb) frb.innerText = r.n;
+    
+    const dl = document.getElementById('debt-list');
+    if(dl) dl.innerHTML = neuralDebt.map(d => `<div style="margin-bottom:10px; border-bottom:1px solid var(--border)">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    
+    if(window.MathJax) window.MathJax.typesetPromise();
     showScreen('screen-over');
     updateHomeDashboard();
 }
 
+// --- FIXED & SAFE DASHBOARD UPDATE ---
 function updateHomeDashboard() {
-    const rank = [
-        {n:"SINGULARITY",t:76},
-        {n:"NEURAL ACE",t:51},
-        {n:"ARCHITECT",t:31},
-        {n:"OPERATOR",t:16},
-        {n:"VARIABLE",t:6},
-        {n:"CONSTANT",t:0}
-    ].find(x => highScore >= x.t);
+    const ranks = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}];
+    const rank = ranks.find(x => highScore >= x.t);
+    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
+    
+    // List of every ID that needs plain text updates
+    const textUpdates = {
+        'high-score': highScore,
+        'side-high-score': highScore,
+        'mobile-high-score': highScore,
+        'user-callsign': callsign,
+        'side-user-callsign': callsign,
+        'display-callsign': callsign,
+        'current-rank': rank.n,
+        'global-proficiency': prof + "%",
+        'side-global-proficiency': prof + "%",
+        'mobile-proficiency': prof + "%"
+    };
 
-    const prof = correctHistory.global.total > 0
-        ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100)
-        : 0;
+    for (const [id, value] of Object.entries(textUpdates)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+    }
+    
+    // Achievement Racks (Safe Update)
+    const meds = [{id:'titan',icon:'💎'},{id:'survivor',icon:'🛡️'},{id:'singularity',icon:'🌌'}];
+    const html = meds.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
+    
+    const racks = ['side-achievement-rack', 'mobile-achievement-rack', 'achievement-rack'];
+    racks.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    });
 
-    // --- STATS ---
-    setText('high-score', highScore);
-    setText('side-high-score', highScore);
-    setText('mobile-high-score', highScore);
-
-    setText('user-callsign', callsign);
-    setText('side-user-callsign', callsign);
-    setText('display-callsign', callsign);
-
-    setText('current-rank', rank.n);
-
-    setText('global-proficiency', prof + "%");
-    setText('side-global-proficiency', prof + "%");
-    setText('mobile-proficiency', prof + "%");
-
-    // --- ACHIEVEMENTS ---
-    const meds = [
-        {id:'titan',icon:'💎'},
-        {id:'survivor',icon:'🛡️'},
-        {id:'singularity',icon:'🌌'}
-    ];
-
-    const html = meds
-        .map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`)
-        .join('');
-
-    setHTML('side-achievement-rack', html);
-    setHTML('mobile-achievement-rack', html);
-
-    // --- PRIORITY BUTTON ---
-    setDisplay(
-        'priority-btn',
-        Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none'
-    );
+    const priorityBtn = document.getElementById('priority-btn');
+    if (priorityBtn) {
+        priorityBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    }
 }
 
 async function init() {
+    // Default question in case fetch fails
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
+    roasts = ["TRY HARDER.", "NEURAL DISCONNECT DETECTED.", "CALIBRATION FAILED."];
+
     try {
         const res = await fetch('mathformula.txt');
         if (res.ok) {
@@ -249,9 +262,20 @@ async function init() {
             });
         }
         const rRes = await fetch('roast.txt');
-        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
-    } catch (e) {}
-    if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
+        if (rRes.ok) {
+            const rText = await rRes.text();
+            const fetchedRoasts = rText.split('\n').filter(l => l.trim() !== "");
+            if(fetchedRoasts.length > 0) roasts = fetchedRoasts;
+        }
+    } catch (e) {
+        console.warn("External data load failed, using defaults.");
+    }
+
+    if (!callsign) {
+        showScreen('screen-login');
+    } else { 
+        updateHomeDashboard(); 
+        showScreen('screen-home'); 
+    }
 }
 init();
-
