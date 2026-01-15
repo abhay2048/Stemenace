@@ -21,13 +21,12 @@
 </head>
 <body>
 
-    <!-- LAYER 0: System Effects -->
     <div class="scanlines"></div>
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
         
-        <!-- LAYER 1: The Nexus Sidebar (Desktop) -->
+        <!-- SIDEBAR (Nexus Layer) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -36,29 +35,33 @@
 
             <div class="surface-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
+                <!-- ID MUST BE 'high-score' -->
                 <div id="high-score" class="stat-value">0</div>
             </div>
 
             <div class="surface-card">
                 <div class="stat-label">🌌 PROFICIENCY</div>
+                <!-- ID MUST BE 'global-proficiency' -->
                 <div id="global-proficiency" class="stat-value">0%</div>
             </div>
 
             <div class="surface-card flex-grow">
                 <div class="stat-label">ACHIEVEMENTS</div>
+                <!-- ID MUST BE 'achievement-rack' -->
                 <div id="achievement-rack" class="achievement-grid"></div>
             </div>
 
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
-                <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
-                <!-- Logic Hooks -->
+                <div class="stat-label" style="margin-top:10px;">OPERATOR: <span id="user-callsign">---</span></div>
+                
+                <!-- CRITICAL HIDDEN LOGIC HOOKS (DO NOT REMOVE) -->
                 <div id="total-drills" style="display:none">0</div>
                 <div id="display-callsign" style="display:none"></div>
             </div>
         </aside>
 
-        <!-- LAYER 1: The Main Stage (Pro App Surface) -->
+        <!-- MAIN STAGE -->
         <main class="main-stage">
 
             <!-- SCREEN: LOGIN -->
@@ -75,6 +78,7 @@
                 <div class="screen-header">
                     <div class="surface-card mini">
                         <h2 class="stat-label">RANK_STATUS</h2>
+                        <!-- ID MUST BE 'current-rank' -->
                         <div id="current-rank" class="stat-value highlight">CONSTANT</div>
                     </div>
                 </div>
@@ -88,7 +92,7 @@
                 </div>
             </div>
 
-            <!-- SCREEN: ARENA (ZERO SCROLL / 2x2 GRID) -->
+            <!-- SCREEN: ARENA -->
             <div id="screen-game" class="screen hidden">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
@@ -96,11 +100,9 @@
                     <div class="hud-item mobile-hide"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail"><div id="timer-fill"></div></div>
-                
                 <div id="formula-chamber" class="neural-glow">
                     <div id="formula-display"></div>
                 </div>
-
                 <div id="options-grid" class="grid-2x2"></div>
             </div>
 
@@ -125,14 +127,14 @@
                 </div>
             </div>
 
-            <!-- SCREEN: VAULT (Internal Scroll) -->
+            <!-- SCREEN: VAULT -->
             <div id="screen-learn" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
                 <div id="vault-content" class="scroll-container"></div>
             </div>
 
-            <!-- SCREEN: DIAGNOSTICS (Internal Scroll) -->
+            <!-- SCREEN: DIAGNOSTICS -->
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
@@ -143,14 +145,17 @@
             <div id="screen-over" class="screen hidden">
                 <div class="centered-content">
                     <h1 class="failure-title glow-text-red">FLATLINED</h1>
+                    <!-- ID MUST BE 'final-rank-badge' -->
                     <div id="final-rank-badge" class="stat-label">RANK: CONSTANT</div>
                     <div class="surface-card revision-log">
+                        <!-- ID MUST BE 'debt-list' -->
                         <div id="debt-list"></div>
                     </div>
                     <div class="btn-grid-2">
                         <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
                         <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
                     </div>
+                    <!-- ID MUST BE 'final-streak' -->
                     <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
             </div>
@@ -158,12 +163,16 @@
         </main>
     </div>
 
-    <!-- LAYER 2: Modals (Overlay Surface) -->
+    <!-- MODAL OVERLAY -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
+            <!-- ID MUST BE 'roast-message' -->
             <p id="roast-message"></p>
-            <div class="correction-surface"><div id="correction-display"></div></div>
+            <div class="correction-surface">
+                <!-- ID MUST BE 'correction-display' -->
+                <div id="correction-display"></div>
+            </div>
             <button class="primary-btn full-width" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
         </div>
     </div>
