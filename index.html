@@ -1,178 +1,179 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STEMANACE | Neural Calibrator</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
-:root {
-    --bg: #0d0208;
-    --surface: rgba(255, 255, 255, 0.03);
-    --surface-bright: rgba(255, 255, 255, 0.08);
-    --border: rgba(239, 143, 167, 0.15);
-    --primary: #ef8fa7;
-    --accent: #ae133f;
-    --text: #ffffff;
-    --text-dim: #a08c92;
-    --radius: 20px;
-    --glow: 0 0 20px rgba(174, 19, 63, 0.3);
-}
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            options: { enableMenu: false },
+            chtml: { displayAlign: 'center', linebreaks: { automatic: true, width: 'container' } }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    <div class="scanlines"></div>
+    <div id="red-alert" class="hidden"></div>
 
-body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    height: 100dvh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    /* 🌌 Background Atmosphere */
-    background-image: 
-        radial-gradient(circle at 0% 0%, #3d0716 0%, transparent 35%),
-        radial-gradient(circle at 100% 100%, #1a050a 0%, transparent 35%);
-}
+    <div class="app-container">
+        
+        <!-- 🌌 SIDEBAR (The Nexus - Constant Navigation) -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h1 class="logo">STEM<span>ANACE</span></h1>
+                <p class="tagline">NEURAL_CALIBRATOR_V.2</p>
+            </div>
 
-/* CRT/Scanline subtlety */
-.scanlines {
-    position: fixed; inset: 0; pointer-events: none; z-index: 100;
-    background: linear-gradient(rgba(255,255,255,0.01) 50%, transparent 50%);
-    background-size: 100% 4px;
-}
+            <div class="sidebar-card">
+                <div class="stat-label">🛡️ SYSTEM_PEAK</div>
+                <div id="high-score" class="stat-value">0</div>
+            </div>
 
-/* --- THE NEXUS LAYOUT --- */
-.app-container {
-    width: 95%;
-    max-width: 1300px;
-    height: 85dvh;
-    display: grid;
-    grid-template-columns: 280px 1fr; /* Sidebar for Desktop */
-    gap: 20px;
-    z-index: 10;
-}
+            <div class="sidebar-card">
+                <div class="stat-label">🌌 MASTERED</div>
+                <div id="global-proficiency" class="stat-value">0%</div>
+            </div>
 
-/* Sidebar Styling (Nexus 🌌) */
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
+            <div id="achievement-rack"></div>
 
-.brand-section { padding: 10px 0 20px 0; }
-.logo { 
-    font-size: 1.8rem; font-weight: 800; color: var(--text); 
-    letter-spacing: -1px; margin: 0;
-}
-.logo span { color: var(--primary); }
+            <div class="sidebar-footer">
+                <button id="mute-btn" class="secondary-btn" onclick="toggleMute()">🔊 AUDIO_ON</button>
+                <div class="stat-label">OPERATOR: <span id="user-callsign">---</span></div>
+            </div>
+        </aside>
 
-/* Main Stage for Screens */
-.main-stage {
-    position: relative;
-    background: var(--surface);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--glow);
-}
+        <!-- 💎 MAIN STAGE (Screen Container) -->
+        <main class="main-stage">
 
-.screen {
-    position: absolute;
-    inset: 0;
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
+            <!-- 1. LOGIN SCREEN -->
+            <div id="screen-login" class="screen">
+                <div class="centered-box">
+                    <h2 class="stat-label">IDENTITY_VERIFICATION</h2>
+                    <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
+                    <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE_SESSION</button>
+                </div>
+            </div>
 
-.hidden { display: none !important; }
+            <!-- 2. HOME SCREEN -->
+            <div id="screen-home" class="screen hidden">
+                <div class="screen-header">
+                    <div>
+                        <h2 class="stat-label">CURRENT_RANK</h2>
+                        <div id="current-rank" class="stat-value highlight">CONSTANT</div>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="stat-label">TOTAL_DRILLS</h2>
+                        <div id="total-drills" class="stat-value">0</div>
+                    </div>
+                </div>
 
-/* --- PROFESSIONAL COMPONENTS --- */
+                <div class="action-zone">
+                    <button class="primary-btn hero-btn" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
+                    <div class="btn-grid">
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">🛡️ THE VAULT</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGNOSTICS</button>
+                    </div>
+                </div>
+            </div>
 
-/* 💎 THE ARENA */
-#formula-chamber {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.2);
-    border-radius: var(--radius);
-    margin: 1.5rem 0;
-    border: 1px solid var(--border);
-    padding: 2rem;
-}
+            <!-- 3. ARENA SCREEN -->
+            <div id="screen-game" class="screen hidden">
+                <div class="hud">
+                    <div class="stat-label">VIT: <span id="lives">❤️❤️❤️</span></div>
+                    <div class="stat-label">COMBO: <span id="streak" class="highlight">0</span></div>
+                    <div class="stat-label">EFF: <span id="efficiency">100%</span></div>
+                </div>
+                <div class="timer-rail">
+                    <div id="timer-fill"></div>
+                </div>
+                
+                <div id="formula-chamber">
+                    <div id="formula-display"></div>
+                </div>
 
-#formula-display mjx-container {
-    font-size: clamp(1.4rem, 4vw, 3rem) !important;
-    color: var(--primary) !important;
-    filter: drop-shadow(0 0 8px rgba(239, 143, 167, 0.4));
-}
+                <div id="options-grid"></div>
+            </div>
 
-/* 🛡️ BUTTONS & GRIDS */
-#options-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
+            <!-- 4. CHAPTER SELECTION -->
+            <div id="screen-chapters" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_ARENA</button>
+                <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
+                <div class="vertical-nav">
+                    <button class="opt-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
+                    <button id="priority-btn" class="primary-btn debt-btn" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
+                </div>
+            </div>
 
-.opt-btn {
-    background: var(--surface-bright);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    padding: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
+            <!-- 5. DIFFICULTY SCREEN -->
+            <div id="screen-difficulty" class="screen hidden">
+                <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
+                <div class="vertical-nav">
+                    <button class="opt-btn" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
+                    <button class="opt-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
+                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
+                </div>
+            </div>
 
-.opt-btn:hover {
-    background: var(--primary);
-    color: var(--bg);
-    transform: translateY(-3px);
-}
+            <!-- 6. VAULT SCREEN -->
+            <div id="screen-learn" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
+                <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
+                <div id="vault-content" class="scroll-area"></div>
+            </div>
 
-/* Cards for Vault/Diagnostics */
-.stat-card {
-    background: var(--surface-bright);
-    padding: 1.2rem;
-    border-radius: 15px;
-    border: 1px solid var(--border);
-}
+            <!-- 7. DIAGNOSTICS SCREEN -->
+            <div id="screen-diagnostics" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_DIAG</button>
+                <h2 class="stat-label title-mt">⚙️ FAILURE_HEATMAP</h2>
+                <div id="diagnostic-results" class="scroll-area"></div>
+            </div>
 
-.stat-label { 
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem; color: var(--primary); 
-    text-transform: uppercase; letter-spacing: 2px;
-}
+            <!-- 8. GAME OVER SCREEN -->
+            <div id="screen-over" class="screen hidden">
+                <div class="centered-box">
+                    <h1 class="failure-title">FLATLINED</h1>
+                    <div id="final-rank-badge" class="stat-label rank-text">RANK: CONSTANT</div>
+                    
+                    <div class="debt-box">
+                        <div class="stat-label">REVISION_LOG</div>
+                        <div id="debt-list"></div>
+                    </div>
 
-.stat-value-sm { font-size: 1.4rem; font-weight: 800; margin-top: 5px; }
+                    <div class="btn-grid">
+                        <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
+                    </div>
+                </div>
+            </div>
 
-/* Primary Action Button */
-.primary-btn {
-    background: var(--accent);
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    border: none;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(174, 19, 63, 0.3);
-}
+        </main>
+    </div>
 
-.primary-btn:hover { opacity: 0.9; transform: scale(1.02); }
+    <!-- 9. ROAST MODAL -->
+    <div id="roast-popup" class="overlay hidden">
+        <div class="modal">
+            <h2 class="stat-label accent-text">NEURAL_DISCREPANCY</h2>
+            <p id="roast-message"></p>
+            <div class="correction-box">
+                <div class="stat-label mini-text">REQUIRED_IDENTITY</div>
+                <div id="correction-display"></div>
+            </div>
+            <button class="primary-btn full-width" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
+        </div>
+    </div>
 
-/* --- MOBILE RESPONSIVENESS --- */
-@media (max-width: 900px) {
-    .app-container {
-        grid-template-columns: 1fr;
-        height: 95dvh;
-    }
-    .sidebar-nav { display: none; } /* Or move to a bottom bar */
-    .screen { padding: 1.5rem; }
-    #options-grid { grid-template-columns: 1fr; }
-}
-
-/* Scrollbars */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    <script src="script.js"></script>
+</body>
+</html>
