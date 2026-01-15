@@ -31,7 +31,7 @@ body {
 .scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(174, 19, 63, 0) 50%, rgba(106, 22, 44, 0.02) 50%); background-size: 100% 4px; }
 .hidden { display: none !important; }
 
-/* LAYOUT */
+/* LAYOUT ARCHITECTURE */
 .app-container {
     width: 95%; max-width: 1200px; height: 90dvh;
     display: grid; grid-template-columns: 280px 1fr; gap: 20px;
@@ -48,20 +48,20 @@ body {
 
 .screen { position: absolute; inset: 0; padding: 2.5rem; display: flex; flex-direction: column; overflow-y: auto; }
 
-/* 🛡️ VAULT FEATURE - BLUR REVEAL */
+/* --- 🛡️ VAULT FEATURE (Blur Reveal Logic) --- */
 .vault-card {
     background: var(--surface-bright); border: 1px solid var(--border);
     border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem;
     cursor: pointer; transition: var(--transition);
 }
-.vault-q { font-size: 1.1rem; color: var(--primary); font-weight: 700; margin-bottom: 10px; }
+.vault-q { font-size: 1.1rem; color: var(--primary); font-weight: 700; margin-bottom: 10px; overflow-x: auto; }
 .vault-a { 
     filter: blur(12px); opacity: 0.1; transition: 0.4s;
-    padding-top: 15px; border-top: 1px dashed var(--border);
+    padding-top: 15px; border-top: 1px dashed var(--border); overflow-x: auto;
 }
 .vault-card.revealed .vault-a { filter: blur(0); opacity: 1; }
 
-/* ⚙️ DIAGNOSTICS FEATURE - FAIL LOGS */
+/* --- ⚙️ DIAGNOSTICS FEATURE (Fail Badges) --- */
 .fail-log-item {
     background: var(--surface-bright); border: 1px solid var(--border);
     padding: 1rem 1.5rem; border-radius: var(--radius-md);
@@ -70,19 +70,30 @@ body {
 .fail-formula { flex: 1; overflow-x: auto; }
 .fail-count-badge {
     background: var(--accent); color: white; padding: 5px 12px;
-    border-radius: 8px; text-align: center; min-width: 60px;
+    border-radius: 8px; text-align: center; min-width: 65px;
 }
-.fail-number { display: block; font-size: 1.2rem; font-weight: 900; font-family: 'JetBrains Mono'; }
+.fail-number { display: block; font-size: 1.2rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
 
-/* 🎖️ ACHIEVEMENT FEATURE */
-.achievement-rack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+/* --- 🎖️ ACHIEVEMENT FEATURE --- */
+.achievement-rack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 30px; }
 .medal { font-size: 1.5rem; filter: drop-shadow(0 0 5px var(--primary)); }
 
-/* 💎 ARENA HUD */
+/* --- 💎 ARENA HUD & TIMER --- */
 .arena-hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.hud-item { background: var(--surface-bright); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border); }
+.hud-item { background: var(--surface-bright); padding: 6px 15px; border-radius: 20px; border: 1px solid var(--border); }
 .timer-rail { height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
 #timer-fill { height: 100%; background: var(--primary); width: 100%; transition: width 0.1s linear; }
+
+/* FORMULA DISPLAY (CONVENIENCE FOR PLAYER) */
+#formula-chamber { 
+    flex: 1; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); 
+    display: flex; align-items: center; justify-content: center; 
+    margin-bottom: 1.5rem; border: 1px solid var(--border); padding: 25px; 
+}
+#formula-display mjx-container {
+    font-size: clamp(1.5rem, 5vw, 3rem) !important;
+    filter: drop-shadow(0 0 10px var(--primary));
+}
 
 /* BUTTONS */
 .primary-btn {
@@ -90,34 +101,44 @@ body {
     border-radius: var(--radius-md); font-weight: 800; text-transform: uppercase;
     cursor: pointer; transition: var(--transition);
 }
-.primary-btn:hover { background: #d0164c; transform: translateY(-2px); }
-.secondary-btn { background: var(--surface-bright); color: white; border: 1px solid var(--border); padding: 0.8rem; border-radius: var(--radius-md); cursor: pointer; }
-.opt-btn { background: var(--surface-bright); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); padding: 1.5rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
-.opt-btn:hover { background: var(--primary); color: var(--bg); }
+.primary-btn:hover { background: #d0164c; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(174, 19, 63, 0.4); }
 
-/* UI TEXT */
-.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--primary); letter-spacing: 1px; }
+.secondary-btn { background: var(--surface-bright); color: white; border: 1px solid var(--border); padding: 0.8rem; border-radius: var(--radius-md); cursor: pointer; }
+.full-width { width: 100%; }
+
+.opt-btn { background: var(--surface-bright); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); padding: 1.5rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.opt-btn:hover { background: var(--primary); color: var(--bg); transform: translateY(-3px); }
+
+/* UI TEXT STYLING */
+.stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; }
 .stat-value { font-size: 1.6rem; font-weight: 800; }
 .highlight { color: var(--primary); }
 .logo span { color: var(--primary); }
 
-/* FORMULA CHAMBER */
-#formula-chamber { flex: 1; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 1px solid var(--border); padding: 20px; }
-#options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* SCROLLBAR (CONVENIENCE) */
+.scroll-area { flex: 1; overflow-y: auto; padding-right: 8px; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-/* MODALS */
+/* MODALS & OVERLAYS */
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
 .modal { background: var(--bg); border: 2px solid var(--accent); border-radius: var(--radius-lg); padding: 2.5rem; max-width: 480px; width: 90%; text-align: center; }
-.correction-zone { background: var(--surface-bright); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; border: 1px solid var(--primary); }
+.correction-zone { background: var(--surface-bright); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; border: 1px solid var(--primary); overflow-x: auto; }
 
-/* RESPONSIVE */
+/* UTILITY CLASSES */
+.centered-box { margin: auto; width: 100%; max-width: 400px; text-align: center; }
+.hero-btn { font-size: 1.2rem; padding: 1.5rem; margin-bottom: 15px; width: 100%; }
+.btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.vertical-nav { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.back-link { position: absolute; top: 1.5rem; left: 1.5rem; color: var(--primary); font-weight: 800; cursor: pointer; background: none; border: none; font-size: 0.75rem; letter-spacing: 1px; z-index: 10; }
+.title-mt { margin-top: 40px; }
+.failure-title { font-size: 3rem; color: var(--accent); margin: 0; letter-spacing: -2px; }
+
+/* RESPONSIVE MOBILE FIX */
 @media (max-width: 900px) {
     .app-container { grid-template-columns: 1fr; height: 95dvh; }
     .sidebar { display: none; }
     #options-grid { grid-template-columns: 1fr; }
     .screen { padding: 1.5rem; }
+    #formula-chamber { padding: 15px; }
 }
-
-.scroll-area { flex: 1; overflow-y: auto; padding-right: 5px; }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
