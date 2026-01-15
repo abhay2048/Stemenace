@@ -21,13 +21,12 @@
 </head>
 <body>
 
-    <!-- CRT & Alert Effects -->
     <div class="scanlines"></div>
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
         
-        <!-- 🌌 THE NEXUS SIDEBAR (Global Stats & Navigation) -->
+        <!-- 🌌 SIDEBAR (Desktop Only) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -44,7 +43,6 @@
                 <div id="global-proficiency" class="stat-value">0%</div>
             </div>
 
-            <!-- Achievement Rack (Feature preserved) -->
             <div class="sidebar-card">
                 <div class="stat-label">ACHIEVEMENTS</div>
                 <div id="achievement-rack" class="achievement-rack"></div>
@@ -53,17 +51,14 @@
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
                 <div class="stat-label" style="margin-top:10px;">OPERATOR: <span id="user-callsign">---</span></div>
-                
-                <!-- Hidden elements required by script logic -->
                 <div id="total-drills" style="display:none">0</div>
-                <div id="display-callsign" style="display:none"></div>
             </div>
         </aside>
 
-        <!-- 💎 MAIN STAGE (Screen Container) -->
+        <!-- 💎 MAIN STAGE -->
         <main class="main-stage">
 
-            <!-- 1. LOGIN SCREEN -->
+            <!-- LOGIN -->
             <div id="screen-login" class="screen">
                 <div class="centered-box">
                     <h2 class="stat-label" style="margin-bottom:20px;">IDENTITY_VERIFICATION</h2>
@@ -72,7 +67,7 @@
                 </div>
             </div>
 
-            <!-- 2. HOME SCREEN -->
+            <!-- HOME -->
             <div id="screen-home" class="screen hidden">
                 <div class="screen-header">
                     <div class="stat-card-mini">
@@ -84,97 +79,86 @@
                 <div class="action-zone">
                     <button class="primary-btn hero-btn" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
                     <div class="btn-grid">
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">🛡️ THE VAULT</button>
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGNOSTICS</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">🛡️ VAULT</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGS</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. ARENA (THE GAMEPLAY CORE) -->
+            <!-- 💎 ARENA (Optimized 2x2) -->
             <div id="screen-game" class="screen hidden arena-screen">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
-                    <div class="hud-item"><span class="stat-label">COMBO:</span> <span id="streak" class="highlight">0</span></div>
-                    <div class="hud-item"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
+                    <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
                 </div>
-                <div class="timer-rail">
-                    <div id="timer-fill"></div>
-                </div>
+                <div class="timer-rail"><div id="timer-fill"></div></div>
                 
+                <!-- Smaller Formula Chamber for player convenience -->
                 <div id="formula-chamber">
                     <div id="formula-display"></div>
                 </div>
 
-                <div id="options-grid"></div>
+                <!-- Bigger 2x2 Bold Grid -->
+                <div id="options-grid" class="grid-2x2"></div>
             </div>
 
-            <!-- 4. CHAPTER SELECTION -->
+            <!-- CHAPTERS -->
             <div id="screen-chapters" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_ARENA</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
                 <div class="vertical-nav">
-                    <button class="opt-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="opt-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
-                    <!-- Priority Drill Feature preserved -->
+                    <button class="opt-btn bold" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn bold" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
                     <button id="priority-btn" class="primary-btn debt-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
 
-            <!-- 5. DIFFICULTY SELECTION -->
+            <!-- DIFFICULTY -->
             <div id="screen-difficulty" class="screen hidden">
                 <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
                 <div class="vertical-nav">
-                    <button class="opt-btn" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
-                    <button class="opt-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
-                    <button class="primary-btn accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
+                    <button class="opt-btn bold" onclick="uiClick(); selectDifficulty(30)">STABLE</button>
+                    <button class="opt-btn bold" onclick="uiClick(); selectDifficulty(15)">VOLATILE</button>
+                    <button class="primary-btn accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL</button>
                 </div>
             </div>
 
-            <!-- 6. THE VAULT (Blur Reveal Feature) -->
+            <!-- VAULT -->
             <div id="screen-learn" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
                 <div id="vault-content" class="scroll-area"></div>
             </div>
 
-            <!-- 7. DIAGNOSTICS (Fail Heatmap Feature) -->
+            <!-- DIAGNOSTICS -->
             <div id="screen-diagnostics" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_DIAG</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
                 <div id="diagnostic-results" class="scroll-area"></div>
             </div>
 
-            <!-- 8. GAME OVER SCREEN -->
+            <!-- GAME OVER -->
             <div id="screen-over" class="screen hidden">
                 <div class="centered-box">
                     <h1 class="failure-title">FLATLINED</h1>
                     <div id="final-rank-badge" class="stat-label rank-text">RANK: CONSTANT</div>
-                    
-                    <div class="debt-box">
-                        <div class="stat-label">REVISION_REQUIRED</div>
-                        <div id="debt-list"></div>
-                    </div>
-
+                    <div class="debt-box"><div id="debt-list"></div></div>
                     <div class="btn-grid">
                         <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
                         <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
                     </div>
-                    <div class="stat-label" style="margin-top: 15px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
             </div>
 
         </main>
     </div>
 
-    <!-- 9. ROAST & CORRECTION MODAL -->
+    <!-- ROAST MODAL -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
             <p id="roast-message"></p>
-            <div class="correction-zone">
-                <div class="stat-label mini-text">REQUIRED_IDENTITY</div>
-                <div id="correction-display"></div>
-            </div>
+            <div class="correction-zone"><div id="correction-display"></div></div>
             <button class="primary-btn full-width" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
         </div>
     </div>
