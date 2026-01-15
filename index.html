@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    
-    <!-- Fix Favicon 404 -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 
-    <!-- Fixed MathJax Config -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
@@ -30,14 +27,13 @@
 
     <div class="app-container">
         
-        <!-- SIDEBAR: The Nexus Layer -->
+        <!-- SIDEBAR (Surface Layer 1) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
                 <p class="tagline">NEURAL_CALIBRATOR_V.2.5</p>
             </div>
 
-            <!-- IDENTITY HOOKS (Ensures script.js finds these) -->
             <div class="surface-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
                 <div id="high-score" class="stat-value">0</div>
@@ -56,14 +52,10 @@
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
                 <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
-                
-                <!-- CRITICAL LOGIC HOOKS: Script.js searches for these IDs specifically -->
-                <div id="total-drills" style="display:none">0</div>
-                <div id="display-callsign" style="display:none"></div>
             </div>
         </aside>
 
-        <!-- MAIN STAGE -->
+        <!-- MAIN STAGE (App Surface) -->
         <main class="main-stage">
 
             <!-- SCREEN: LOGIN -->
@@ -91,9 +83,6 @@
                         <button class="secondary-btn" onclick="showScreen('screen-diagnostics')">⚙️ DIAGS</button>
                     </div>
                 </div>
-                
-                <!-- Hidden Home-specific Proficency hook for some script versions -->
-                <div id="home-proficiency" style="display:none">0%</div>
             </div>
 
             <!-- SCREEN: ARENA -->
@@ -142,7 +131,7 @@
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
-                <div id="diagnostic-results" class="scroll-area"></div>
+                <div id="diagnostic-results" class="scroll-container"></div>
             </div>
 
             <!-- SCREEN: GAME OVER -->
@@ -172,6 +161,14 @@
             <div class="correction-surface"><div id="correction-display"></div></div>
             <button class="primary-btn full-width" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
         </div>
+    </div>
+
+    <!-- 🛑 LOGIC SAFETY BLOCK: HIDDEN ELEMENTS FOR SCRIPT.JS FUNCTIONALITY 🛑 -->
+    <div style="display:none" aria-hidden="true">
+        <div id="total-drills">0</div>
+        <div id="display-callsign"></div>
+        <div id="home-proficiency">0%</div>
+        <div id="global-rank">CONSTANT</div>
     </div>
 
     <script src="script.js"></script>
