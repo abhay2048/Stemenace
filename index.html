@@ -1,139 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>STEMANACE | Neural Calibrator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STEMANACE | Neural Calibrator</title>
+    
+    <!-- Fix Favicon 404 -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 
-<!-- Kill favicon errors -->
-<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
-
-<!-- MathJax v3 SAFE CONFIG -->
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$']]
-  },
-  options: { enableMenu: false },
-  chtml: { displayAlign: 'center' }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
-
-<link rel="stylesheet" href="style.css">
+    <!-- Fixed MathJax Config -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+            options: { enableMenu: false },
+            chtml: { displayAlign: 'center' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="scanlines"></div>
+    <div class="scanlines"></div>
+    <div id="red-alert" class="hidden"></div>
 
-<div class="app-container">
+    <div class="app-container">
+        
+        <!-- SIDEBAR: The Nexus Layer -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h1 class="logo">STEM<span>ANACE</span></h1>
+                <p class="tagline">NEURAL_CALIBRATOR_V.2.5</p>
+            </div>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <h1 class="logo">STEM<span>ANACE</span></h1>
+            <!-- IDENTITY HOOKS (Ensures script.js finds these) -->
+            <div class="surface-card">
+                <div class="stat-label">🛡️ SYSTEM_PEAK</div>
+                <div id="high-score" class="stat-value">0</div>
+            </div>
 
-  <div class="surface-card">
-    <div class="stat-label">SYSTEM_PEAK</div>
-    <div id="high-score" class="stat-value">0</div>
-  </div>
+            <div class="surface-card">
+                <div class="stat-label">🌌 PROFICIENCY</div>
+                <div id="global-proficiency" class="stat-value">0%</div>
+            </div>
 
-  <div class="surface-card">
-    <div class="stat-label">PROFICIENCY</div>
-    <div id="global-proficiency" class="stat-value">0%</div>
-  </div>
+            <div class="surface-card flex-grow">
+                <div class="stat-label">ACHIEVEMENTS</div>
+                <div id="achievement-rack" class="achievement-grid"></div>
+            </div>
 
-  <div class="surface-card">
-    <div class="stat-label">ACHIEVEMENTS</div>
-    <div id="achievement-rack" class="achievement-grid"></div>
-  </div>
+            <div class="sidebar-footer">
+                <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
+                <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
+                
+                <!-- CRITICAL LOGIC HOOKS: Script.js searches for these IDs specifically -->
+                <div id="total-drills" style="display:none">0</div>
+                <div id="display-callsign" style="display:none"></div>
+            </div>
+        </aside>
 
-  <!-- Hidden hooks -->
-  <div id="total-drills" hidden>0</div>
-  <div id="display-callsign" hidden></div>
-</aside>
+        <!-- MAIN STAGE -->
+        <main class="main-stage">
 
-<!-- MAIN -->
-<main class="main-stage">
+            <!-- SCREEN: LOGIN -->
+            <div id="screen-login" class="screen">
+                <div class="centered-content">
+                    <h2 class="stat-label emphasis">IDENTITY_VERIFICATION</h2>
+                    <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15" class="neural-input">
+                    <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE</button>
+                </div>
+            </div>
 
-<!-- LOGIN -->
-<div id="screen-login" class="screen">
-  <h2 class="stat-label">IDENTITY_VERIFICATION</h2>
-  <input id="callsign-input" class="neural-input" placeholder="ENTER_OPERATOR_NAME">
-  <button class="primary-btn" onclick="submitLogin()">INITIALIZE</button>
-</div>
+            <!-- SCREEN: HOME -->
+            <div id="screen-home" class="screen hidden">
+                <div class="screen-header">
+                    <div class="surface-card mini">
+                        <h2 class="stat-label">RANK_STATUS</h2>
+                        <div id="current-rank" class="stat-value highlight">CONSTANT</div>
+                    </div>
+                </div>
 
-<!-- HOME -->
-<div id="screen-home" class="screen hidden">
-  <h2 class="stat-label">RANK_STATUS</h2>
-  <div id="current-rank" class="stat-value highlight">CONSTANT</div>
+                <div class="action-zone">
+                    <button class="primary-btn hero-btn glow-text" onclick="showScreen('screen-chapters')">💎 ENTER ARENA</button>
+                    <div class="btn-grid-2">
+                        <button class="secondary-btn" onclick="showScreen('screen-learn')">🛡️ VAULT</button>
+                        <button class="secondary-btn" onclick="showScreen('screen-diagnostics')">⚙️ DIAGS</button>
+                    </div>
+                </div>
+                
+                <!-- Hidden Home-specific Proficency hook for some script versions -->
+                <div id="home-proficiency" style="display:none">0%</div>
+            </div>
 
-  <button class="primary-btn" onclick="showScreen('screen-game')">ENTER ARENA</button>
-</div>
+            <!-- SCREEN: ARENA -->
+            <div id="screen-game" class="screen hidden">
+                <div class="arena-hud">
+                    <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
+                    <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
+                    <div class="hud-item mobile-hide"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
+                </div>
+                <div class="timer-rail"><div id="timer-fill"></div></div>
+                <div id="formula-chamber" class="neural-glow">
+                    <div id="formula-display"></div>
+                </div>
+                <div id="options-grid" class="grid-2x2"></div>
+            </div>
 
-<!-- GAME -->
-<div id="screen-game" class="screen hidden">
-  <div class="arena-hud">
-    <div class="hud-item">❤️❤️❤️</div>
-    <div class="hud-item">STREAK: <span id="streak">0</span></div>
-  </div>
+            <!-- SCREEN: CHAPTERS -->
+            <div id="screen-chapters" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+                <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
+                <div class="stack-nav">
+                    <button class="opt-btn-large" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn-large" onclick="selectChapter('calculus')">CALCULUS</button>
+                    <button id="priority-btn" class="primary-btn debt-glow" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
+                </div>
+            </div>
 
-  <div class="timer-rail"><div id="timer-fill"></div></div>
+            <!-- SCREEN: DIFFICULTY -->
+            <div id="screen-difficulty" class="screen hidden">
+                <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
+                <div class="stack-nav">
+                    <button class="opt-btn-large" onclick="selectDifficulty(30)">STABLE</button>
+                    <button class="opt-btn-large" onclick="selectDifficulty(15)">VOLATILE</button>
+                    <button class="primary-btn" onclick="selectDifficulty(8)">CRITICAL</button>
+                </div>
+            </div>
 
-  <div id="formula-chamber">
-    <div id="formula-display">$$x^2 + y^2$$</div>
-  </div>
+            <!-- SCREEN: VAULT -->
+            <div id="screen-learn" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+                <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
+                <div id="vault-content" class="scroll-container"></div>
+            </div>
 
-  <div class="grid-2x2">
-    <button class="opt-btn">A</button>
-    <button class="opt-btn">B</button>
-    <button class="opt-btn">C</button>
-    <button class="opt-btn">D</button>
-  </div>
-</div>
+            <!-- SCREEN: DIAGNOSTICS -->
+            <div id="screen-diagnostics" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+                <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
+                <div id="diagnostic-results" class="scroll-area"></div>
+            </div>
 
-</main>
-</div>
+            <!-- SCREEN: GAME OVER -->
+            <div id="screen-over" class="screen hidden">
+                <div class="centered-content">
+                    <h1 class="failure-title glow-text-red">FLATLINED</h1>
+                    <div id="final-rank-badge" class="stat-label">RANK: CONSTANT</div>
+                    <div class="surface-card revision-log">
+                        <div id="debt-list"></div>
+                    </div>
+                    <div class="btn-grid-2">
+                        <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
+                        <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
+                    </div>
+                    <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
+                </div>
+            </div>
 
-<!-- SAFE SCRIPT -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
+        </main>
+    </div>
 
-  function $(id) {
-    return document.getElementById(id);
-  }
+    <!-- MODAL OVERLAY -->
+    <div id="roast-popup" class="overlay hidden">
+        <div class="modal">
+            <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
+            <p id="roast-message"></p>
+            <div class="correction-surface"><div id="correction-display"></div></div>
+            <button class="primary-btn full-width" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
+        </div>
+    </div>
 
-  window.showScreen = function(id) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
-    const target = $(id);
-    if (target) target.classList.remove("hidden");
-  };
-
-  window.submitLogin = function () {
-    const input = $("callsign-input");
-    if (!input || !input.value.trim()) return;
-
-    $("display-callsign").textContent = input.value.trim();
-    showScreen("screen-home");
-    updateHomeDashboard();
-  };
-
-  function updateHomeDashboard() {
-    if ($("high-score")) $("high-score").textContent = "42";
-    if ($("global-proficiency")) $("global-proficiency").textContent = "73%";
-    if ($("current-rank")) $("current-rank").textContent = "VECTOR";
-
-    const rack = $("achievement-rack");
-    if (rack) rack.innerHTML = "🏅 🏅 🏅";
-  }
-
-});
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
