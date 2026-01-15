@@ -21,12 +21,13 @@
 </head>
 <body>
 
+    <!-- CRT & Alert Effects -->
     <div class="scanlines"></div>
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
         
-        <!-- 🌌 SIDEBAR (Navigation & Global Progress) -->
+        <!-- 🌌 THE NEXUS SIDEBAR (Global Stats & Navigation) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -39,32 +40,33 @@
             </div>
 
             <div class="sidebar-card">
-                <div class="stat-label">🌌 MASTERED</div>
+                <div class="stat-label">🌌 PROFICIENCY</div>
                 <div id="global-proficiency" class="stat-value">0%</div>
             </div>
 
-            <!-- Achievement Medals Rack -->
+            <!-- Achievement Rack (Feature preserved) -->
             <div class="sidebar-card">
                 <div class="stat-label">ACHIEVEMENTS</div>
                 <div id="achievement-rack" class="achievement-rack"></div>
             </div>
 
             <div class="sidebar-footer">
-                <button id="mute-btn" class="secondary-btn" onclick="toggleMute()">🔊 AUDIO_ON</button>
-                <div class="stat-label">OPERATOR: <span id="user-callsign">---</span></div>
-                <!-- Hidden drill counter for script logic -->
+                <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
+                <div class="stat-label" style="margin-top:10px;">OPERATOR: <span id="user-callsign">---</span></div>
+                
+                <!-- Hidden elements required by script logic -->
                 <div id="total-drills" style="display:none">0</div>
                 <div id="display-callsign" style="display:none"></div>
             </div>
         </aside>
 
-        <!-- 💎 MAIN STAGE -->
+        <!-- 💎 MAIN STAGE (Screen Container) -->
         <main class="main-stage">
 
             <!-- 1. LOGIN SCREEN -->
             <div id="screen-login" class="screen">
                 <div class="centered-box">
-                    <h2 class="stat-label">IDENTITY_VERIFICATION</h2>
+                    <h2 class="stat-label" style="margin-bottom:20px;">IDENTITY_VERIFICATION</h2>
                     <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
                     <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE_SESSION</button>
                 </div>
@@ -88,11 +90,11 @@
                 </div>
             </div>
 
-            <!-- 3. ARENA SCREEN -->
-            <div id="screen-game" class="screen hidden">
+            <!-- 3. ARENA (THE GAMEPLAY CORE) -->
+            <div id="screen-game" class="screen hidden arena-screen">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
-                    <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
+                    <div class="hud-item"><span class="stat-label">COMBO:</span> <span id="streak" class="highlight">0</span></div>
                     <div class="hud-item"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail">
@@ -113,11 +115,12 @@
                 <div class="vertical-nav">
                     <button class="opt-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
                     <button class="opt-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
+                    <!-- Priority Drill Feature preserved -->
                     <button id="priority-btn" class="primary-btn debt-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
 
-            <!-- 5. DIFFICULTY SCREEN -->
+            <!-- 5. DIFFICULTY SELECTION -->
             <div id="screen-difficulty" class="screen hidden">
                 <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
                 <div class="vertical-nav">
@@ -127,14 +130,14 @@
                 </div>
             </div>
 
-            <!-- 6. VAULT (ACTIVE RECALL) -->
+            <!-- 6. THE VAULT (Blur Reveal Feature) -->
             <div id="screen-learn" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
                 <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
                 <div id="vault-content" class="scroll-area"></div>
             </div>
 
-            <!-- 7. DIAGNOSTICS (FAILURE HEATMAP) -->
+            <!-- 7. DIAGNOSTICS (Fail Heatmap Feature) -->
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT_DIAG</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
@@ -163,7 +166,7 @@
         </main>
     </div>
 
-    <!-- 9. ROAST MODAL -->
+    <!-- 9. ROAST & CORRECTION MODAL -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
