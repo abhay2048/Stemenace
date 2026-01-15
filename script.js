@@ -12,6 +12,23 @@ let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 const subjects = ['global', 'calculus', 'trigonometry'];
 subjects.forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
 
+
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+}
+
+function setHTML(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = value;
+}
+
+function setDisplay(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = value;
+}
+
+
 // --- AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playProceduralSound(f, t, d, v = 0.1) {
@@ -171,23 +188,53 @@ function endGame() {
 }
 
 function updateHomeDashboard() {
-    const rank = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}].find(x => highScore >= x.t);
-    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    
-    const ids = ['high-score', 'side-high-score', 'mobile-high-score', 'user-callsign', 'side-user-callsign', 'display-callsign', 'current-rank', 'global-proficiency', 'side-global-proficiency', 'mobile-proficiency'];
-    ids.forEach(id => {
-        const el = document.getElementById(id); if(!el) return;
-        if(id.includes('high-score')) el.innerText = highScore;
-        else if(id.includes('callsign')) el.innerText = callsign;
-        else if(id.includes('rank')) el.innerText = rank.n;
-        else if(id.includes('proficiency')) el.innerText = prof + "%";
-    });
-    
-    const meds = [{id:'titan',icon:'💎'},{id:'survivor',icon:'🛡️'},{id:'singularity',icon:'🌌'}];
-    const html = meds.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
-    document.getElementById('side-achievement-rack').innerHTML = html;
-    document.getElementById('mobile-achievement-rack').innerHTML = html;
-    document.getElementById('priority-btn').style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    const rank = [
+        {n:"SINGULARITY",t:76},
+        {n:"NEURAL ACE",t:51},
+        {n:"ARCHITECT",t:31},
+        {n:"OPERATOR",t:16},
+        {n:"VARIABLE",t:6},
+        {n:"CONSTANT",t:0}
+    ].find(x => highScore >= x.t);
+
+    const prof = correctHistory.global.total > 0
+        ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100)
+        : 0;
+
+    // --- STATS ---
+    setText('high-score', highScore);
+    setText('side-high-score', highScore);
+    setText('mobile-high-score', highScore);
+
+    setText('user-callsign', callsign);
+    setText('side-user-callsign', callsign);
+    setText('display-callsign', callsign);
+
+    setText('current-rank', rank.n);
+
+    setText('global-proficiency', prof + "%");
+    setText('side-global-proficiency', prof + "%");
+    setText('mobile-proficiency', prof + "%");
+
+    // --- ACHIEVEMENTS ---
+    const meds = [
+        {id:'titan',icon:'💎'},
+        {id:'survivor',icon:'🛡️'},
+        {id:'singularity',icon:'🌌'}
+    ];
+
+    const html = meds
+        .map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`)
+        .join('');
+
+    setHTML('side-achievement-rack', html);
+    setHTML('mobile-achievement-rack', html);
+
+    // --- PRIORITY BUTTON ---
+    setDisplay(
+        'priority-btn',
+        Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none'
+    );
 }
 
 async function init() {
@@ -207,3 +254,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else { updateHomeDashboard(); showScreen('screen-home'); }
 }
 init();
+
