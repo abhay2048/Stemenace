@@ -27,43 +27,40 @@
 
     <div class="app-container">
         
-        <!-- SIDEBAR (Nexus Surface) -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="brand">
-                <h1 class="logo">STEM<span>ANACE</span></h1>
+                <h1 class="logo" onclick="changeCallsign()" style="cursor:pointer">STEM<span>ANACE</span></h1>
                 <p class="tagline">NEURAL_CALIBRATOR_V.2.5</p>
             </div>
 
-            <!-- ID: side-high-score and high-score -->
+            <!-- Dashboard Stats (Sidebar IDs) -->
             <div class="surface-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
-                <div class="stat-value"><span id="side-high-score">0</span></div>
-                <span id="high-score" style="display:none">0</span>
+                <div id="side-high-score" class="stat-value">0</div>
             </div>
 
-            <!-- ID: side-global-proficiency and global-proficiency -->
             <div class="surface-card">
                 <div class="stat-label">🌌 PROFICIENCY</div>
-                <div class="stat-value"><span id="side-global-proficiency">0%</span></div>
-                <span id="global-proficiency" style="display:none">0%</span>
+                <div id="side-global-proficiency" class="stat-value">0%</div>
             </div>
 
-            <!-- ID: side-achievement-rack (Fixes Line 188) -->
             <div class="surface-card flex-grow">
                 <div class="stat-label">ACHIEVEMENTS</div>
+                <!-- CRITICAL ID: side-achievement-rack -->
                 <div id="side-achievement-rack" class="achievement-grid"></div>
             </div>
 
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 ON</button>
                 <div class="stat-label" style="margin-top:10px;">ID: <span id="side-user-callsign">---</span></div>
-                <span id="user-callsign" style="display:none">---</span>
             </div>
         </aside>
 
+        <!-- MAIN STAGE -->
         <main class="main-stage">
 
-            <!-- LOGIN -->
+            <!-- 1. LOGIN -->
             <div id="screen-login" class="screen">
                 <div class="centered-content">
                     <h2 class="stat-label emphasis">IDENTITY_VERIFICATION</h2>
@@ -72,7 +69,7 @@
                 </div>
             </div>
 
-            <!-- HOME -->
+            <!-- 2. HOME -->
             <div id="screen-home" class="screen hidden">
                 <div class="screen-header">
                     <div class="surface-card mini">
@@ -82,20 +79,18 @@
                 </div>
 
                 <div class="action-zone">
-                    <button class="primary-btn hero-btn glow-text" onclick="showScreen('screen-chapters')">💎 ENTER ARENA</button>
+                    <button class="primary-btn hero-btn glow-text" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
                     <div class="btn-grid-2">
-                        <button class="secondary-btn" onclick="showScreen('screen-learn')">🛡️ VAULT</button>
-                        <button class="secondary-btn" onclick="showScreen('screen-diagnostics')">⚙️ DIAGS</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">🛡️ VAULT</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGS</button>
                     </div>
                 </div>
-                <!-- ID: mobile-achievement-rack (Fixes Line 189) -->
+                
+                <!-- CRITICAL ID: mobile-achievement-rack -->
                 <div id="mobile-achievement-rack" class="hidden"></div>
-                <!-- ID: mobile-high-score and mobile-proficiency -->
-                <span id="mobile-high-score" class="hidden"></span>
-                <span id="mobile-proficiency" class="hidden"></span>
             </div>
 
-            <!-- ARENA -->
+            <!-- 3. ARENA (2x2 Grid + HUD) -->
             <div id="screen-game" class="screen hidden arena-screen">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
@@ -109,39 +104,40 @@
                 <div id="options-grid" class="grid-2x2"></div>
             </div>
 
-            <!-- CHAPTERS -->
+            <!-- 4. CHAPTERS -->
             <div id="screen-chapters" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
                 <div class="stack-nav">
-                    <button class="opt-btn-large" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="opt-btn-large" onclick="selectChapter('calculus')">CALCULUS</button>
-                    <button id="priority-btn" class="primary-btn" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
+                    <button class="opt-btn-large" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn-large" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
+                    <button id="priority-btn" class="primary-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
 
-            <!-- DIFFICULTY -->
+            <!-- 5. DIFFICULTY -->
             <div id="screen-difficulty" class="screen hidden">
                 <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
                 <div class="stack-nav">
-                    <button class="opt-btn-large" onclick="selectDifficulty(30)">STABLE</button>
-                    <button class="opt-btn-large" onclick="selectDifficulty(15)">VOLATILE</button>
-                    <button class="primary-btn" onclick="selectDifficulty(8)">CRITICAL</button>
+                    <button class="opt-btn-large" onclick="uiClick(); selectDifficulty(30)">STABLE</button>
+                    <button class="opt-btn-large" onclick="uiClick(); selectDifficulty(15)">VOLATILE</button>
+                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL</button>
                 </div>
             </div>
 
-            <!-- VAULT & DIAGNOSTICS -->
+            <!-- 6. VAULT -->
             <div id="screen-learn" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-                <div id="vault-content" class="scroll-container"></div>
+                <div id="vault-content" class="scroll-area"></div>
             </div>
 
+            <!-- 7. DIAGNOSTICS -->
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-                <div id="diagnostic-results" class="scroll-container"></div>
+                <div id="diagnostic-results" class="scroll-area"></div>
             </div>
 
-            <!-- GAME OVER -->
+            <!-- 8. GAME OVER -->
             <div id="screen-over" class="screen hidden">
                 <div class="centered-content">
                     <h1 class="failure-title">FLATLINED</h1>
@@ -149,9 +145,9 @@
                     <div class="surface-card revision-log">
                         <div id="debt-list"></div>
                     </div>
-                    <div class="btn-grid-2" style="margin-top:20px;">
-                        <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
-                        <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
+                    <div class="btn-grid-2">
+                        <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
+                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
                     </div>
                     <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
@@ -159,7 +155,7 @@
         </main>
     </div>
 
-    <!-- ROAST MODAL -->
+    <!-- 9. ROAST MODAL -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
@@ -169,12 +165,16 @@
         </div>
     </div>
 
-    <!-- DATA HOOKS FOR JS (Hidden Logic) -->
+    <!-- 🛑 CRITICAL LOGIC HOOKS: JS EXPECTS THESE TO EXIST 🛑 -->
     <div style="display:none">
-        <div id="total-drills">0</div>
+        <div id="high-score">0</div>
+        <div id="mobile-high-score">0</div>
+        <div id="user-callsign">---</div>
         <div id="display-callsign"></div>
+        <div id="global-proficiency">0%</div>
+        <div id="mobile-proficiency">0%</div>
         <div id="home-proficiency">0%</div>
-        <div id="achievement-rack"></div>
+        <div id="total-drills">0</div>
     </div>
 
     <script src="script.js"></script>
