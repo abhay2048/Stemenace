@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
     
+    <!-- Prevent Favicon 404 -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 
+    <!-- Fixed MathJax Configuration (Removed invalid 'linebreaks' option) -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center', linebreaks: { automatic: true, width: 'container' } }
+            chtml: { displayAlign: 'center' }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
@@ -35,27 +39,24 @@
 
             <div class="surface-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
-                <!-- ID MUST BE 'high-score' -->
                 <div id="high-score" class="stat-value">0</div>
             </div>
 
             <div class="surface-card">
                 <div class="stat-label">🌌 PROFICIENCY</div>
-                <!-- ID MUST BE 'global-proficiency' -->
                 <div id="global-proficiency" class="stat-value">0%</div>
             </div>
 
             <div class="surface-card flex-grow">
                 <div class="stat-label">ACHIEVEMENTS</div>
-                <!-- ID MUST BE 'achievement-rack' -->
                 <div id="achievement-rack" class="achievement-grid"></div>
             </div>
 
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
-                <div class="stat-label" style="margin-top:10px;">OPERATOR: <span id="user-callsign">---</span></div>
+                <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
                 
-                <!-- CRITICAL HIDDEN LOGIC HOOKS (DO NOT REMOVE) -->
+                <!-- CRITICAL SCRIPT HOOKS -->
                 <div id="total-drills" style="display:none">0</div>
                 <div id="display-callsign" style="display:none"></div>
             </div>
@@ -78,7 +79,6 @@
                 <div class="screen-header">
                     <div class="surface-card mini">
                         <h2 class="stat-label">RANK_STATUS</h2>
-                        <!-- ID MUST BE 'current-rank' -->
                         <div id="current-rank" class="stat-value highlight">CONSTANT</div>
                     </div>
                 </div>
@@ -138,24 +138,21 @@
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
-                <div id="diagnostic-results" class="scroll-container"></div>
+                <div id="diagnostic-results" class="scroll-area"></div>
             </div>
 
             <!-- SCREEN: GAME OVER -->
             <div id="screen-over" class="screen hidden">
                 <div class="centered-content">
                     <h1 class="failure-title glow-text-red">FLATLINED</h1>
-                    <!-- ID MUST BE 'final-rank-badge' -->
                     <div id="final-rank-badge" class="stat-label">RANK: CONSTANT</div>
                     <div class="surface-card revision-log">
-                        <!-- ID MUST BE 'debt-list' -->
                         <div id="debt-list"></div>
                     </div>
                     <div class="btn-grid-2">
                         <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
                         <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
                     </div>
-                    <!-- ID MUST BE 'final-streak' -->
                     <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
             </div>
@@ -167,10 +164,8 @@
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
-            <!-- ID MUST BE 'roast-message' -->
             <p id="roast-message"></p>
             <div class="correction-surface">
-                <!-- ID MUST BE 'correction-display' -->
                 <div id="correction-display"></div>
             </div>
             <button class="primary-btn full-width" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
