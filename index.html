@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
-    
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
-
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -20,63 +19,62 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="scanlines"></div>
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
         
-        <!-- 🌌 SIDEBAR (Desktop Only - Logic Hooks Intact) -->
+        <!-- SIDEBAR (Desktop Only) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
                 <p class="tagline">NEURAL_CALIBRATOR_V.2</p>
             </div>
-
             <div class="sidebar-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
-                <div id="high-score" class="stat-value">0</div>
+                <div id="side-high-score" class="stat-value">0</div>
             </div>
-
             <div class="sidebar-card">
                 <div class="stat-label">🌌 PROFICIENCY</div>
-                <div id="global-proficiency" class="stat-value">0%</div>
+                <div id="side-global-proficiency" class="stat-value">0%</div>
             </div>
-
             <div class="sidebar-card">
                 <div class="stat-label">ACHIEVEMENTS</div>
-                <div id="achievement-rack" class="achievement-rack"></div>
+                <div id="side-achievement-rack" class="achievement-rack"></div>
             </div>
-
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
-                <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
-                <!-- Logic Hidden Elements -->
-                <div id="total-drills" style="display:none">0</div>
-                <div id="display-callsign" style="display:none"></div>
+                <div class="stat-label" style="margin-top:10px;">OP_ID: <span id="side-user-callsign">---</span></div>
             </div>
         </aside>
 
-        <!-- 💎 MAIN STAGE (Zero-Scroll on Mobile) -->
+        <!-- MAIN STAGE -->
         <main class="main-stage">
 
             <!-- LOGIN -->
             <div id="screen-login" class="screen">
                 <div class="centered-box">
+                    <h1 class="logo mobile-only">STEM<span>ANACE</span></h1>
                     <h2 class="stat-label" style="margin-bottom:20px;">IDENTITY_VERIFICATION</h2>
                     <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
                     <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE</button>
                 </div>
             </div>
 
-            <!-- HOME -->
+            <!-- HOME (Visible Stats for Mobile) -->
             <div id="screen-home" class="screen hidden">
-                <div class="screen-header">
+                <div class="mobile-stats-header">
                     <div class="stat-card-mini">
-                        <h2 class="stat-label">RANK_STATUS</h2>
+                        <div class="stat-label">RANK</div>
                         <div id="current-rank" class="stat-value highlight">CONSTANT</div>
                     </div>
+                    <!-- These only show on mobile because sidebar is gone -->
+                    <div class="stat-card-mini mobile-only">
+                        <div class="stat-label">PEAK</div>
+                        <div id="mobile-high-score" class="stat-value">0</div>
+                    </div>
                 </div>
+                
                 <div class="action-zone">
                     <button class="primary-btn hero-btn" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
                     <div class="btn-grid">
@@ -84,14 +82,15 @@
                         <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGS</button>
                     </div>
                 </div>
+                <div id="mobile-achievement-rack" class="achievement-rack mobile-only" style="margin-top:20px"></div>
             </div>
 
-            <!-- ARENA (2x2 Grid + No Scroll) -->
+            <!-- ARENA (Zero-Scroll Flex Layout) -->
             <div id="screen-game" class="screen hidden arena-screen">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
                     <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
-                    <div class="hud-item mobile-hidden"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
+                    <div class="hud-item"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail"><div id="timer-fill"></div></div>
                 
@@ -99,7 +98,7 @@
                     <div id="formula-display"></div>
                 </div>
 
-                <div id="options-grid" class="grid-2x2"></div>
+                <div id="options-grid"></div>
             </div>
 
             <!-- CHAPTERS -->
@@ -107,9 +106,9 @@
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
                 <div class="vertical-nav">
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
-                    <button id="priority-btn" class="primary-btn debt-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
+                    <button class="opt-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+                    <button id="priority-btn" class="primary-btn" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
 
@@ -117,49 +116,38 @@
             <div id="screen-difficulty" class="screen hidden">
                 <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
                 <div class="vertical-nav">
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
-                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
+                    <button class="opt-btn" onclick="selectDifficulty(30)">STABLE</button>
+                    <button class="opt-btn" onclick="selectDifficulty(15)">VOLATILE</button>
+                    <button class="primary-btn" onclick="selectDifficulty(8)">CRITICAL</button>
                 </div>
             </div>
 
-            <!-- VAULT (Scroll only inside content) -->
-            <div id="screen-learn" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-                <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
-                <div id="vault-content" class="scroll-area"></div>
-            </div>
-
-            <!-- DIAGNOSTICS (Scroll only inside content) -->
-            <div id="screen-diagnostics" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-                <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
-                <div id="diagnostic-results" class="scroll-area"></div>
-            </div>
+            <!-- VAULT & DIAGS (Scrollable) -->
+            <div id="screen-learn" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="vault-content" class="scroll-area"></div></div>
+            <div id="screen-diagnostics" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="diagnostic-results" class="scroll-area"></div></div>
 
             <!-- GAME OVER -->
             <div id="screen-over" class="screen hidden">
-                <div class="centered-box">
-                    <h1 class="failure-title">FLATLINED</h1>
-                    <div id="final-rank-badge" class="stat-label rank-text">RANK: CONSTANT</div>
-                    <div class="debt-box"><div id="debt-list"></div></div>
-                    <div class="btn-grid">
-                        <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
-                    </div>
-                    <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
+                <h1 class="failure-title">FLATLINED</h1>
+                <div id="final-rank-badge" class="rank-badge">CONSTANT</div>
+                <div class="revision-box"><div id="debt-list"></div></div>
+                <div class="btn-grid">
+                    <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
+                    <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
                 </div>
+                <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
             </div>
+
         </main>
     </div>
 
     <!-- ROAST MODAL -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
-            <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
+            <h2 class="stat-label">NEURAL_DISCREPANCY</h2>
             <p id="roast-message"></p>
             <div class="correction-zone"><div id="correction-display"></div></div>
-            <button class="primary-btn full-width" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
+            <button class="primary-btn full-width" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
         </div>
     </div>
 
