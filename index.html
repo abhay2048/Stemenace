@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 
     <script>
         window.MathJax = {
@@ -26,7 +26,7 @@
 
     <div class="app-container">
         
-        <!-- 🌌 SIDEBAR (Desktop Only) -->
+        <!-- 🌌 SIDEBAR (Desktop Only - Logic Hooks Intact) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -50,12 +50,14 @@
 
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
-                <div class="stat-label" style="margin-top:10px;">OPERATOR: <span id="user-callsign">---</span></div>
+                <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
+                <!-- Logic Hidden Elements -->
                 <div id="total-drills" style="display:none">0</div>
+                <div id="display-callsign" style="display:none"></div>
             </div>
         </aside>
 
-        <!-- 💎 MAIN STAGE -->
+        <!-- 💎 MAIN STAGE (Zero-Scroll on Mobile) -->
         <main class="main-stage">
 
             <!-- LOGIN -->
@@ -63,7 +65,7 @@
                 <div class="centered-box">
                     <h2 class="stat-label" style="margin-bottom:20px;">IDENTITY_VERIFICATION</h2>
                     <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
-                    <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE_SESSION</button>
+                    <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE</button>
                 </div>
             </div>
 
@@ -75,7 +77,6 @@
                         <div id="current-rank" class="stat-value highlight">CONSTANT</div>
                     </div>
                 </div>
-
                 <div class="action-zone">
                     <button class="primary-btn hero-btn" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
                     <div class="btn-grid">
@@ -85,20 +86,19 @@
                 </div>
             </div>
 
-            <!-- 💎 ARENA (Optimized 2x2) -->
+            <!-- ARENA (2x2 Grid + No Scroll) -->
             <div id="screen-game" class="screen hidden arena-screen">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
                     <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
+                    <div class="hud-item mobile-hidden"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail"><div id="timer-fill"></div></div>
                 
-                <!-- Smaller Formula Chamber for player convenience -->
                 <div id="formula-chamber">
                     <div id="formula-display"></div>
                 </div>
 
-                <!-- Bigger 2x2 Bold Grid -->
                 <div id="options-grid" class="grid-2x2"></div>
             </div>
 
@@ -107,8 +107,8 @@
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
                 <div class="vertical-nav">
-                    <button class="opt-btn bold" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="opt-btn bold" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
+                    <button class="opt-btn bold-text" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn bold-text" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
                     <button id="priority-btn" class="primary-btn debt-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
@@ -117,22 +117,22 @@
             <div id="screen-difficulty" class="screen hidden">
                 <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
                 <div class="vertical-nav">
-                    <button class="opt-btn bold" onclick="uiClick(); selectDifficulty(30)">STABLE</button>
-                    <button class="opt-btn bold" onclick="uiClick(); selectDifficulty(15)">VOLATILE</button>
-                    <button class="primary-btn accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL</button>
+                    <button class="opt-btn bold-text" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
+                    <button class="opt-btn bold-text" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
+                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
                 </div>
             </div>
 
-            <!-- VAULT -->
+            <!-- VAULT (Scroll only inside content) -->
             <div id="screen-learn" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
                 <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
                 <div id="vault-content" class="scroll-area"></div>
             </div>
 
-            <!-- DIAGNOSTICS -->
+            <!-- DIAGNOSTICS (Scroll only inside content) -->
             <div id="screen-diagnostics" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
                 <div id="diagnostic-results" class="scroll-area"></div>
             </div>
@@ -147,9 +147,9 @@
                         <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
                         <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
                     </div>
+                    <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
             </div>
-
         </main>
     </div>
 
