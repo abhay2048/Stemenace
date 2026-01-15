@@ -92,30 +92,41 @@ function updateHUD() {
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
+    
     const alert = document.getElementById('red-alert');
     if(alert) alert.classList.add('hidden');
     
-    document.querySelectorAll('.arena-screen').forEach(el => el.classList.remove('panic'));
-    
+    // Select Question
     if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     
+    // UPDATE FORMULA - Uses clear formatting for MathJax
     const display = document.getElementById('formula-display');
-    if(display) display.innerHTML = `\\[ ${currentQ.q} \\]`;
+    if(display) {
+        display.innerHTML = `\\[ ${currentQ.q} \\]`;
+    }
     
     const grid = document.getElementById('options-grid');
     if(!grid) return;
     grid.innerHTML = "";
     
+    // SHUFFLE OPTIONS
     const opts = [...currentQ.options].sort(() => 0.5 - Math.random());
+    
     opts.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
+        // Wrap option in inline LaTeX
         btn.innerHTML = `\\( ${opt} \\)`;
-        btn.onclick = () => handleChoice(opt);
+        btn.onclick = () => { uiClick(); handleChoice(opt); };
         grid.appendChild(btn);
     });
-    if(window.MathJax) window.MathJax.typesetPromise();
+
+    // 🛑 CRITICAL: TELL MATHJAX TO RENDER THE NEW FORMULAS 🛑
+    if(window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([display, grid]).catch((err) => console.log(err));
+    }
+
     resetTimer();
 }
 
@@ -279,3 +290,4 @@ async function init() {
     }
 }
 init();
+
