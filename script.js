@@ -8,7 +8,7 @@ let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { c
 let achievements = JSON.parse(localStorage.getItem('stemanaceMedals')) || { titan: false, survivor: false, singularity: false };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
-// Fix structure integrity
+// Ensure History Integrity
 const subjects = ['global', 'calculus', 'trigonometry'];
 subjects.forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
 
@@ -27,6 +27,8 @@ window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); 
 const failSound = () => { playSound(100, 'sine', 0.4, 0.3); playSound(50, 'sine', 0.4, 0.3); };
 const successSound = () => playSound(1200, 'sine', 0.2, 0.05);
 const tickSound = () => playSound(1800, 'sine', 0.05, 0.02);
+
+window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
 
 // --- IDENTITY ---
 window.submitLogin = () => {
@@ -110,7 +112,7 @@ function resetTimer() {
         if (timeLeft < 3) { 
             if (Math.floor(timeLeft * 10) % 2 === 0) tickSound();
             document.getElementById('red-alert').classList.remove('hidden'); 
-            document.querySelector('.screen:not(.hidden)')?.classList.add('panic'); 
+            document.querySelector('.arena-screen')?.classList.add('panic'); 
         }
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -211,10 +213,8 @@ function populateVault() {
     window.MathJax.typesetPromise();
 }
 
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 OFF" : "🔊 ON"; };
-
 window.shareResult = () => {
-    const text = `STEMANACE Report: Combo ${score}. Challenge me: ${window.location.href}`;
+    const text = `SYSTEM REPORT: I cleared STEMANACE Arena with a streak of ${score}.\nCan you beat me? ${window.location.href}`;
     if (navigator.share) navigator.share({ title: 'STEMANACE', text: text, url: window.location.href }); else alert("Copied!");
 };
 
