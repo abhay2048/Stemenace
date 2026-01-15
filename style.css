@@ -12,11 +12,12 @@ body {
                       radial-gradient(circle at 80% 80%, var(--primary) 0%, transparent 40%);
 }
 
-.app-container { width: 100%; max-width: 800px; height: 95dvh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
+.app-container { width: 100%; max-width: 800px; height: 95dvh; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; }
 
 .screen {
     background: var(--white); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid var(--primary);
-    box-shadow: 0 10px 30px rgba(106, 22, 44, 0.1); height: 100%; display: flex; flex-direction: column; 
+    box-shadow: 0 10px 30px var(--shadow), inset 0 0 20px rgba(255,255,255,1);
+    height: 100%; display: flex; flex-direction: column; 
     position: relative; box-sizing: border-box; overflow: hidden;
 }
 
@@ -30,7 +31,7 @@ body {
 }
 
 #formula-display mjx-container {
-    font-size: clamp(1rem, 4vw, 2.4rem) !important;
+    font-size: clamp(0.9rem, 4vw, 2.3rem) !important;
     max-width: 100% !important;
     white-space: normal !important; 
     display: block !important;
@@ -43,7 +44,7 @@ body {
 }
 
 @media (max-width: 600px) {
-    #options-grid { grid-template-columns: 1fr; } 
+    #options-grid { grid-template-columns: 1fr; }
     .screen { padding: 1.2rem; border-radius: 1rem; }
     .logo { font-size: 2.2rem; }
     #formula-display mjx-container { font-size: 1.2rem !important; }
@@ -54,13 +55,7 @@ body {
     color: var(--text); padding: 12px 5px; min-height: 60px; font-weight: 800;
     display: flex; align-items: center; justify-content: center; transition: 0.2s;
 }
-
-.opt-btn mjx-container {
-    font-size: clamp(0.75rem, 3.5vw, 1.1rem) !important;
-    white-space: normal !important;
-    max-width: 100% !important;
-}
-
+.opt-btn mjx-container { font-size: clamp(0.7rem, 3.5vw, 1rem) !important; white-space: normal !important; }
 .opt-btn:hover { background: var(--background); border-color: var(--accent); transform: translateY(-2px); }
 
 /* ACHIEVEMENT MEDALS */
@@ -86,7 +81,10 @@ body {
 .stat-value-sm { font-size: 1.1rem; font-weight: 900; font-family: monospace; }
 .nav-grid { display: grid; gap: 8px; width: 100%; max-width: 400px; margin: 0 auto; }
 
-/* HUD */
+.primary-btn { background: var(--accent); color: white; padding: 1rem; border-radius: 0.8rem; font-weight: 900; border: none; cursor: pointer; }
+.secondary-btn { background: var(--white); border: 2px solid var(--primary); color: var(--accent); padding: 0.8rem; border-radius: 0.8rem; font-weight: 800; border: none; cursor: pointer; }
+.accent-btn { background: var(--text); color: white; padding: 1rem; border-radius: 0.8rem; font-weight: 900; border: none; cursor: pointer; }
+
 .arena-hud { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 900; margin-bottom: 5px; }
 .timer-rail { background: var(--background); height: 6px; border-radius: 3px; border: 1px solid var(--primary); overflow: hidden; margin-bottom: 10px; }
 #timer-fill { background: var(--text); height: 100%; transition: width 0.1s linear; }
@@ -97,7 +95,6 @@ body {
 .vault-q { font-size: 1.1rem; color: var(--accent); font-weight: 800; width: 100%; overflow-x: auto; white-space: nowrap; }
 .vault-a { filter: blur(12px); opacity: 0.15; transition: 0.4s; border-top: 1px dashed var(--primary); padding-top: 10px; margin-top: 10px; width: 100%; overflow-x: auto; }
 .vault-card.revealed .vault-a { filter: blur(0); opacity: 1; color: var(--text); }
-.vault-card mjx-container { font-size: clamp(0.8rem, 3.5vw, 1.2rem) !important; max-width: none !important; }
 
 .fail-log-item { background: var(--white); border: 1px solid var(--primary); border-radius: 1rem; padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; width: 100%; }
 .fail-formula { flex: 1; overflow-x: auto; text-align: left; }
