@@ -204,28 +204,46 @@ function updateAchievementRack() {
 
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
+    if (!container) return;
+    const drills = localStorage.getItem('stemanaceDrills') || 0;
     const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
-    let html = `<div class="diag-summary-header"><span class="hud-label">TOTAL_RUNS</span><div class="stat-value" style="font-size:2rem; color:var(--accent)">${totalDrills}</div></div><h3 class="vault-header">NEURAL_FAIL_LOG</h3>`;
-    if (sortedFails.length === 0) html += `<p>Integrity: 100%.</p>`;
-    else sortedFails.forEach(([f, c]) => { html += `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge"><span>${c}</span></div></div>`; });
+
+    let html = `
+        <div class="diag-summary-header">
+            <span style="font-size:0.6rem; font-weight:900; letter-spacing:1px;">TOTAL_SESSIONS</span>
+            <div style="font-size:2rem; font-weight:900;">${drills}</div>
+        </div>
+        <h3 style="font-size:0.9rem; margin-bottom:10px;">NEURAL_FAIL_LOG</h3>
+    `;
+
+    if (sortedFails.length === 0) {
+        html += `<p style="opacity:0.5; font-size:0.8rem;">Integrity: 100%. No distortions detected.</p>`;
+    } else {
+        sortedFails.forEach(([f, c]) => {
+            html += `
+                <div class="fail-log-item">
+                    <div class="fail-formula">\\(${f}\\)</div>
+                    <div class="fail-count-badge">
+                        <span class="fail-number">${c}</span>
+                        <span style="font-size:0.4rem; font-weight:900;">FAILS</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
     container.innerHTML = html;
-    window.MathJax.typesetPromise();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 function populateVault() {
     const list = document.getElementById('vault-content');
     if (!list) return;
-
     const grouped = {};
-    allQuestions.forEach(q => {
-        if(!grouped[q.chapter]) grouped[q.chapter] = [];
-        grouped[q.chapter].push(q);
-    });
+    allQuestions.forEach(q => { if(!grouped[q.chapter]) grouped[q.chapter] = []; grouped[q.chapter].push(q); });
 
-    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px; font-weight:bold;'>[ ACTIVE_RECALL_MODE: TAP TO DE-BLUR ]</p>";
-    
+    let html = "<p style='font-size:0.6rem; color:var(--text); margin-bottom:20px; font-weight:bold;'>TAP CARDS TO REVEAL IDENTITY</p>";
     for (const c in grouped) {
-        html += `<h3 class="vault-header">${c.toUpperCase()} UNIT</h3>`;
+        html += `<h3 style="font-size:1rem; border-bottom:2px solid var(--primary); margin-bottom:15px; padding-bottom:5px;">${c.toUpperCase()}</h3>`;
         grouped[c].forEach(q => {
             html += `
                 <div class="vault-card" onclick="this.classList.toggle('revealed'); window.uiClick();">
@@ -235,13 +253,8 @@ function populateVault() {
             `;
         });
     }
-    
     list.innerHTML = html;
-
-    // Force MathJax to process the newly added cards
-    if (window.MathJax) {
-        window.MathJax.typesetPromise();
-    }
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 window.shareResult = () => {
     const t = `SYSTEM REPORT: Streak [${score}] on STEMANACE Arena. Challenge me: ${window.location.href}`;
@@ -275,4 +288,5 @@ async function init() {
     if (!callsign) window.showScreen('screen-login'); else { updateHomeDashboard(); window.showScreen('screen-home'); }
 }
 init();
+
 
