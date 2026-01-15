@@ -1,5 +1,5 @@
 /**
- * STEMANACE NEURAL CALIBRATOR - FIXED JS
+ * STEMANACE NEURAL CALIBRATOR - CLEANED JS (no TS asserts)
  */
 
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
@@ -9,15 +9,15 @@ let totalDrills = parseInt(localStorage.getItem('stemanaceDrills')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0}, global:{correct:0,total:0} };
 let achievements = JSON.parse(localStorage.getItem('stemanaceMedals')) || { titan: false, survivor: false, singularity: false };
-let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
+let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false, roundActive = false;
 
 // Ensure history subjects exist
-['global', 'calculus', 'trigonometry'].forEach(s => {
-    if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 };
-});
+['global', 'calculus', 'trigonometry'].forEach(s => { if (!correctHistory[s]) correctHistory[s] = { correct: 0, total: 0 }; });
 
 // --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+document.addEventListener('click', () => { if (audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
+
 function playProceduralSound(f, t, d, v = 0.1) {
     if (isMuted || audioCtx.state === 'suspended') return;
     try {
@@ -27,36 +27,20 @@ function playProceduralSound(f, t, d, v = 0.1) {
         o.frequency.setValueAtTime(f, audioCtx.currentTime);
         g.gain.setValueAtTime(v, audioCtx.currentTime);
         g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g);
-        g.connect(audioCtx.destination);
-        o.start();
-        o.stop(audioCtx.currentTime + d);
-    } catch(e) {}
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch (e) {}
 }
 
-window.uiClick = function() { 
-    if (audioCtx.state === 'suspended') audioCtx.resume(); 
-    playProceduralSound(600, 'sine', 0.1); 
-};
+window.uiClick = function() { playProceduralSound(600, 'sine', 0.1); };
+window.failSound = function() { playProceduralSound(100, 'sine', 0.4, 0.4); playProceduralSound(50, 'sine', 0.4, 0.4); };
+window.successSound = function() { playProceduralSound(1200, 'sine', 0.2, 0.05); };
+window.tickSound = function() { playProceduralSound(1800, 'sine', 0.05, 0.02); };
 
-window.failSound = function() { 
-    playProceduralSound(100, 'sine', 0.4, 0.4); 
-    playProceduralSound(50, 'sine', 0.4, 0.4); 
-};
-
-window.successSound = function() { 
-    playProceduralSound(1200, 'sine', 0.2, 0.05); 
-};
-
-window.tickSound = function() { 
-    playProceduralSound(1800, 'sine', 0.05, 0.02); 
-};
-
-// --- MUTE ---
 window.toggleMute = function() { 
     isMuted = !isMuted; 
     const btn = document.getElementById('mute-btn');
-    if(btn) btn.innerText = isMuted ? "🔇 OFF" : "🔊 ON"; 
+    if (btn) btn.innerText = isMuted ? "🔇 OFF" : "🔊 ON";
 };
 
 // --- NAV / LOGIN ---
@@ -67,26 +51,26 @@ window.submitLogin = function() {
     if (val.trim().length > 1) {
         callsign = val.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
-        updateHomeDashboard();
+        updateHomeDashboard(); 
         showScreen('screen-home');
     }
 };
 
 window.changeCallsign = function() {
     const n = prompt("ENTER CALLSIGN:");
-    if(n) { 
-        callsign = n.toUpperCase(); 
-        localStorage.setItem('stemanaceCallsign', callsign); 
-        updateHomeDashboard(); 
+    if (n) {
+        callsign = n.toUpperCase();
+        localStorage.setItem('stemanaceCallsign', callsign);
+        updateHomeDashboard();
     }
 };
 
 window.showScreen = function(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     const target = document.getElementById(id);
-    if(target) target.classList.remove('hidden');
+    if (target) target.classList.remove('hidden');
     uiClick();
-    if(timerId) clearInterval(timerId);
+    if (timerId) clearInterval(timerId);
 };
 
 // --- CHAPTER / DIFFICULTY ---
@@ -96,40 +80,43 @@ window.selectChapter = function(chap) {
 };
 
 window.selectPriorityDrill = function() {
-    const failedIds = Object.keys(formulaAnalytics);
-    filteredQuestions = allQuestions.filter(q => failedIds.includes(q.q));
+    const normalize = s => s.replace(/\s+/g,'');
+    const failed = Object.keys(formulaAnalytics).map(normalize);
+    filteredQuestions = allQuestions.filter(q => failed.includes(normalize(q.q)));
     showScreen('screen-difficulty');
 };
 
 window.selectDifficulty = function(sec) {
-    timeLimit = sec; lives = 3; score = 0; neuralDebt = [];
+    timeLimit = sec; lives = 3; score = 0; neuralDebt = []; roundActive = false;
     updateHUD();
     showScreen('screen-game');
     nextRound();
 };
 
-// --- GAMEPLAY ---
+// --- HUD ---
 function updateHUD() {
     const lEl = document.getElementById('lives'), sEl = document.getElementById('streak');
-    if(lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
-    if(sEl) sEl.innerText = score;
+    if (lEl) lEl.innerText = "❤️".repeat(Math.max(0, lives));
+    if (sEl) sEl.innerText = score;
 }
 
+// --- GAMEPLAY ---
 function nextRound() {
-    if(timerId) clearInterval(timerId);
+    if (timerId) clearInterval(timerId);
+    roundActive = true;
 
     const alert = document.getElementById('red-alert');
-    if(alert) alert.classList.add('hidden');
+    if (alert) alert.classList.add('hidden');
     document.querySelectorAll('.arena-screen').forEach(el => el.classList.remove('panic'));
 
-    if(filteredQuestions.length === 0) filteredQuestions = allQuestions;
+    if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
 
     const display = document.getElementById('formula-display');
-    if(display) display.innerHTML = `\\[ ${currentQ.q} \\]`;
+    if (display) display.innerHTML = `\\[ ${currentQ.q} \\]`;
 
     const grid = document.getElementById('options-grid');
-    if(!grid) return;
+    if (!grid) return;
     grid.innerHTML = "";
 
     const opts = [...currentQ.options].sort(() => 0.5 - Math.random());
@@ -141,43 +128,65 @@ function nextRound() {
         grid.appendChild(btn);
     });
 
-    if(window.MathJax) MathJax.typesetPromise([display, grid]).catch(err => console.warn(err));
-
+    if (window.MathJax) window.MathJax.typesetPromise([display, grid]).catch(err => console.warn(err));
     resetTimer();
 }
 
 function resetTimer() {
+    const start = performance.now();
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
+
+    if (timerId) clearInterval(timerId);
     timerId = setInterval(function() {
-        timeLeft -= 0.1;
+        if (!roundActive) return;
+
+        const elapsed = (performance.now() - start) / 1000;
+        timeLeft = Math.max(0, timeLimit - elapsed);
         const ratio = (timeLeft / timeLimit) * 100;
-        if(bar) bar.style.width = ratio + "%";
+        if (bar) bar.style.width = ratio + "%";
 
         const eff = document.getElementById('efficiency');
-        if(eff) eff.innerText = Math.max(0, Math.round(ratio)) + "%";
+        if (eff) eff.innerText = Math.round(ratio) + "%";
 
-        if(timeLeft < 3) { 
-            if(Math.floor(timeLeft * 10) % 2 === 0) tickSound();
+        if (timeLeft < 3) {
+            if (Math.floor(elapsed * 10) % 2 === 0) tickSound();
             const alert = document.getElementById('red-alert');
-            if(alert) alert.classList.remove('hidden'); 
+            if (alert) alert.classList.remove('hidden');
         }
-        if(timeLeft <= 0) handleWrong();
+
+        if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(choice) {
-    if(choice === currentQ.correct) {
+    if (!roundActive) return;
+    roundActive = false;
+
+    // increment total attempts every round
+    correctHistory.global.total++;
+    correctHistory[currentQ.chapter].total++;
+
+    if (choice === currentQ.correct) {
         score++; successSound();
-        if(score % 10 === 0 && lives < 3) lives++;
+        if (score % 10 === 0 && lives < 3) lives++;
         correctHistory.global.correct++;
         correctHistory[currentQ.chapter].correct++;
         checkAchievements(); updateHUD(); nextRound();
-    } else handleWrong();
+    } else {
+        handleWrong();
+    }
+
+    localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
 }
 
 function handleWrong() {
-    failSound(); lives--; updateHUD(); clearInterval(timerId);
+    if (!roundActive) return;
+    roundActive = false;
+
+    failSound(); lives--; updateHUD(); 
+    if (timerId) { clearInterval(timerId); timerId = null; }
+
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
     correctHistory.global.total++;
     correctHistory[currentQ.chapter].total++;
@@ -188,51 +197,57 @@ function handleWrong() {
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
 
     const roastEl = document.getElementById('roast-message');
-    if(roastEl) roastEl.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "NEURAL DISCONNECT.";
+    if (roastEl) {
+        roastEl.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "NEURAL DISCONNECT.";
+    }
 
     const corrEl = document.getElementById('correction-display');
-    if(corrEl) corrEl.innerHTML = `\\[ ${currentQ.correct} \\]`;
+    if (corrEl) corrEl.innerHTML = `\\[ ${currentQ.correct} \\]`;
 
     const popup = document.getElementById('roast-popup');
-    if(popup) popup.classList.remove('hidden');
-    if(window.MathJax) MathJax.typesetPromise([corrEl]);
+    if (popup) popup.classList.remove('hidden');
+    if (window.MathJax && corrEl) window.MathJax.typesetPromise([corrEl]).catch(() => {});
 }
 
 window.resumeAfterRoast = function() {
     const popup = document.getElementById('roast-popup');
-    if(popup) popup.classList.add('hidden');
-    if(lives <= 0) {
-        totalDrills++; 
+    if (popup) popup.classList.add('hidden');
+    if (lives <= 0) {
+        totalDrills++;
         localStorage.setItem('stemanaceDrills', totalDrills);
-        if(score > highScore) { 
-            highScore = score; 
-            localStorage.setItem('stemanaceHS', highScore); 
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('stemanaceHS', highScore);
         }
         endGame();
     } else nextRound();
 };
 
 function checkAchievements() {
-    if(score >= 76) achievements.singularity = true;
-    if(currentQ && currentQ.chapter === 'calculus' && score >= 20) achievements.titan = true;
-    if(lives === 1 && score >= 15) achievements.survivor = true;
+    if (score >= 76) achievements.singularity = true;
+    if (currentQ && currentQ.chapter === 'calculus' && score >= 20) achievements.titan = true;
+    if (lives === 1 && score >= 15) achievements.survivor = true;
     localStorage.setItem('stemanaceMedals', JSON.stringify(achievements));
 }
 
 function endGame() {
     const ranks = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}];
-    const r = ranks.find(x => score >= x.t);
+    const r = ranks.find(x => score >= x.t) || ranks[ranks.length - 1];
 
     const fs = document.getElementById('final-streak');
-    if(fs) fs.innerText = score;
+    if (fs) fs.innerText = score;
 
     const frb = document.getElementById('final-rank-badge');
-    if(frb) frb.innerText = r.n;
+    if (frb) frb.innerText = r.n;
 
     const dl = document.getElementById('debt-list');
-    if(dl) {
-        dl.innerHTML = neuralDebt.map(d => `<div class="fail-log-item"><div class="fail-formula">\\(${d.q}\\) &rarr; <b>\\(${d.a}\\)</b></div></div>`).join('');
-        if(window.MathJax) MathJax.typesetPromise([dl]);
+    if (dl) {
+        dl.innerHTML = neuralDebt.map(d => `
+            <div class="fail-log-item">
+                <div class="fail-formula">\\(${d.q}\\) &rarr; <b>\\(${d.a}\\)</b></div>
+            </div>
+        `).join('');
+        if (window.MathJax) window.MathJax.typesetPromise([dl]).catch(() => {});
     }
 
     showScreen('screen-over');
@@ -241,7 +256,7 @@ function endGame() {
 
 function updateHomeDashboard() {
     const ranks = [{n:"SINGULARITY",t:76},{n:"NEURAL ACE",t:51},{n:"ARCHITECT",t:31},{n:"OPERATOR",t:16},{n:"VARIABLE",t:6},{n:"CONSTANT",t:0}];
-    const rank = ranks.find(x => highScore >= x.t);
+    const rank = ranks.find(x => highScore >= x.t) || ranks[ranks.length - 1];
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
 
     const textMap = {
@@ -258,30 +273,33 @@ function updateHomeDashboard() {
         'total-drills': totalDrills
     };
 
-    for(const [id,val] of Object.entries(textMap)){
+    for (const [id, val] of Object.entries(textMap)) {
         const el = document.getElementById(id);
-        if(el) el.innerText = val;
+        if (el) el.innerText = val;
     }
 
     const meds = [{id:'titan',icon:'💎'},{id:'survivor',icon:'🛡️'},{id:'singularity',icon:'🌌'}];
-    const html = meds.map(m => `<div class="medal ${achievements[m.id]? 'unlocked':'locked'}" style="opacity:${achievements[m.id]?1:0.2}">${m.icon}</div>`).join('');
-    ['achievement-rack','side-achievement-rack','mobile-achievement-rack'].forEach(id => {
+    const html = meds.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : 'locked'}" style="opacity: ${achievements[m.id] ? 1 : 0.2}">${m.icon}</div>`).join('');
+
+    ['achievement-rack', 'side-achievement-rack', 'mobile-achievement-rack'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) el.innerHTML = html;
+        if (el) el.innerHTML = html;
     });
 
     const priorityBtn = document.getElementById('priority-btn');
-    if(priorityBtn) priorityBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    if (priorityBtn) {
+        priorityBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    }
 }
 
-// --- INIT DATA ---
+// --- INIT ---
 async function init() {
     allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
-    roasts = ["NEURAL DISCONNECT.","TRY HARDER.","ERROR IN CALIBRATION."];
+    roasts = ["NEURAL DISCONNECT.", "TRY HARDER.", "ERROR IN CALIBRATION."];
 
     try {
         const res = await fetch('mathformula.txt');
-        if(res.ok){
+        if (res.ok) {
             const text = await res.text();
             allQuestions = text.split('\n').filter(l => l.includes('::')).map(line => {
                 const p = line.split('::').map(s => s.trim());
@@ -290,15 +308,15 @@ async function init() {
         }
 
         const rRes = await fetch('roast.txt');
-        if(rRes.ok){
+        if (rRes.ok) {
             const rText = await rRes.text();
             roasts = rText.split('\n').filter(l => l.trim() !== "");
         }
-    } catch(e){
+    } catch (e) {
         console.warn("External data could not be reached. Using local fallbacks.");
     }
 
-    if(!callsign){
+    if (!callsign) {
         showScreen('screen-login');
     } else {
         updateHomeDashboard();
