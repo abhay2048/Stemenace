@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
+    
+    <!-- Fix Favicon 404 -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 
+    <!-- Fixed MathJax Configuration -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
@@ -27,7 +30,7 @@
 
     <div class="app-container">
         
-        <!-- SIDEBAR (Surface Layer 1) -->
+        <!-- SIDEBAR (Nexus Layer) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -36,32 +39,37 @@
 
             <div class="surface-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
+                <!-- REQUIRED ID: high-score -->
                 <div id="high-score" class="stat-value">0</div>
             </div>
 
             <div class="surface-card">
                 <div class="stat-label">🌌 PROFICIENCY</div>
+                <!-- REQUIRED ID: global-proficiency -->
                 <div id="global-proficiency" class="stat-value">0%</div>
             </div>
 
             <div class="surface-card flex-grow">
                 <div class="stat-label">ACHIEVEMENTS</div>
+                <!-- REQUIRED ID: achievement-rack -->
                 <div id="achievement-rack" class="achievement-grid"></div>
             </div>
 
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
+                <!-- REQUIRED ID: user-callsign -->
                 <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
             </div>
         </aside>
 
-        <!-- MAIN STAGE (App Surface) -->
+        <!-- MAIN STAGE -->
         <main class="main-stage">
 
             <!-- SCREEN: LOGIN -->
             <div id="screen-login" class="screen">
                 <div class="centered-content">
                     <h2 class="stat-label emphasis">IDENTITY_VERIFICATION</h2>
+                    <!-- REQUIRED ID: callsign-input -->
                     <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15" class="neural-input">
                     <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE</button>
                 </div>
@@ -72,6 +80,7 @@
                 <div class="screen-header">
                     <div class="surface-card mini">
                         <h2 class="stat-label">RANK_STATUS</h2>
+                        <!-- REQUIRED ID: current-rank -->
                         <div id="current-rank" class="stat-value highlight">CONSTANT</div>
                     </div>
                 </div>
@@ -88,14 +97,20 @@
             <!-- SCREEN: ARENA -->
             <div id="screen-game" class="screen hidden">
                 <div class="arena-hud">
+                    <!-- REQUIRED IDs: lives, streak, efficiency -->
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
                     <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
                     <div class="hud-item mobile-hide"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
+                <!-- REQUIRED ID: timer-fill -->
                 <div class="timer-rail"><div id="timer-fill"></div></div>
+                
                 <div id="formula-chamber" class="neural-glow">
+                    <!-- REQUIRED ID: formula-display -->
                     <div id="formula-display"></div>
                 </div>
+
+                <!-- REQUIRED ID: options-grid -->
                 <div id="options-grid" class="grid-2x2"></div>
             </div>
 
@@ -106,6 +121,7 @@
                 <div class="stack-nav">
                     <button class="opt-btn-large" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                     <button class="opt-btn-large" onclick="selectChapter('calculus')">CALCULUS</button>
+                    <!-- REQUIRED ID: priority-btn -->
                     <button id="priority-btn" class="primary-btn debt-glow" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
@@ -124,6 +140,7 @@
             <div id="screen-learn" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
+                <!-- REQUIRED ID: vault-content -->
                 <div id="vault-content" class="scroll-container"></div>
             </div>
 
@@ -131,21 +148,25 @@
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
+                <!-- REQUIRED ID: diagnostic-results -->
                 <div id="diagnostic-results" class="scroll-container"></div>
             </div>
 
             <!-- SCREEN: GAME OVER -->
             <div id="screen-over" class="screen hidden">
                 <div class="centered-content">
-                    <h1 class="failure-title glow-text-red">FLATLINED</h1>
+                    <h1 class="failure-title">FLATLINED</h1>
+                    <!-- REQUIRED ID: final-rank-badge -->
                     <div id="final-rank-badge" class="stat-label">RANK: CONSTANT</div>
                     <div class="surface-card revision-log">
+                        <!-- REQUIRED ID: debt-list -->
                         <div id="debt-list"></div>
                     </div>
                     <div class="btn-grid-2">
                         <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
                         <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
                     </div>
+                    <!-- REQUIRED ID: final-streak -->
                     <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
             </div>
@@ -154,16 +175,22 @@
     </div>
 
     <!-- MODAL OVERLAY -->
+    <!-- REQUIRED ID: roast-popup -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
+            <!-- REQUIRED ID: roast-message -->
             <p id="roast-message"></p>
-            <div class="correction-surface"><div id="correction-display"></div></div>
+            <div class="correction-surface">
+                <!-- REQUIRED ID: correction-display -->
+                <div id="correction-display"></div>
+            </div>
             <button class="primary-btn full-width" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
         </div>
     </div>
 
-    <!-- 🛑 LOGIC SAFETY BLOCK: HIDDEN ELEMENTS FOR SCRIPT.JS FUNCTIONALITY 🛑 -->
+    <!-- 🛑 CRITICAL LOGIC HOOKS: DO NOT REMOVE THESE 🛑 -->
+    <!-- These IDs are required by updateHomeDashboard to prevent innerHTML errors -->
     <div style="display:none" aria-hidden="true">
         <div id="total-drills">0</div>
         <div id="display-callsign"></div>
