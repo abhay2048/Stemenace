@@ -6,18 +6,18 @@
     <title>STEMANACE | Neural Calibrator</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+    <!-- Professional Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 
+    <!-- MathJax Setup -->
     <script>
         window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center' }
+            chtml: { displayAlign: 'center', scale: 1 }
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,14 +27,13 @@
 
     <div class="app-container">
         
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (Nexus Layer) -->
         <aside class="sidebar">
             <div class="brand">
-                <h1 class="logo" onclick="changeCallsign()" style="cursor:pointer">STEM<span>ANACE</span></h1>
+                <h1 class="logo">STEM<span>ANACE</span></h1>
                 <p class="tagline">NEURAL_CALIBRATOR_V.2.5</p>
             </div>
 
-            <!-- Dashboard Stats (Sidebar IDs) -->
             <div class="surface-card">
                 <div class="stat-label">🛡️ SYSTEM_PEAK</div>
                 <div id="side-high-score" class="stat-value">0</div>
@@ -47,7 +46,6 @@
 
             <div class="surface-card flex-grow">
                 <div class="stat-label">ACHIEVEMENTS</div>
-                <!-- CRITICAL ID: side-achievement-rack -->
                 <div id="side-achievement-rack" class="achievement-grid"></div>
             </div>
 
@@ -57,19 +55,19 @@
             </div>
         </aside>
 
-        <!-- MAIN STAGE -->
+        <!-- MAIN STAGE (App Surface) -->
         <main class="main-stage">
 
-            <!-- 1. LOGIN -->
+            <!-- LOGIN -->
             <div id="screen-login" class="screen">
-                <div class="centered-content">
+                <div class="centered-box">
                     <h2 class="stat-label emphasis">IDENTITY_VERIFICATION</h2>
                     <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15" class="neural-input">
                     <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE</button>
                 </div>
             </div>
 
-            <!-- 2. HOME -->
+            <!-- HOME -->
             <div id="screen-home" class="screen hidden">
                 <div class="screen-header">
                     <div class="surface-card mini">
@@ -79,18 +77,17 @@
                 </div>
 
                 <div class="action-zone">
-                    <button class="primary-btn hero-btn glow-text" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
+                    <button class="primary-btn hero-btn glow-text" onclick="showScreen('screen-chapters')">💎 ENTER ARENA</button>
                     <div class="btn-grid-2">
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">🛡️ VAULT</button>
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGS</button>
+                        <button class="secondary-btn" onclick="showScreen('screen-learn')">🛡️ VAULT</button>
+                        <button class="secondary-btn" onclick="showScreen('screen-diagnostics')">⚙️ DIAGS</button>
                     </div>
                 </div>
-                
-                <!-- CRITICAL ID: mobile-achievement-rack -->
+                <!-- Hidden Achievement Hook for Mobile -->
                 <div id="mobile-achievement-rack" class="hidden"></div>
             </div>
 
-            <!-- 3. ARENA (2x2 Grid + HUD) -->
+            <!-- ARENA (Strict 2x2 Grid) -->
             <div id="screen-game" class="screen hidden arena-screen">
                 <div class="arena-hud">
                     <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
@@ -98,64 +95,48 @@
                     <div class="hud-item mobile-hide"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail"><div id="timer-fill"></div></div>
+                
+                <!-- Formula Chamber (Professional Hierarchy) -->
                 <div id="formula-chamber" class="neural-glow">
                     <div id="formula-display"></div>
                 </div>
+
+                <!-- 2x2 Bold Grid -->
                 <div id="options-grid" class="grid-2x2"></div>
             </div>
 
-            <!-- 4. CHAPTERS -->
-            <div id="screen-chapters" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
-                <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
-                <div class="stack-nav">
-                    <button class="opt-btn-large" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="opt-btn-large" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
-                    <button id="priority-btn" class="primary-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
-                </div>
-            </div>
-
-            <!-- 5. DIFFICULTY -->
-            <div id="screen-difficulty" class="screen hidden">
-                <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
-                <div class="stack-nav">
-                    <button class="opt-btn-large" onclick="uiClick(); selectDifficulty(30)">STABLE</button>
-                    <button class="opt-btn-large" onclick="uiClick(); selectDifficulty(15)">VOLATILE</button>
-                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL</button>
-                </div>
-            </div>
-
-            <!-- 6. VAULT -->
+            <!-- VAULT & DIAGNOSTICS (Scroll Restricted) -->
             <div id="screen-learn" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <div id="vault-content" class="scroll-area"></div>
             </div>
 
-            <!-- 7. DIAGNOSTICS -->
             <div id="screen-diagnostics" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
                 <div id="diagnostic-results" class="scroll-area"></div>
             </div>
 
-            <!-- 8. GAME OVER -->
-            <div id="screen-over" class="screen hidden">
-                <div class="centered-content">
-                    <h1 class="failure-title">FLATLINED</h1>
-                    <div id="final-rank-badge" class="stat-label">RANK: CONSTANT</div>
-                    <div class="surface-card revision-log">
-                        <div id="debt-list"></div>
-                    </div>
-                    <div class="btn-grid-2">
-                        <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
-                    </div>
-                    <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
+            <!-- OTHER SCREENS -->
+            <div id="screen-chapters" class="screen hidden">
+                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+                <div class="vertical-stack"><div id="priority-btn" style="display:none" onclick="selectPriorityDrill()"></div></div>
+                <div id="chapters-nav" class="vertical-stack">
+                    <button class="opt-btn bold-text" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="opt-btn bold-text" onclick="selectChapter('calculus')">CALCULUS</button>
                 </div>
+            </div>
+
+            <div id="screen-over" class="screen hidden">
+                <h1 class="failure-title">FLATLINED</h1>
+                <div id="final-rank-badge" class="stat-label">RANK: CONSTANT</div>
+                <div class="surface-card revision-log"><div id="debt-list"></div></div>
+                <div id="final-streak" class="stat-value">0</div>
+                <button class="primary-btn" onclick="showScreen('screen-home')">HOME</button>
             </div>
         </main>
     </div>
 
-    <!-- 9. ROAST MODAL -->
+    <!-- ROAST MODAL -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
             <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
@@ -165,7 +146,7 @@
         </div>
     </div>
 
-    <!-- 🛑 CRITICAL LOGIC HOOKS: JS EXPECTS THESE TO EXIST 🛑 -->
+    <!-- LOGIC HOOKS FOR SCRIPT.JS (Prevents Null Errors) -->
     <div style="display:none">
         <div id="high-score">0</div>
         <div id="mobile-high-score">0</div>
@@ -175,6 +156,7 @@
         <div id="mobile-proficiency">0%</div>
         <div id="home-proficiency">0%</div>
         <div id="total-drills">0</div>
+        <div id="achievement-rack"></div>
     </div>
 
     <script src="script.js"></script>
