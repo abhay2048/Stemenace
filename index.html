@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
-    <!-- MathJax Configuration -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -28,7 +26,7 @@
 
     <div class="app-container">
         
-        <!-- 🌌 SIDEBAR (The Nexus - Constant Navigation) -->
+        <!-- 🌌 SIDEBAR (Navigation & Global Progress) -->
         <aside class="sidebar">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
@@ -45,15 +43,22 @@
                 <div id="global-proficiency" class="stat-value">0%</div>
             </div>
 
-            <div id="achievement-rack"></div>
+            <!-- Achievement Medals Rack -->
+            <div class="sidebar-card">
+                <div class="stat-label">ACHIEVEMENTS</div>
+                <div id="achievement-rack" class="achievement-rack"></div>
+            </div>
 
             <div class="sidebar-footer">
                 <button id="mute-btn" class="secondary-btn" onclick="toggleMute()">🔊 AUDIO_ON</button>
                 <div class="stat-label">OPERATOR: <span id="user-callsign">---</span></div>
+                <!-- Hidden drill counter for script logic -->
+                <div id="total-drills" style="display:none">0</div>
+                <div id="display-callsign" style="display:none"></div>
             </div>
         </aside>
 
-        <!-- 💎 MAIN STAGE (Screen Container) -->
+        <!-- 💎 MAIN STAGE -->
         <main class="main-stage">
 
             <!-- 1. LOGIN SCREEN -->
@@ -68,13 +73,9 @@
             <!-- 2. HOME SCREEN -->
             <div id="screen-home" class="screen hidden">
                 <div class="screen-header">
-                    <div>
-                        <h2 class="stat-label">CURRENT_RANK</h2>
+                    <div class="stat-card-mini">
+                        <h2 class="stat-label">RANK_STATUS</h2>
                         <div id="current-rank" class="stat-value highlight">CONSTANT</div>
-                    </div>
-                    <div class="text-right">
-                        <h2 class="stat-label">TOTAL_DRILLS</h2>
-                        <div id="total-drills" class="stat-value">0</div>
                     </div>
                 </div>
 
@@ -89,10 +90,10 @@
 
             <!-- 3. ARENA SCREEN -->
             <div id="screen-game" class="screen hidden">
-                <div class="hud">
-                    <div class="stat-label">VIT: <span id="lives">❤️❤️❤️</span></div>
-                    <div class="stat-label">COMBO: <span id="streak" class="highlight">0</span></div>
-                    <div class="stat-label">EFF: <span id="efficiency">100%</span></div>
+                <div class="arena-hud">
+                    <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
+                    <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
+                    <div class="hud-item"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail">
                     <div id="timer-fill"></div>
@@ -112,7 +113,7 @@
                 <div class="vertical-nav">
                     <button class="opt-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
                     <button class="opt-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
-                    <button id="priority-btn" class="primary-btn debt-btn" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
+                    <button id="priority-btn" class="primary-btn debt-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
 
@@ -122,21 +123,21 @@
                 <div class="vertical-nav">
                     <button class="opt-btn" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
                     <button class="opt-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
-                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
+                    <button class="primary-btn accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
                 </div>
             </div>
 
-            <!-- 6. VAULT SCREEN -->
+            <!-- 6. VAULT (ACTIVE RECALL) -->
             <div id="screen-learn" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
                 <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
                 <div id="vault-content" class="scroll-area"></div>
             </div>
 
-            <!-- 7. DIAGNOSTICS SCREEN -->
+            <!-- 7. DIAGNOSTICS (FAILURE HEATMAP) -->
             <div id="screen-diagnostics" class="screen hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT_DIAG</button>
-                <h2 class="stat-label title-mt">⚙️ FAILURE_HEATMAP</h2>
+                <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
                 <div id="diagnostic-results" class="scroll-area"></div>
             </div>
 
@@ -147,7 +148,7 @@
                     <div id="final-rank-badge" class="stat-label rank-text">RANK: CONSTANT</div>
                     
                     <div class="debt-box">
-                        <div class="stat-label">REVISION_LOG</div>
+                        <div class="stat-label">REVISION_REQUIRED</div>
                         <div id="debt-list"></div>
                     </div>
 
@@ -155,6 +156,7 @@
                         <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
                         <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
                     </div>
+                    <div class="stat-label" style="margin-top: 15px;">STREAK: <span id="final-streak">0</span></div>
                 </div>
             </div>
 
@@ -164,9 +166,9 @@
     <!-- 9. ROAST MODAL -->
     <div id="roast-popup" class="overlay hidden">
         <div class="modal">
-            <h2 class="stat-label accent-text">NEURAL_DISCREPANCY</h2>
+            <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
             <p id="roast-message"></p>
-            <div class="correction-box">
+            <div class="correction-zone">
                 <div class="stat-label mini-text">REQUIRED_IDENTITY</div>
                 <div id="correction-display"></div>
             </div>
