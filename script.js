@@ -174,22 +174,33 @@ function endGame() {
 function updateHomeDashboard() {
     const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
     const r = highScore > 75 ? "SINGULARITY" : highScore > 50 ? "NEURAL ACE" : highScore > 30 ? "ARCHITECT" : highScore > 15 ? "OPERATOR" : highScore > 5 ? "VARIABLE" : "CONSTANT";
-    safeSet('high-score', highScore); safeSet('user-callsign', callsign); safeSet('display-callsign', callsign); safeSet('current-rank', r);
-    safeSet('total-drills-stat', totalDrills);
+    
+    // Original HUD updates
+    safeSet('high-score', highScore); 
+    safeSet('user-callsign', callsign); 
+    safeSet('current-rank', r);
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     safeSet('global-proficiency', prof + "%");
+
+    // NEW: Sidebar Sync
+    safeSet('side-high-score', highScore);
+    safeSet('side-proficiency', prof + "%");
+    safeSet('side-rank', r);
+    
     const pBtn = document.getElementById('priority-btn');
     if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
+    
     updateAchievementRack();
 }
-
 function updateAchievementRack() {
-    const rack = document.getElementById('achievement-rack');
-    if (!rack) return;
     const medals = [{ id: 'titan', icon: '💎' }, { id: 'survivor', icon: '🛡️' }, { id: 'singularity', icon: '🌌' }];
-    rack.innerHTML = medals.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
+    const html = medals.map(m => `<div class="medal ${achievements[m.id] ? 'unlocked' : ''}">${m.icon}</div>`).join('');
+    
+    const rack = document.getElementById('achievement-rack');
+    const sideRack = document.getElementById('side-achievement-rack');
+    if (rack) rack.innerHTML = html;
+    if (sideRack) sideRack.innerHTML = html;
 }
-
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
     const sortedFails = Object.entries(formulaAnalytics).filter(([f, c]) => c > 0).sort(([, a], [, b]) => b - a);
@@ -240,3 +251,4 @@ async function init() {
     if (!callsign) window.showScreen('screen-login'); else { updateHomeDashboard(); window.showScreen('screen-home'); }
 }
 init();
+
