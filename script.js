@@ -173,23 +173,19 @@ function endGame() {
 
 function updateHomeDashboard() {
     const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-    const r = highScore > 75 ? "SINGULARITY" : highScore > 50 ? "NEURAL ACE" : highScore > 30 ? "ARCHITECT" : highScore > 15 ? "OPERATOR" : highScore > 5 ? "VARIABLE" : "CONSTANT";
-    
-    // Original HUD updates
-    safeSet('high-score', highScore); 
-    safeSet('user-callsign', callsign); 
-    safeSet('current-rank', r);
+    const r = highScore > 50 ? "SINGULARITY" : highScore > 25 ? "NEURAL ACE" : highScore > 10 ? "OPERATOR" : "CONSTANT";
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    safeSet('global-proficiency', prof + "%");
 
-    // NEW: Sidebar Sync
+    // Update Main Home Screen
+    safeSet('high-score', highScore);
+    safeSet('user-callsign', callsign || '---');
+    safeSet('current-rank', r);
+
+    // Update Nexus Sidebar
     safeSet('side-high-score', highScore);
     safeSet('side-proficiency', prof + "%");
     safeSet('side-rank', r);
-    
-    const pBtn = document.getElementById('priority-btn');
-    if(pBtn) pBtn.style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
-    
+
     updateAchievementRack();
 }
 function updateAchievementRack() {
@@ -230,25 +226,29 @@ window.shareResult = () => {
 };
 
 async function init() {
-    allQuestions = [{ chapter: "calculus", q: "\\int x^n dx", correct: "\\frac{x^{n+1}}{n+1} + C", options: ["\\frac{x^{n+1}}{n+1} + C", "nx^{n-1}", "x^{n+1}", "x^n"] }];
+    // 1. Force screen to Login on load
+    showScreen('screen-login');
+    
+    // 2. Load Formulas
     try {
         const res = await fetch('mathformula.txt');
         if (res.ok) {
             const text = await res.text();
-            const lines = text.split('\n');
-            const parsed = [];
-            for (let i = 0; i < lines.length; i++) {
-                if (lines[i].includes('::')) {
-                    const p = lines[i].split('::');
-                    parsed.push({ chapter: p[0].trim(), q: p[1].trim(), correct: p[2].trim(), options: [p[2].trim(), p[3].trim(), p[4].trim(), p[5].trim()] });
-                }
-            }
-            if (parsed.length > 0) allQuestions = parsed;
+            allQuestions = parseFormulas(text);
         }
-        const rRes = await fetch('roast.txt');
-        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
-    } catch (e) {}
-    if (!callsign) window.showScreen('screen-login'); else { updateHomeDashboard(); window.showScreen('screen-home'); }
+    } catch (e) { console.error("Formula Load Error", e); }
+
+    // 3. Load Roasts
+    try {
+        const res = await fetch('roast.txt');
+        if (res.ok) {
+            const text = await res.text();
+            roasts = text.split('\n').filter(l => l.trim().length > 0);
+        }
+    } catch (e) { console.error("Roast Load Error", e); }
+
+    updateHomeDashboard();
 }
 init();
+
 
