@@ -4,153 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
+    <!-- Favicon Fix -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
-
+    <!-- MathJax Configuration: Precision Scaling & Auto-Wrapping -->
     <script>
         window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
-            options: { enableMenu: false },
-            chtml: { displayAlign: 'center', linebreaks: { automatic: true, width: 'container' } }
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false
+            },
+            chtml: {
+                displayAlign: 'center',
+                displayIndent: '0',
+                linebreaks: { automatic: true, width: 'container' }
+            }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="scanlines"></div>
     <div id="red-alert" class="hidden"></div>
 
     <div class="app-container">
         
-        <aside class="sidebar">
+        <!-- 1. LOGIN SCREEN -->
+        <div id="screen-login" class="screen">
             <div class="brand">
                 <h1 class="logo">STEM<span>ANACE</span></h1>
-                <p class="tagline">NEURAL_CALIBRATOR_V.2</p>
+                <p class="tagline">IDENTITY_VERIFICATION_REQUIRED</p>
             </div>
-
-            <div class="sidebar-card">
-                <div class="stat-label">🛡️ SYSTEM_PEAK</div>
-                <div id="high-score" class="stat-value">0</div>
+            <div class="login-box">
+                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
+                <button class="primary-btn hazard-btn" onclick="submitLogin()">INITIALIZE_SESSION</button>
             </div>
+        </div>
 
-            <div class="sidebar-card">
-                <div class="stat-label">🌌 PROFICIENCY</div>
-                <div id="global-proficiency" class="stat-value">0%</div>
-            </div>
-
-            <div class="sidebar-card">
-                <div class="stat-label">ACHIEVEMENTS</div>
+        <!-- 2. HOME SCREEN -->
+        <div id="screen-home" class="screen hidden">
+            <header class="home-header">
+                <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROF: <span id="global-proficiency">0%</span></div>
+                <h1 class="logo-med">STEM<span>ANACE</span></h1>
                 <div id="achievement-rack" class="achievement-rack"></div>
-            </div>
-
-            <div class="sidebar-footer">
-                <button id="mute-btn" class="secondary-btn full-width" onclick="toggleMute()">🔊 AUDIO_ON</button>
-                <div class="stat-label" style="margin-top:10px;">ID: <span id="user-callsign">---</span></div>
-                <div id="total-drills" style="display:none">0</div>
+            </header>
+            
+            <div class="dashboard">
+                <div class="stat-card clickable" onclick="changeCallsign()">
+                    <div class="stat-label">NEURAL_ID</div>
+                    <div id="user-callsign" class="stat-value-sm">---</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">PEAK_STREAK</div>
+                    <div id="high-score" class="stat-value-sm">0</div>
+                </div>
+                <!-- Global Metrics Hidden for Logic -->
+                <div id="total-drills-stat" style="display:none">0</div>
                 <div id="display-callsign" style="display:none"></div>
             </div>
-        </aside>
 
-        <main class="main-stage">
-
-            <div id="screen-login" class="screen">
-                <div class="centered-box">
-                    <h2 class="stat-label" style="margin-bottom:20px;">IDENTITY_VERIFICATION</h2>
-                    <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
-                    <button class="primary-btn full-width" onclick="submitLogin()">INITIALIZE</button>
-                </div>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
+                <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">DIAGNOSTICS</button>
+                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
             </div>
+        </div>
 
-            <div id="screen-home" class="screen hidden">
-                <div class="screen-header">
-                    <div class="stat-card-mini">
-                        <h2 class="stat-label">RANK_STATUS</h2>
-                        <div id="current-rank" class="stat-value highlight">CONSTANT</div>
-                    </div>
-                </div>
-                <div class="action-zone">
-                    <button class="primary-btn hero-btn" onclick="uiClick(); showScreen('screen-chapters')">💎 ENTER ARENA</button>
-                    <div class="btn-grid">
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">🛡️ VAULT</button>
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">⚙️ DIAGS</button>
-                    </div>
-                </div>
+        <!-- 3. ARENA (SINGLE VIEWPORT) -->
+        <div id="screen-game" class="screen arena-screen hidden">
+            <div class="arena-hud">
+                <div class="hud-item">VIT: <span id="lives">❤️❤️❤️</span></div>
+                <div class="hud-item">COMBO: <span id="streak">0</span></div>
+                <div class="hud-item">EFF: <span id="efficiency">100%</span></div>
             </div>
+            <div class="timer-rail"><div id="timer-fill"></div></div>
+            <div id="formula-chamber"><div id="formula-display"></div></div>
+            <div id="options-grid"></div>
+        </div>
 
-            <div id="screen-game" class="screen hidden arena-screen">
-                <div class="arena-hud">
-                    <div class="hud-item"><span class="stat-label">VIT:</span> <span id="lives">❤️❤️❤️</span></div>
-                    <div class="hud-item"><span class="stat-label">STREAK:</span> <span id="streak" class="highlight">0</span></div>
-                    <div class="hud-item mobile-hidden"><span class="stat-label">EFF:</span> <span id="efficiency">100%</span></div>
+        <!-- 4. ROAST & CORRECTION MODAL -->
+        <div id="roast-popup" class="overlay hidden">
+            <div class="modal">
+                <div class="modal-header">NEURAL_DISCREPANCY</div>
+                <p id="roast-message"></p>
+                <div class="correction-zone">
+                    <span class="correction-label">REQUIRED_IDENTITY</span>
+                    <div id="correction-display"></div>
                 </div>
-                <div class="timer-rail"><div id="timer-fill"></div></div>
-                
-                <div id="formula-chamber">
-                    <div id="formula-display"></div>
-                </div>
-
-                <div id="options-grid" class="grid-2x2"></div>
+                <button class="primary-btn" style="width:100%" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
             </div>
+        </div>
 
-            <div id="screen-chapters" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
-                <h2 class="stat-label title-mt">TARGET_DOMAIN</h2>
-                <div class="vertical-nav">
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
-                    <button id="priority-btn" class="primary-btn debt-btn" style="display:none;" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
-                </div>
+        <!-- 5. CHAPTER SELECTION -->
+        <div id="screen-chapters" class="screen hidden">
+            <button class="back-link" onclick="showScreen('screen-home')">← EXIT</button>
+            <h2 class="vault-header">TARGET_DOMAIN</h2>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
+                <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
+                <button id="priority-btn" class="secondary-btn" style="display:none; border-color:var(--accent)" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
             </div>
+        </div>
 
-            <div id="screen-difficulty" class="screen hidden">
-                <h2 class="stat-label title-mt">STRESS_LEVEL</h2>
-                <div class="vertical-nav">
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
-                    <button class="opt-btn bold-text" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
-                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
-                </div>
+        <!-- 6. DIFFICULTY SELECTOR -->
+        <div id="screen-difficulty" class="screen hidden">
+            <h2 class="vault-header">STRESS_LEVEL</h2>
+            <div class="nav-grid">
+                <button class="primary-btn" onclick="selectDifficulty(30)">STABLE (30s)</button>
+                <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
+                <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
+        </div>
 
-            <div id="screen-learn" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-                <h2 class="stat-label title-mt">🛡️ NEURAL_LIBRARY</h2>
-                <div id="vault-content" class="scroll-area"></div>
+        <!-- 7. STUDY VAULT -->
+        <div id="screen-learn" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="vault-content"></div></div>
+
+        <!-- 8. DIAGNOSTICS -->
+        <div id="screen-diagnostics" class="screen hidden"><button class="back-link" onclick="showScreen('screen-home')">←</button><div id="diagnostic-results"></div></div>
+
+        <!-- 9. GAME OVER -->
+        <div id="screen-over" class="screen hidden">
+            <h1 class="failure-msg">FLATLINED</h1>
+            <div id="final-rank-badge" class="rank-badge">CONSTANT</div>
+            <div class="revision-box"><div id="debt-list"></div></div>
+            <div class="nav-grid" style="margin-top:auto">
+                <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
+                <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
             </div>
-
-            <div id="screen-diagnostics" class="screen hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← BACK</button>
-                <h2 class="stat-label title-mt">⚙️ SYSTEM_FAILURES</h2>
-                <div id="diagnostic-results" class="scroll-area"></div>
-            </div>
-
-            <div id="screen-over" class="screen hidden">
-                <div class="centered-box">
-                    <h1 class="failure-title">FLATLINED</h1>
-                    <div id="final-rank-badge" class="stat-label rank-text">RANK: CONSTANT</div>
-                    <div class="debt-box"><div id="debt-list"></div></div>
-                    <div class="btn-grid">
-                        <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
-                        <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
-                    </div>
-                    <div class="stat-label" style="margin-top:10px;">STREAK: <span id="final-streak">0</span></div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="roast-popup" class="overlay hidden">
-        <div class="modal">
-            <h2 class="stat-label alert-text">NEURAL_DISCREPANCY</h2>
-            <p id="roast-message"></p>
-            <div class="correction-zone"><div id="correction-display"></div></div>
-            <button class="primary-btn full-width" onclick="uiClick(); resumeAfterRoast()">ACKNOWLEDGE</button>
+            <div class="final-stat" style="margin-top:10px">STREAK: <span id="final-streak">0</span></div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
