@@ -74,19 +74,35 @@ window.showScreen = function(id) {
 };
 
 window.submitLogin = function() {
-    // Try to find the input in two different ways just in case
-    const input = document.getElementById('callsign-input') || document.querySelector('input[type="text"]');
+    // 1. Try to find the input by ID
+    let input = document.getElementById('callsign-input');
     
-    console.log("Input found:", input);
+    // 2. If not found, look for any text input on the page
+    if (!input) {
+        input = document.querySelector('input[type="text"]');
+    }
     
-    if (input && input.value.trim() !== "") {
-        callsign = input.value.trim().toUpperCase();
-        localStorage.setItem('stemanaceCallsign', callsign);
+    // 3. If still not found, try by placeholder
+    if (!input) {
+        const allInputs = document.getElementsByTagName('input');
+        for(let i of allInputs) {
+            if(i.placeholder.includes('NAME')) { input = i; break; }
+        }
+    }
+
+    console.log("Input element detected:", input);
+
+    if (input && input.value.trim().length > 0) {
+        const name = input.value.trim().toUpperCase();
+        console.log("Success! Name entered:", name);
         
-        // Success! Move to home screen
+        callsign = name;
+        localStorage.setItem('stemanaceCallsign', name);
+        
+        // Move to the next screen
         window.showScreen('screen-home');
     } else {
-        alert("PLEASE ENTER A NAME IN THE BOX");
+        alert("THE SYSTEM DOES NOT DETECT A NAME. PLEASE TYPE IN THE BOX.");
     }
 };
 function updateHomeDashboard() {
@@ -242,4 +258,5 @@ async function startApp() {
 
 // Run as soon as page loads
 window.onload = startApp;
+
 
