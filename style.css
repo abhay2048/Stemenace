@@ -158,17 +158,28 @@ body {
 #formula-chamber {
     flex: 1;
     background: #000;
-    border: 1px solid var(--surface-bright);
-    border-radius: 24px;
+    border: 1px solid #333;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    margin-bottom: 20px;
-    overflow-x: auto; /* Fix for long formulas */
-    scrollbar-width: none;
+    margin: 15px 0;
+    
+    /* THE FIX: Allow swiping instead of breaking */
+    overflow-x: auto; 
+    overflow-y: hidden;
+    scrollbar-width: none; /* Firefox */
 }
-#formula-chamber::-webkit-scrollbar { display: none; }
+
+#formula-chamber::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Prevent MathJax from shrinking too small */
+mjx-container {
+    min-width: 100%;
+}
 
 #formula-display mjx-container {
     font-size: clamp(1.2rem, 6vw, 2rem) !important;
@@ -356,3 +367,4 @@ body {
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
