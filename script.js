@@ -1,53 +1,44 @@
 // --- AUDIO ENGINE: NEW GLITCH SOUND ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSystemSound(type) {
+
+function playTone(freq, type, duration, volume, decay = true) {
     if (isMuted) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    const now = audioCtx.currentTime;
 
-    if (type === 'click') {
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.frequency.setValueAtTime(800, now);
-        g.gain.setValueAtTime(0.1, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.start(); osc.stop(now + 0.1);
-    } else if (type === 'success') {
-        const osc = audioCtx.createOscillator();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
-        const g = audioCtx.createGain();
-        g.gain.setValueAtTime(0.1, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.start(); osc.stop(now + 0.2);
-    } else if (type === 'fail') {
-        // --- NEW GLITCH DRONE SOUND ---
-        const osc = audioCtx.createOscillator();
-        const osc2 = audioCtx.createOscillator();
-        osc.type = 'sawtooth';
-        osc2.type = 'square';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
-        osc2.frequency.setValueAtTime(190, now);
-        osc2.frequency.exponentialRampToValueAtTime(35, now + 0.6);
-        const g = audioCtx.createGain();
-        g.gain.setValueAtTime(0.2, now);
-        g.gain.linearRampToValueAtTime(0, now + 0.6);
-        osc.connect(g); osc2.connect(g); g.connect(audioCtx.destination);
-        osc.start(); osc2.start(); osc.stop(now + 0.6); osc2.stop(now + 0.6);
-    } else if (type === 'tick') {
-        const osc = audioCtx.createOscillator();
-        osc.frequency.setValueAtTime(2500, now);
-        const g = audioCtx.createGain();
-        g.gain.setValueAtTime(0.02, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.start(); osc.stop(now + 0.05);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    if (decay) {
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
     }
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
 }
+window.uiClick = () => {
+    // Layer 1: The sharp plastic click (High freq)
+    playTone(1200, 'sine', 0.05, 0.1); 
+    // Layer 2: The "depth" / switch weight (Lower freq triangle)
+    playTone(150, 'triangle', 0.1, 0.15); 
+};
+// Success "Chime"
+const successSound = () => {
+    playTone(600, 'sine', 0.2, 0.1);
+    setTimeout(() => playTone(900, 'sine', 0.3, 0.08), 50);
+};
+
+// Failure "Error"
+const failSound = () => {
+    playTone(120, 'square', 0.3, 0.1);
+    playTone(80, 'square', 0.4, 0.1);
+};
 
 // Global Haptics & Clicks
 document.addEventListener('click', (e) => {
@@ -129,18 +120,26 @@ function resetTimer() {
     }, 100);
 }
 
-function handleChoice(c) {
-    if (c === currentQ.correct) {
-        playSystemSound('success'); score++; xp += 30;
-        correctHistory.global.correct++; correctHistory[currentQ.chapter].correct++;
-        if (score >= 75) achievements.singularity = true;
-        if (currentQ.chapter === 'calculus' && score >= 20) achievements.titan = true;
-        if (lives === 1 && score >= 15) achievements.survivor = true;
-        localStorage.setItem('stemanaceMedals', JSON.stringify(achievements));
-        updateHUD(); nextRound();
-    } else handleWrong();
+function handleChoice(choice) {
+    if (choice === currentQ.correct) {
+        successSound();
+        score++;
+        xp += 25;
+        
+        const chamber = document.getElementById('formula-chamber');
+        chamber.style.borderColor = 'var(--accent)';
+        chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.3)';
+        
+        setTimeout(() => {
+            chamber.style.borderColor = 'var(--glass-border)';
+            chamber.style.boxShadow = 'none';
+            nextRound();
+        }, 200);
+    } else {
+        handleWrong();
+    }
+    updateHUD();
 }
-
 function handleWrong() {
     lives--; clearInterval(timerId); playSystemSound('fail');
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
@@ -196,3 +195,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
