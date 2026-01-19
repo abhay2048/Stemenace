@@ -1,49 +1,63 @@
-// --- AUDIO SYSTEM ---
+// --- AUDIO ENGINE: NEW GLITCH SOUND ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSystemSound(type) {
     if (isMuted) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
-        osc.frequency.setValueAtTime(900, now);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now); osc.stop(now + 0.1);
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.frequency.setValueAtTime(800, now);
+        g.gain.setValueAtTime(0.1, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(now + 0.1);
     } else if (type === 'success') {
+        const osc = audioCtx.createOscillator();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(600, now);
         osc.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now); osc.stop(now + 0.2);
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0.1, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(now + 0.2);
     } else if (type === 'fail') {
+        // --- NEW GLITCH DRONE SOUND ---
+        const osc = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(140, now);
-        osc.frequency.linearRampToValueAtTime(40, now + 0.4);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now); osc.stop(now + 0.4);
+        osc2.type = 'square';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
+        osc2.frequency.setValueAtTime(190, now);
+        osc2.frequency.exponentialRampToValueAtTime(35, now + 0.6);
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0.2, now);
+        g.gain.linearRampToValueAtTime(0, now + 0.6);
+        osc.connect(g); osc2.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc2.start(); osc.stop(now + 0.6); osc2.stop(now + 0.6);
     } else if (type === 'tick') {
-        osc.frequency.setValueAtTime(2200, now);
-        gain.gain.setValueAtTime(0.03, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now); osc.stop(now + 0.05);
+        const osc = audioCtx.createOscillator();
+        osc.frequency.setValueAtTime(2500, now);
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0.02, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(now + 0.05);
     }
 }
 
-// Global Press Effect
+// Global Haptics & Clicks
 document.addEventListener('click', (e) => {
     if (e.target.tagName === 'BUTTON') {
         playSystemSound('click');
-        if(navigator.vibrate) navigator.vibrate(10);
+        if(navigator.vibrate) navigator.vibrate(12);
     }
 });
 
-// --- STATE MANAGEMENT ---
+// --- STATE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
@@ -55,13 +69,13 @@ let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
 const triggerMath = () => { if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise().catch(() => {}); };
 
-// --- CORE FUNCTIONS ---
+// --- LOGIC ---
 window.submitLogin = () => {
-    const val = document.getElementById('callsign-input').value.trim().toUpperCase();
-    if (val.length > 1) { callsign = val; localStorage.setItem('stemanaceCallsign', val); showScreen('screen-home'); }
+    const v = document.getElementById('callsign-input').value.trim().toUpperCase();
+    if (v.length > 1) { callsign = v; localStorage.setItem('stemanaceCallsign', v); showScreen('screen-home'); }
 };
 
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "AUDIO: OFF" : "AUDIO: ON"; };
+window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO_OFF" : "🔊 AUDIO_ON"; };
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -75,86 +89,54 @@ window.showScreen = (id) => {
 function updateHome() {
     document.getElementById('user-callsign').innerText = callsign || "GUEST";
     document.getElementById('high-score').innerText = highScore;
-    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    document.getElementById('global-proficiency').innerText = prof + "%";
+    const p = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
+    document.getElementById('global-proficiency').innerText = p + "%";
     document.getElementById('level-display').innerText = `LVL ${Math.floor(xp / 1000) + 1}`;
     document.getElementById('xp-fill').style.width = (xp % 1000) / 10 + "%";
+    document.getElementById('current-rank').innerText = "RANK: " + (highScore > 50 ? "ACE" : "CONSTANT");
     
-    const rank = highScore > 50 ? "NEURAL ACE" : highScore > 20 ? "OPERATOR" : "CONSTANT";
-    document.getElementById('current-rank').innerText = "RANK: " + rank;
     document.getElementById('priority-btn').classList.toggle('hidden', Object.keys(formulaAnalytics).length === 0);
-    
-    // Achievement Render
     const rack = document.getElementById('achievement-rack');
-    const medals = [{ id: 'titan', icon: '💎' }, { id: 'survivor', icon: '🛡️' }, { id: 'singularity', icon: '🌌' }];
-    rack.innerHTML = medals.map(m => `<span style="opacity:${achievements[m.id]?1:0.1}; margin: 0 5px">${m.icon}</span>`).join('');
+    const meds = [{id:'titan',icon:'💎'}, {id:'survivor',icon:'🛡️'}, {id:'singularity',icon:'🌌'}];
+    rack.innerHTML = meds.map(m => `<span style="opacity:${achievements[m.id]?1:0.1}">${m.icon}</span>`).join('');
 }
 
-window.selectChapter = (c) => { 
-    filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === c); 
-    showScreen('screen-difficulty'); 
-};
+window.selectChapter = (c) => { filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === c); showScreen('screen-difficulty'); };
 
-window.selectPriorityDrill = () => {
-    const ids = Object.keys(formulaAnalytics);
-    filteredQuestions = allQuestions.filter(q => ids.includes(q.q));
-    showScreen('screen-difficulty');
-};
-
-window.selectDifficulty = (s) => { 
-    timeLimit = s; lives = 3; score = 0; neuralDebt = []; 
-    updateHUD(); showScreen('screen-game'); nextRound(); 
-};
+window.selectDifficulty = (s) => { timeLimit = s; lives = 3; score = 0; neuralDebt = []; updateHUD(); showScreen('screen-game'); nextRound(); };
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('panic-overlay').classList.add('hidden');
-    if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
-    
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    const grid = document.getElementById('options-grid'); 
-    grid.innerHTML = "";
-    
+    const grid = document.getElementById('options-grid'); grid.innerHTML = "";
     [...currentQ.options].sort(() => 0.5 - Math.random()).forEach(o => {
-        const b = document.createElement('button'); 
-        b.className = 'opt-btn';
-        b.innerHTML = `\\( ${o} \\)`; 
-        b.onclick = () => handleChoice(o);
+        const b = document.createElement('button'); b.className = 'opt-btn';
+        b.innerHTML = `\\( ${o} \\)`; b.onclick = () => handleChoice(o);
         grid.appendChild(b);
     });
-    
-    triggerMath(); 
-    resetTimer();
+    triggerMath(); resetTimer();
 }
 
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
     timerId = setInterval(() => {
-        timeLeft -= 0.1; 
-        bar.style.width = (timeLeft / timeLimit) * 100 + "%";
-        if (timeLeft <= 3 && timeLeft > 0) { 
-            if (Math.round(timeLeft * 10) % 5 === 0) playSystemSound('tick'); 
-            document.getElementById('panic-overlay').classList.remove('hidden'); 
-        }
+        timeLeft -= 0.1; bar.style.width = (timeLeft / timeLimit) * 100 + "%";
+        if (timeLeft <= 3 && timeLeft > 0) { if (Math.round(timeLeft * 10) % 5 === 0) playSystemSound('tick'); document.getElementById('panic-overlay').classList.remove('hidden'); }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(c) {
     if (c === currentQ.correct) {
-        playSystemSound('success'); 
-        score++; xp += 30;
-        correctHistory.global.correct++; 
-        correctHistory[currentQ.chapter].correct++;
-        
-        // Achievement Checks
+        playSystemSound('success'); score++; xp += 30;
+        correctHistory.global.correct++; correctHistory[currentQ.chapter].correct++;
         if (score >= 75) achievements.singularity = true;
         if (currentQ.chapter === 'calculus' && score >= 20) achievements.titan = true;
         if (lives === 1 && score >= 15) achievements.survivor = true;
         localStorage.setItem('stemanaceMedals', JSON.stringify(achievements));
-
         updateHUD(); nextRound();
     } else handleWrong();
 }
@@ -162,9 +144,7 @@ function handleChoice(c) {
 function handleWrong() {
     lives--; clearInterval(timerId); playSystemSound('fail');
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
-    correctHistory.global.total++; 
-    correctHistory[currentQ.chapter].total++;
-    
+    correctHistory.global.total++; correctHistory[currentQ.chapter].total++;
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
@@ -175,59 +155,32 @@ function handleWrong() {
     triggerMath();
 }
 
-window.resumeAfterRoast = () => { 
-    document.getElementById('roast-popup').classList.add('hidden'); 
-    if (lives <= 0) endGame(); else nextRound(); 
-};
+window.resumeAfterRoast = () => { document.getElementById('roast-popup').classList.add('hidden'); if (lives <= 0) endGame(); else nextRound(); };
 
 function endGame() {
     if (score > highScore) { highScore = score; localStorage.setItem('stemanaceHS', highScore); }
     localStorage.setItem('stemanaceXP', xp);
     document.getElementById('final-streak').innerText = score;
-    document.getElementById('final-rank-badge').innerText = score > 30 ? "ACE" : "CONSTANT";
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `
-        <div class="stat-card" style="margin-bottom:10px; font-size:0.7rem">
-            \\(${d.q}\\) <br> <b style="color:var(--accent)">\\(${d.a}\\)</b>
-        </div>
-    `).join('');
-    triggerMath(); 
-    showScreen('screen-over');
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div class="vault-card" style="font-size:0.75rem">\\(${d.q}\\) → <b style="color:var(--accent)">\\(${d.a}\\)</b></div>`).join('');
+    triggerMath(); showScreen('screen-over');
 }
 
-function updateHUD() { 
-    document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives)); 
-    document.getElementById('streak').innerText = score; 
-}
+function updateHUD() { document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives)); document.getElementById('streak').innerText = score; }
 
 function populateVault() {
     const l = document.getElementById('vault-content'); l.innerHTML = "";
     const groups = {}; allQuestions.forEach(q => { if(!groups[q.chapter]) groups[q.chapter] = []; groups[q.chapter].push(q); });
     for (const c in groups) {
-        l.innerHTML += `<h3 class="stat-label" style="margin:20px 0 10px">${c.toUpperCase()}</h3>`;
-        groups[c].forEach(q => { 
-            l.innerHTML += `<div class="stat-card vault-card" style="text-align:left; margin-bottom:10px" onclick="this.classList.toggle('revealed')">
-                <div class="vault-q">\\(${q.q}\\)</div>
-                <div class="vault-a" style="display:none; color:var(--accent); margin-top:10px; border-top:1px solid #222; padding-top:10px">\\(${q.correct}\\)</div>
-            </div>`; 
-        });
+        l.innerHTML += `<h3 class="label" style="margin:20px 0 10px">${c.toUpperCase()}</h3>`;
+        groups[c].forEach(q => { l.innerHTML += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><div class="vault-q">\\(${q.q}\\)</div><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
     }
-    document.querySelectorAll('.vault-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const a = this.querySelector('.vault-a');
-            a.style.display = a.style.display === 'none' ? 'block' : 'none';
-        });
-    });
     triggerMath();
 }
 
 function populateLogs() {
     const c = document.getElementById('diagnostic-results');
     const s = Object.entries(formulaAnalytics).sort(([,a],[,b])=>b-a);
-    c.innerHTML = s.map(([f,co]) => `
-        <div class="stat-card" style="display:flex; justify-content:space-between; margin-bottom:8px">
-            <div style="overflow-x:auto">\\(${f}\\)</div>
-            <div style="color:var(--primary); font-weight:900; margin-left:15px">${co}</div>
-        </div>`).join('') || "<p class='stat-label'>CLEAN_LOGS</p>";
+    c.innerHTML = s.map(([f,co]) => `<div class="vault-card" style="display:flex; justify-content:space-between"><div>\\(${f}\\)</div><b style="color:var(--primary)">${co}</b></div>`).join('') || "<p class='label'>CLEAN_LOGS</p>";
     triggerMath();
 }
 
