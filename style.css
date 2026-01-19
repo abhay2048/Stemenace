@@ -1,13 +1,12 @@
 :root {
-    --text: #ae133f;
-    --background: #faefef;
+    --text: #ffffff;
+    --background: #0a0a0c;
     --primary: #ef8fa7;
-    --secondary: #f896b7;
-    --accent: #6a162c;
-    --white: #ffffff;
-    --glass: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --shadow: rgba(174, 19, 63, 0.1);
+    --secondary: #6a162c;
+    --accent: #ef8fa7;
+    --glass: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --shadow: rgba(239, 143, 167, 0.1);
 }
 
 body {
@@ -17,139 +16,120 @@ body {
     margin: 0;
     height: 100dvh;
     width: 100vw;
-    overflow: hidden; /* Zero-Scroll Mobile Logic */
-    background-image: radial-gradient(circle at 20% 20%, var(--secondary) 0%, transparent 40%),
-                      radial-gradient(circle at 80% 80%, var(--primary) 0%, transparent 40%);
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, #15151a 0%, #0a0a0c 100%);
 }
 
 /* 1. LAYOUT ARCHITECTURE */
 .main-layout {
     display: flex;
-    width: 100%;
-    height: 100dvh;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    width: 100%;
+    height: 100dvh;
+    gap: 25px;
     padding: 15px;
     box-sizing: border-box;
 }
 
 .nexus-sidebar {
-    display: none; /* Hidden on Mobile */
+    display: none;
     width: 300px;
-    height: 90vh;
+    height: 92dvh;
     flex-direction: column;
     padding: 2rem;
-    background: var(--glass);
-    backdrop-filter: blur(15px);
     border-radius: 1.5rem;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 40px var(--shadow);
     box-sizing: border-box;
 }
 
 @media (min-width: 1024px) {
     .nexus-sidebar { display: flex; }
-    .app-container { width: 450px; }
+    .app-container { max-width: 480px; flex-shrink: 0; }
 }
 
 .app-container {
     width: 100%;
     max-width: 500px;
-    height: 90vh;
+    height: 92dvh;
     position: relative;
-    border-radius: 2rem;
-    overflow: hidden;
 }
 
+/* 2. GLASSMORPHISM */
 .glass {
     background: var(--glass);
     backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 50px var(--shadow), inset 0 0 20px rgba(255,255,255,0.4);
+    box-shadow: 0 15px 45px rgba(0,0,0,0.5);
 }
 
-/* 2. LOGO STYLE */
-.logo-lg, .logo-med, .logo-sm { font-weight: 900; letter-spacing: -1px; }
-.logo-lg span, .logo-med span, .logo-sm span { color: var(--accent); }
+.glass-heavy {
+    background: rgba(10, 10, 12, 0.98);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--primary);
+}
 
-/* 3. GAMEPLAY (THE ARENA) */
+/* 3. ARENA (2x2 GRID) */
 .tactic-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 12px;
-    height: 160px; /* Thumb-sized fixed height */
+    height: 180px;
     margin-top: 15px;
 }
 
 #formula-chamber {
     flex: 1;
-    background: rgba(106, 22, 44, 0.03);
-    border: 1px dashed var(--primary);
-    border-radius: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(255,255,255,0.02);
+    border-radius: 1.2rem;
     padding: 20px;
+    border: 1px dashed var(--glass-border);
     text-align: center;
 }
 
 .opt-btn {
-    background: var(--white);
-    border: 1px solid var(--primary);
-    border-radius: 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.8rem;
+    color: white;
     font-weight: 900;
+    cursor: pointer;
     transition: 0.2s;
 }
 
-.opt-btn:active { transform: translateY(2px); background: var(--primary); color: white; }
+.opt-btn:hover { background: var(--primary); color: #000; transform: translateY(-2px); }
 
-/* 4. THE VAULT (ACTIVE RECALL) */
-.vault-card { cursor: pointer; margin-bottom: 10px; padding: 15px; border-radius: 1rem; background: var(--white); border: 1px solid var(--primary); }
-.vault-a { filter: blur(15px); transition: filter 0.3s ease; }
-.vault-card.revealed .vault-a { filter: blur(0); }
-
-/* 5. INTERNAL SCROLLBARS */
+/* 4. INTERNAL SCROLLS */
 .internal-scroll {
     flex: 1;
     overflow-y: auto;
-    padding-right: 10px;
+    padding-right: 8px;
 }
 .internal-scroll::-webkit-scrollbar { width: 4px; }
 .internal-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
-/* 6. FAILURE HEATMAP */
-.fail-count-badge {
-    background: #8b0000; /* Maroon */
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-weight: 900;
-}
+/* 5. VAULT ACTIVE RECALL */
+.vault-card { padding: 1rem; border-radius: 1rem; border: 1px solid var(--glass-border); margin-bottom: 10px; cursor: pointer; }
+.vault-a { filter: blur(15px); transition: filter 0.4s ease; margin-top: 8px; color: var(--primary); }
+.vault-card.revealed .vault-a { filter: blur(0); }
 
-/* 7. CRT SCANLINES & ALERT */
-.scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%); background-size: 100% 4px; }
-#red-alert { position: fixed; inset: 0; background: radial-gradient(circle, rgba(174, 19, 63, 0.2) 0%, transparent 75%); pointer-events: none; animation: pulse 1.5s infinite alternate; }
+/* 6. CRT & ALERTS */
+.scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 9999; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%); background-size: 100% 4px; opacity: 0.4; }
+#red-alert { position: fixed; inset: 0; background: radial-gradient(circle, rgba(239, 143, 167, 0.2) 0%, transparent 75%); pointer-events: none; z-index: 1000; animation: pulse 1s infinite alternate; }
 
 @keyframes pulse { from { opacity: 0; } to { opacity: 1; } }
 
 /* Screens */
-.screen { position: absolute; inset: 0; padding: 2rem; display: flex; flex-direction: column; }
+.screen { position: absolute; inset: 0; padding: 2rem; display: flex; flex-direction: column; border-radius: 1.5rem; }
 .hidden { display: none !important; }
 
-/* General Buttons */
-.primary-btn, .secondary-btn, .accent-btn {
-    padding: 1.2rem;
-    border-radius: 1rem;
-    border: none;
-    font-weight: 900;
-    cursor: pointer;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-}
-.primary-btn { background: var(--accent); color: white; }
-.secondary-btn { background: var(--white); border: 1px solid var(--accent); color: var(--accent); }
+/* Buttons */
+.primary-btn, .secondary-btn, .accent-btn { padding: 1rem; border-radius: 0.8rem; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; margin-bottom: 8px; }
+.primary-btn { background: var(--primary); color: black; }
+.secondary-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
 .accent-btn { background: #ae133f; color: white; }
+
+.logo-sm span, .logo-med span, .logo-lg span { color: var(--primary); }
