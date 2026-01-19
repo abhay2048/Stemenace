@@ -75,10 +75,20 @@ window.changeCallsign = () => {
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
+    
     if (timerId) clearInterval(timerId);
+    
     if (id === 'screen-home') updateHomeDashboard();
-    if (id === 'screen-learn') populateVault();
-    if (id === 'screen-diagnostics') populateDiagnostics();
+    
+    // Crucial: Re-populate and Trigger MathJax after the screen is visible
+    if (id === 'screen-learn') {
+        populateVault();
+        setTimeout(triggerMathUpdates, 50);
+    }
+    if (id === 'screen-diagnostics') {
+        populateDiagnostics();
+        setTimeout(triggerMathUpdates, 50);
+    }
 };
 
 function updateHomeDashboard() {
@@ -236,3 +246,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
