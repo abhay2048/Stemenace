@@ -15,21 +15,50 @@ function triggerMathUpdates() {
 }
 
 // --- AUDIO ---
+// --- IMPROVED AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(f, t, d, v = 0.1) {
-    if (isMuted || audioCtx.state === 'suspended') return;
-    try {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e) {}
+
+function playTone(freq, type, duration, volume, decay = true) {
+    if (isMuted) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    if (decay) {
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    }
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
 }
-window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
-const successSound = () => playSound(1200, 'sine', 0.15, 0.1);
-const failSound = () => { playSound(100, 'sine', 0.4, 0.2); playSound(60, 'sine', 0.4, 0.2); };
+
+// Satisfying "Mechanical" Click
+window.uiClick = () => {
+    // Layer 1: The sharp plastic click (High freq)
+    playTone(1200, 'sine', 0.05, 0.1); 
+    // Layer 2: The "depth" / switch weight (Lower freq triangle)
+    playTone(150, 'triangle', 0.1, 0.15); 
+};
+
+// Success "Chime"
+const successSound = () => {
+    playTone(600, 'sine', 0.2, 0.1);
+    setTimeout(() => playTone(900, 'sine', 0.3, 0.08), 50);
+};
+
+// Failure "Error"
+const failSound = () => {
+    playTone(120, 'square', 0.3, 0.1);
+    playTone(80, 'square', 0.4, 0.1);
+};
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO: OFF" : "🔊 AUDIO: ON"; };
 
@@ -117,20 +146,24 @@ function resetTimer() {
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) {
-    // Visual Pulse for Correct Answer
-    const chamber = document.getElementById('formula-chamber');
-    chamber.style.borderColor = 'var(--accent)';
-    chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.2)';
-    
-    setTimeout(() => {
-        chamber.style.borderColor = 'var(--glass-border)';
-        chamber.style.boxShadow = 'none';
-    }, 300);
-    
-    // ... rest of your score/xp logic
-} else handleWrong();
+        successSound();
+        score++;
+        xp += 25;
+        
+        const chamber = document.getElementById('formula-chamber');
+        chamber.style.borderColor = 'var(--accent)';
+        chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.3)';
+        
+        setTimeout(() => {
+            chamber.style.borderColor = 'var(--glass-border)';
+            chamber.style.boxShadow = 'none';
+            nextRound();
+        }, 200);
+    } else {
+        handleWrong();
+    }
+    updateHUD();
 }
-
 function handleWrong() {
     lives--; clearInterval(timerId); failSound();
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
@@ -205,4 +238,5 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
 
