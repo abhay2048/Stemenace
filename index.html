@@ -10,11 +10,11 @@
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true
             },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center' } // Removed invalid linebreaks option
+            chtml: { displayAlign: 'center', displayIndent: '0' }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
@@ -25,36 +25,36 @@
     <div id="red-alert" class="hidden"></div>
 
     <div class="main-layout">
-        <aside class="nexus-sidebar">
-            <div class="sidebar-brand">
+        <aside class="nexus-sidebar glass">
+            <div class="sidebar-top">
                 <h1 class="logo-sm">STEM<span>ANACE</span></h1>
                 <p class="sidebar-tagline">NEURAL_CALIBRATOR_V2</p>
             </div>
             
             <div class="sidebar-stats">
-                <div class="side-stat">
+                <div class="side-stat-item">
                     <label>SYSTEM_PEAK</label>
                     <span id="side-high-score">0</span>
                 </div>
-                <div class="side-stat">
+                <div class="side-stat-item">
                     <label>GLOBAL_PROFICIENCY</label>
                     <span id="side-proficiency">0%</span>
                 </div>
-                <div class="side-stat">
+                <div class="side-stat-item">
                     <label>CURRENT_RANK</label>
                     <span id="side-rank" class="rank-mini">CONSTANT</span>
                 </div>
             </div>
 
-            <div class="sidebar-footer">
-                <label>ACHIEVEMENTS</label>
+            <div class="sidebar-achievements">
+                <label>CORE_MEDALS</label>
                 <div id="side-achievement-rack" class="achievement-rack"></div>
             </div>
         </aside>
 
-        <main class="app-container glass">
+        <main class="app-container">
             
-            <div id="screen-login" class="screen">
+            <div id="screen-login" class="screen glass">
                 <div class="brand-center">
                     <h1 class="logo-lg">STEM<span>ANACE</span></h1>
                     <p class="tagline">IDENTITY_VERIFICATION_REQUIRED</p>
@@ -65,20 +65,21 @@
                 </div>
             </div>
 
-            <div id="screen-home" class="screen hidden">
-                <div class="home-header">
-                    <h2 class="logo-med">STEM<span>ANACE</span></h2>
+            <div id="screen-home" class="screen glass hidden">
+                <header class="home-header">
+                    <div class="status-bar">RANK: <span id="current-rank">CONSTANT</span> // PROF: <span id="global-proficiency">0%</span></div>
+                    <h1 class="logo-med">STEM<span>ANACE</span></h1>
                     <div id="achievement-rack" class="achievement-rack"></div>
-                </div>
+                </header>
                 
-                <div class="dashboard-grid">
+                <div class="dashboard">
                     <div class="stat-card clickable" onclick="changeCallsign()">
                         <div class="stat-label">NEURAL_ID</div>
-                        <div id="user-callsign" class="stat-value">---</div>
+                        <div id="user-callsign" class="stat-value-sm">---</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">PEAK_STREAK</div>
-                        <div id="high-score" class="stat-value">0</div>
+                        <div id="high-score" class="stat-value-sm">0</div>
                     </div>
                 </div>
 
@@ -90,33 +91,30 @@
                 </div>
             </div>
 
-            <div id="screen-game" class="screen arena-screen hidden">
+            <div id="screen-game" class="screen arena-screen glass hidden">
                 <div class="arena-hud">
                     <div class="hud-item">VIT: <span id="lives">❤️❤️❤️</span></div>
                     <div class="hud-item">COMBO: <span id="streak">0</span></div>
                     <div class="hud-item">EFF: <span id="efficiency">100%</span></div>
                 </div>
                 <div class="timer-rail"><div id="timer-fill"></div></div>
-                <div id="formula-chamber">
-                    <div id="formula-display"></div>
-                </div>
-                <div id="options-grid" class="tactic-grid">
-                    </div>
+                <div id="formula-chamber"><div id="formula-display"></div></div>
+                <div id="options-grid" class="tactic-grid"></div>
             </div>
 
-            <div id="screen-learn" class="screen hidden">
+            <div id="screen-learn" class="screen glass hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
                 <div id="vault-content" class="internal-scroll"></div>
             </div>
 
-            <div id="screen-diagnostics" class="screen hidden">
+            <div id="screen-diagnostics" class="screen glass hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">← EXIT_DIAG</button>
                 <div id="diagnostic-results" class="internal-scroll"></div>
             </div>
 
-            <div id="screen-chapters" class="screen hidden">
+            <div id="screen-chapters" class="screen glass hidden">
                 <button class="back-link" onclick="showScreen('screen-home')">←</button>
-                <h2 class="menu-title">SELECT_DOMAIN</h2>
+                <h2 class="menu-title">TARGET_DOMAIN</h2>
                 <div class="nav-stack">
                     <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                     <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
@@ -124,7 +122,7 @@
                 </div>
             </div>
 
-            <div id="screen-difficulty" class="screen hidden">
+            <div id="screen-difficulty" class="screen glass hidden">
                 <h2 class="menu-title">STRESS_LEVEL</h2>
                 <div class="nav-stack">
                     <button class="primary-btn" onclick="selectDifficulty(30)">STABLE (30s)</button>
@@ -133,13 +131,13 @@
                 </div>
             </div>
 
-            <div id="screen-over" class="screen hidden">
-                <h1 class="failure-msg">SYSTEM_FAILURE</h1>
+            <div id="screen-over" class="screen glass hidden">
+                <h1 class="failure-msg">FLATLINED</h1>
                 <div id="final-rank-badge" class="rank-badge">CONSTANT</div>
                 <div class="revision-label">NEURAL_DEBT_RECAP</div>
                 <div class="revision-box internal-scroll"><div id="debt-list"></div></div>
                 <div class="nav-stack" style="margin-top:auto">
-                    <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INITIALIZE</button>
+                    <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
                     <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
                 </div>
             </div>
@@ -148,7 +146,7 @@
 
     <div id="roast-popup" class="overlay hidden">
         <div class="modal glass-heavy">
-            <div class="modal-header">DISCREPANCY_DETECTED</div>
+            <div class="modal-header">NEURAL_DISCREPANCY</div>
             <p id="roast-message"></p>
             <div class="correction-zone">
                 <span class="correction-label">REQUIRED_IDENTITY</span>
