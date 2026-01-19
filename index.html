@@ -113,19 +113,24 @@
         </div>
 
         <!-- CONTENT SCREENS -->
-        <div id="screen-learn" class="screen hidden">
-    <div style="flex-shrink: 0; padding-bottom: 10px;">
-        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
-        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Neural_Vault</h2>
+<!-- VAULT SCREEN -->
+<div id="screen-learn" class="screen hidden">
+    <div class="screen-header">
+        <button class="back-btn" onclick="showScreen('screen-home')">← CORE_SYSTEM</button>
+        <h2 class="label">Neural_Vault</h2>
     </div>
-    <div id="vault-content" class="scroll-area"></div>
+    <div id="vault-content" class="scroll-area">
+        <!-- JS will inject cards here -->
+    </div>
 </div>
         <div id="screen-diagnostics" class="screen hidden">
-    <div style="flex-shrink: 0; padding-bottom: 10px;">
-        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
-        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Failure_Logs</h2>
+    <div class="screen-header">
+        <button class="back-btn" onclick="showScreen('screen-home')">← CORE_SYSTEM</button>
+        <h2 class="label">Failure_Logs</h2>
     </div>
-    <div id="diagnostic-results" class="scroll-area"></div>
+    <div id="diagnostic-results" class="scroll-area">
+        <!-- JS will inject logs here -->
+    </div>
 </div>
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
@@ -144,5 +149,6 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
