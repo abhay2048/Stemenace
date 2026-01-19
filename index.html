@@ -113,9 +113,18 @@
         </div>
 
         <!-- CONTENT SCREENS -->
-        <div id="screen-learn" class="screen hidden"><button class="back-btn" onclick="showScreen('screen-home')">←</button><div id="vault-content" class="scroll-area"></div></div>
-        <div id="screen-diagnostics" class="screen hidden"><button class="back-btn" onclick="showScreen('screen-home')">←</button><div id="diagnostic-results" class="scroll-area"></div></div>
-
+        <div id="screen-learn" class="screen hidden">
+    <!-- Back Button stays fixed at top -->
+    <button class="back-btn" onclick="showScreen('screen-home')">← BACK TO CORE</button>
+    <h2 class="label">NEURAL_VAULT</h2>
+    <!-- Only this div scrolls -->
+    <div id="vault-content" class="scroll-area"></div>
+</div>
+        <div id="screen-diagnostics" class="screen hidden">
+    <button class="back-btn" onclick="showScreen('screen-home')">← BACK TO CORE</button>
+    <h2 class="label">FAILURE_LOGS</h2>
+    <div id="diagnostic-results" class="scroll-area"></div>
+</div>
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
@@ -133,3 +142,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
