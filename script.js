@@ -1,4 +1,4 @@
-// --- AUDIO ENGINE ---
+// --- AUDIO SYSTEM ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSystemSound(type) {
     if (isMuted) return;
@@ -9,55 +9,56 @@ function playSystemSound(type) {
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
-        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.setValueAtTime(900, now);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
     } else if (type === 'success') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(500, now);
-        osc.frequency.exponentialRampToValueAtTime(1500, now + 0.1);
-        gain.gain.setValueAtTime(0.05, now);
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
+        gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
     } else if (type === 'fail') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.setValueAtTime(140, now);
         osc.frequency.linearRampToValueAtTime(40, now + 0.4);
-        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
         osc.start(now); osc.stop(now + 0.4);
     } else if (type === 'tick') {
-        osc.frequency.setValueAtTime(2500, now);
-        gain.gain.setValueAtTime(0.02, now);
+        osc.frequency.setValueAtTime(2200, now);
+        gain.gain.setValueAtTime(0.03, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
         osc.start(now); osc.stop(now + 0.05);
     }
 }
 
-// Global Click Sound
+// Global Press Effect
 document.addEventListener('click', (e) => {
     if (e.target.tagName === 'BUTTON') {
         playSystemSound('click');
-        if(navigator.vibrate) navigator.vibrate(8);
+        if(navigator.vibrate) navigator.vibrate(10);
     }
 });
 
-// --- STATE ---
+// --- STATE MANAGEMENT ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
 let xp = parseInt(localStorage.getItem('stemanaceXP')) || 0;
 let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytics')) || {};
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { global:{correct:0,total:0}, calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0} };
+let achievements = JSON.parse(localStorage.getItem('stemanaceMedals')) || { titan: false, survivor: false, singularity: false };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
 const triggerMath = () => { if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise().catch(() => {}); };
 
-// --- LOGIC ---
+// --- CORE FUNCTIONS ---
 window.submitLogin = () => {
-    const v = document.getElementById('callsign-input').value.trim().toUpperCase();
-    if (v.length > 1) { callsign = v; localStorage.setItem('stemanaceCallsign', v); showScreen('screen-home'); }
+    const val = document.getElementById('callsign-input').value.trim().toUpperCase();
+    if (val.length > 1) { callsign = val; localStorage.setItem('stemanaceCallsign', val); showScreen('screen-home'); }
 };
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "AUDIO: OFF" : "AUDIO: ON"; };
@@ -74,50 +75,86 @@ window.showScreen = (id) => {
 function updateHome() {
     document.getElementById('user-callsign').innerText = callsign || "GUEST";
     document.getElementById('high-score').innerText = highScore;
-    const p = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
-    document.getElementById('global-proficiency').innerText = p + "%";
+    const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
+    document.getElementById('global-proficiency').innerText = prof + "%";
     document.getElementById('level-display').innerText = `LVL ${Math.floor(xp / 1000) + 1}`;
     document.getElementById('xp-fill').style.width = (xp % 1000) / 10 + "%";
+    
+    const rank = highScore > 50 ? "NEURAL ACE" : highScore > 20 ? "OPERATOR" : "CONSTANT";
+    document.getElementById('current-rank').innerText = "RANK: " + rank;
     document.getElementById('priority-btn').classList.toggle('hidden', Object.keys(formulaAnalytics).length === 0);
+    
+    // Achievement Render
+    const rack = document.getElementById('achievement-rack');
+    const medals = [{ id: 'titan', icon: '💎' }, { id: 'survivor', icon: '🛡️' }, { id: 'singularity', icon: '🌌' }];
+    rack.innerHTML = medals.map(m => `<span style="opacity:${achievements[m.id]?1:0.1}; margin: 0 5px">${m.icon}</span>`).join('');
 }
 
-window.selectChapter = (c) => { filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === c); showScreen('screen-difficulty'); };
+window.selectChapter = (c) => { 
+    filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === c); 
+    showScreen('screen-difficulty'); 
+};
+
 window.selectPriorityDrill = () => {
     const ids = Object.keys(formulaAnalytics);
     filteredQuestions = allQuestions.filter(q => ids.includes(q.q));
     showScreen('screen-difficulty');
 };
 
-window.selectDifficulty = (s) => { timeLimit = s; lives = 3; score = 0; neuralDebt = []; updateHUD(); showScreen('screen-game'); nextRound(); };
+window.selectDifficulty = (s) => { 
+    timeLimit = s; lives = 3; score = 0; neuralDebt = []; 
+    updateHUD(); showScreen('screen-game'); nextRound(); 
+};
 
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('panic-overlay').classList.add('hidden');
+    if (filteredQuestions.length === 0) filteredQuestions = allQuestions;
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
+    
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    const grid = document.getElementById('options-grid'); grid.innerHTML = "";
+    const grid = document.getElementById('options-grid'); 
+    grid.innerHTML = "";
+    
     [...currentQ.options].sort(() => 0.5 - Math.random()).forEach(o => {
-        const b = document.createElement('button'); b.className = 'opt-btn';
-        b.innerHTML = `\\( ${o} \\)`; b.onclick = () => handleChoice(o);
+        const b = document.createElement('button'); 
+        b.className = 'opt-btn';
+        b.innerHTML = `\\( ${o} \\)`; 
+        b.onclick = () => handleChoice(o);
         grid.appendChild(b);
     });
-    triggerMath(); resetTimer();
+    
+    triggerMath(); 
+    resetTimer();
 }
 
 function resetTimer() {
     timeLeft = timeLimit;
     const bar = document.getElementById('timer-fill');
     timerId = setInterval(() => {
-        timeLeft -= 0.1; bar.style.width = (timeLeft / timeLimit) * 100 + "%";
-        if (timeLeft <= 3 && timeLeft > 0) { if (Math.round(timeLeft * 10) % 5 === 0) playSystemSound('tick'); document.getElementById('panic-overlay').classList.remove('hidden'); }
+        timeLeft -= 0.1; 
+        bar.style.width = (timeLeft / timeLimit) * 100 + "%";
+        if (timeLeft <= 3 && timeLeft > 0) { 
+            if (Math.round(timeLeft * 10) % 5 === 0) playSystemSound('tick'); 
+            document.getElementById('panic-overlay').classList.remove('hidden'); 
+        }
         if (timeLeft <= 0) handleWrong();
     }, 100);
 }
 
 function handleChoice(c) {
     if (c === currentQ.correct) {
-        playSystemSound('success'); score++; xp += 25;
-        correctHistory.global.correct++; correctHistory[currentQ.chapter].correct++;
+        playSystemSound('success'); 
+        score++; xp += 30;
+        correctHistory.global.correct++; 
+        correctHistory[currentQ.chapter].correct++;
+        
+        // Achievement Checks
+        if (score >= 75) achievements.singularity = true;
+        if (currentQ.chapter === 'calculus' && score >= 20) achievements.titan = true;
+        if (lives === 1 && score >= 15) achievements.survivor = true;
+        localStorage.setItem('stemanaceMedals', JSON.stringify(achievements));
+
         updateHUD(); nextRound();
     } else handleWrong();
 }
@@ -125,43 +162,72 @@ function handleChoice(c) {
 function handleWrong() {
     lives--; clearInterval(timerId); playSystemSound('fail');
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
-    correctHistory.global.total++; correctHistory[currentQ.chapter].total++;
+    correctHistory.global.total++; 
+    correctHistory[currentQ.chapter].total++;
+    
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
     
-    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "SYNC_ERROR";
+    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "FATAL_SYNC_ERROR";
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
     triggerMath();
 }
 
-window.resumeAfterRoast = () => { document.getElementById('roast-popup').classList.add('hidden'); if (lives <= 0) endGame(); else nextRound(); };
+window.resumeAfterRoast = () => { 
+    document.getElementById('roast-popup').classList.add('hidden'); 
+    if (lives <= 0) endGame(); else nextRound(); 
+};
 
 function endGame() {
     if (score > highScore) { highScore = score; localStorage.setItem('stemanaceHS', highScore); }
     localStorage.setItem('stemanaceXP', xp);
     document.getElementById('final-streak').innerText = score;
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div class="vault-card" style="font-size:0.7rem">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
-    triggerMath(); showScreen('screen-over');
+    document.getElementById('final-rank-badge').innerText = score > 30 ? "ACE" : "CONSTANT";
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `
+        <div class="stat-card" style="margin-bottom:10px; font-size:0.7rem">
+            \\(${d.q}\\) <br> <b style="color:var(--accent)">\\(${d.a}\\)</b>
+        </div>
+    `).join('');
+    triggerMath(); 
+    showScreen('screen-over');
 }
 
-function updateHUD() { document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives)); document.getElementById('streak').innerText = score; }
+function updateHUD() { 
+    document.getElementById('lives').innerText = "❤️".repeat(Math.max(0, lives)); 
+    document.getElementById('streak').innerText = score; 
+}
 
 function populateVault() {
     const l = document.getElementById('vault-content'); l.innerHTML = "";
     const groups = {}; allQuestions.forEach(q => { if(!groups[q.chapter]) groups[q.chapter] = []; groups[q.chapter].push(q); });
     for (const c in groups) {
-        l.innerHTML += `<h3 class="label" style="margin:20px 0 10px">${c.toUpperCase()}</h3>`;
-        groups[c].forEach(q => { l.innerHTML += `<div class="vault-card" onclick="this.classList.toggle('revealed')"><div class="vault-q">\\(${q.q}\\)</div><div class="vault-a">\\(${q.correct}\\)</div></div>`; });
+        l.innerHTML += `<h3 class="stat-label" style="margin:20px 0 10px">${c.toUpperCase()}</h3>`;
+        groups[c].forEach(q => { 
+            l.innerHTML += `<div class="stat-card vault-card" style="text-align:left; margin-bottom:10px" onclick="this.classList.toggle('revealed')">
+                <div class="vault-q">\\(${q.q}\\)</div>
+                <div class="vault-a" style="display:none; color:var(--accent); margin-top:10px; border-top:1px solid #222; padding-top:10px">\\(${q.correct}\\)</div>
+            </div>`; 
+        });
     }
+    document.querySelectorAll('.vault-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const a = this.querySelector('.vault-a');
+            a.style.display = a.style.display === 'none' ? 'block' : 'none';
+        });
+    });
     triggerMath();
 }
 
 function populateLogs() {
     const c = document.getElementById('diagnostic-results');
     const s = Object.entries(formulaAnalytics).sort(([,a],[,b])=>b-a);
-    c.innerHTML = s.map(([f,co]) => `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge">${co}</div></div>`).join('') || "<p class='label'>CLEAN_LOGS</p>";
+    c.innerHTML = s.map(([f,co]) => `
+        <div class="stat-card" style="display:flex; justify-content:space-between; margin-bottom:8px">
+            <div style="overflow-x:auto">\\(${f}\\)</div>
+            <div style="color:var(--primary); font-weight:900; margin-left:15px">${co}</div>
+        </div>`).join('') || "<p class='stat-label'>CLEAN_LOGS</p>";
     triggerMath();
 }
 
