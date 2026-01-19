@@ -26,30 +26,27 @@
     <div class="app-container">
         <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
-    <div class="brand-area">
-        <h1 class="logo-large">STEM<span>ANACE</span></h1>
-    </div>
-    <div class="login-box">
-        <!-- THE ID MUST BE: callsign-input -->
-        <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" style="display:block !important; visibility:visible !important;">
-        <button class="btn-primary" onclick="window.submitLogin()">INITIALIZE</button>
-    </div>
-</div>
-    <div class="login-box">
-        <!-- MAKE SURE THIS ID IS CORRECT -->
-        <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
-        <button class="btn-primary" onclick="window.submitLogin()">INITIALIZE</button>
-    </div>
-</div>
+            <div class="brand-area" style="text-align:center; margin-top:40px">
+                <h1 class="logo-large">STEM<span>ANACE</span></h1>
+                <p class="tagline">NEURAL_INTERFACE_v3.0</p>
+            </div>
+            <div class="login-box" style="margin-top:auto; margin-bottom:40px">
+                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
+                <button class="btn-primary" id="login-btn" style="width:100%">INITIALIZE</button>
+            </div>
+        </div>
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen hidden">
             <header class="home-header">
                 <div class="user-meta">
-                    <span id="current-rank" class="rank-tag">RANK: CONSTANT</span>
-                    <span id="user-callsign" class="callsign-display">---</span>
+                    <span id="current-rank" class="rank-tag">RANK: OPERATOR</span>
+                    <span id="user-callsign" class="value" style="font-size:1rem">---</span>
                 </div>
                 <div class="xp-container">
-                    <div class="xp-labels"><span class="label">NEURAL_SYNC</span><span id="level-display" class="value">LVL 1</span></div>
+                    <div style="display:flex; justify-content:space-between">
+                        <span class="label">NEURAL_SYNC</span>
+                        <span id="level-display" class="label" style="color:white">LVL 1</span>
+                    </div>
                     <div class="xp-bar-wrap"><div id="xp-fill"></div></div>
                 </div>
             </header>
@@ -157,6 +154,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
