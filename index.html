@@ -58,15 +58,18 @@
                     <div id="global-proficiency" class="value">0%</div>
                 </div>
             </div>
-            <div class="nav-stack">
-                <button class="btn-primary" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
-                <div class="sub-nav">
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
-                </div>
-                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
-            </div>
-        </div>
+<div class="nav-stack">
+    <!-- Main Action -->
+    <button class="btn-primary" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
+    
+    <!-- Symmetrical Pair to fix congestion -->
+    <div class="sub-nav" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
+        <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
+    </div>
+    
+    <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
+</div>
 
         <!-- ARENA -->
         <div id="screen-game" class="screen hidden">
@@ -149,6 +152,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
