@@ -75,14 +75,30 @@ body {
     box-shadow: 0 4px 15px rgba(255, 46, 99, 0.3);
 }
 
-/* Option Buttons in Arena (Cyan/Holographic) */
+/* --- ARENA OPTIONS: Readability First (Vertical Stack) --- */
+#options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    /* This ensures the grid doesn't push off the screen */
+    flex-shrink: 1; 
+}
+
 .opt-btn {
+    width: 100%;
+    min-height: 60px; /* Consistent height for all buttons */
+    padding: 12px 20px !important;
     background: rgba(8, 217, 214, 0.05);
     border: 1px solid rgba(8, 217, 214, 0.2);
-    color: white;
-    padding: 16px;
     border-radius: 16px;
-    font-size: 1rem;
+    color: white;
+    font-size: 1rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
 }
 .opt-btn:hover {
     border-color: var(--accent);
@@ -153,13 +169,56 @@ body {
 }
 
 /* --- ORIGINAL LAYOUT CLASSES (Do not change) --- */
-.screen { flex: 1; display: flex; flex-direction: column; animation: screenEnter 0.4s ease-out; }
+/* --- THE SCROLLING FIX (Vault & Logs) --- */
+.screen {
+    height: 100%; /* Force screen to fill container */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent the whole screen from moving */
+}
+
+
 @keyframes screenEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .hidden { display: none !important; }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
 .nav-stack { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
 .sub-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.scroll-area { flex: 1; overflow-y: auto; padding-right: 8px; }
+.scroll-area {
+    flex: 1; /* Take up all available space */
+    overflow-y: auto !important; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+    padding-bottom: 30px; /* Space at bottom so last item isn't cut off */
+    margin-top: 10px;
+}
+/* Custom scrollbar to look premium */
+.scroll-area::-webkit-scrollbar {
+    width: 4px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+/* --- VAULT & LOG CARDS --- */
+.vault-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    padding: 20px;
+    margin-bottom: 12px;
+    border-radius: 20px;
+    flex-shrink: 0; /* Prevents card from squishing */
+}
+
+.fail-log-item {
+    background: rgba(255, 46, 99, 0.05);
+    border: 1px solid rgba(255, 46, 99, 0.1);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
 
 /* Overlay/Modal Backgrounds */
 .overlay {
@@ -169,3 +228,4 @@ body {
     z-index: 1000;
     display: flex; align-items: center; justify-content: center; padding: 25px;
 }
+
