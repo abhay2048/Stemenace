@@ -262,7 +262,23 @@ body {
     padding: 10px !important;
     border-radius: 10px !important;
 }
+#callsign-input {
+    position: relative;
+    z-index: 9999; /* Put it on top of everything */
+    background: rgba(0,0,0,0.8) !important;
+    border: 1px solid var(--accent) !important;
+    color: var(--accent) !important;
+    padding: 20px !important;
+    width: 100% !important;
+    display: block !important;
+}
+
+.login-box {
+    z-index: 9998;
+    position: relative;
+}
 
 .nav-stack { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
 .sub-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
 
