@@ -1,3 +1,4 @@
+// --- STATE ---
 let allQuestions = [], filteredQuestions = [], roasts = [], neuralDebt = [], currentQ = null;
 let score = 0, lives = 3, callsign = localStorage.getItem('stemanaceCallsign') || "";
 let highScore = parseInt(localStorage.getItem('stemanaceHS')) || 0;
@@ -6,8 +7,12 @@ let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytic
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { global:{correct:0,total:0}, calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0} };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
-// --- UTILS ---
-const safeMath = () => { if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise().catch(e => console.log("MathJax busy")); };
+// --- THE FIX: MATH RENDERING ---
+function triggerMathUpdates() {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().catch(err => console.log("MathJax busy..."));
+    }
+}
 
 // --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -28,7 +33,7 @@ const failSound = () => { playSound(100, 'sine', 0.4, 0.2); playSound(60, 'sine'
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO: OFF" : "🔊 AUDIO: ON"; };
 
-// --- LOGIN & DASHBOARD ---
+// --- NAVIGATION ---
 window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value;
     if (val.trim().length > 1) {
@@ -57,20 +62,22 @@ function updateHomeDashboard() {
     document.getElementById('high-score').innerText = highScore;
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     document.getElementById('global-proficiency').innerText = prof + "%";
-    
-    const level = Math.floor(xp / 1000) + 1;
-    document.getElementById('level-display').innerText = `LVL ${level}`;
+    document.getElementById('level-display').innerText = `LVL ${Math.floor(xp / 1000) + 1}`;
     document.getElementById('xp-fill').style.width = (xp % 1000) / 10 + "%";
-    
     const rank = highScore > 50 ? "NEURAL ACE" : highScore > 20 ? "OPERATOR" : "CONSTANT";
     document.getElementById('current-rank').innerText = "RANK: " + rank;
     document.getElementById('priority-btn').style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
 }
 
-// --- GAME LOGIC ---
+// --- GAME CORE ---
 window.selectChapter = (chap) => {
     filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap);
-    if(filteredQuestions.length === 0) filteredQuestions = allQuestions; // Fallback
+    showScreen('screen-difficulty');
+};
+
+window.selectPriorityDrill = () => {
+    const failedIds = Object.keys(formulaAnalytics);
+    filteredQuestions = allQuestions.filter(q => failedIds.indexOf(q.q) !== -1);
     showScreen('screen-difficulty');
 };
 
@@ -82,23 +89,18 @@ window.selectDifficulty = (sec) => {
 function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('panic-overlay').classList.add('hidden');
-    
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
-    
-    let opts = [...currentQ.options].sort(() => 0.5 - Math.random());
-    opts.forEach(opt => {
+    [...currentQ.options].sort(() => 0.5 - Math.random()).forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerHTML = `\\( ${opt} \\)`;
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
-    
-    safeMath();
+    triggerMathUpdates();
     resetTimer();
 }
 
@@ -107,9 +109,7 @@ function resetTimer() {
     const bar = document.getElementById('timer-fill');
     timerId = setInterval(() => {
         timeLeft -= 0.1;
-        const ratio = (timeLeft / timeLimit) * 100;
-        bar.style.width = ratio + "%";
-        
+        bar.style.width = (timeLeft / timeLimit) * 100 + "%";
         if (timeLeft < 3) document.getElementById('panic-overlay').classList.remove('hidden');
         if (timeLeft <= 0) handleWrong();
     }, 100);
@@ -117,7 +117,7 @@ function resetTimer() {
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) {
-        score++; xp += 15; successSound();
+        score++; xp += 20; successSound();
         correctHistory.global.correct++;
         correctHistory[currentQ.chapter].correct++;
         if (score % 10 === 0 && lives < 3) lives++;
@@ -130,15 +130,13 @@ function handleWrong() {
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
     correctHistory.global.total++;
     correctHistory[currentQ.chapter].total++;
-    
     localStorage.setItem('stemanaceFormulaAnalytics', JSON.stringify(formulaAnalytics));
     localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
-    
-    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "CALCULATION_ERROR";
+    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "SYNC_FAILED";
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
-    safeMath();
+    triggerMathUpdates();
 }
 
 window.resumeAfterRoast = () => {
@@ -149,14 +147,10 @@ window.resumeAfterRoast = () => {
 function endGame() {
     if (score > highScore) { highScore = score; localStorage.setItem('stemanaceHS', highScore); }
     localStorage.setItem('stemanaceXP', xp);
-    
     document.getElementById('final-streak').innerText = score;
     document.getElementById('final-rank-badge').innerText = score > 20 ? "OPERATOR" : "CONSTANT";
-    
-    const dList = document.getElementById('debt-list');
-    dList.innerHTML = neuralDebt.map(d => `<div class="vault-card" style="font-size:0.7rem">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
-    
-    safeMath();
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div class="vault-card" style="font-size:0.7rem">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
+    triggerMathUpdates();
     showScreen('screen-over');
 }
 
@@ -165,11 +159,10 @@ function updateHUD() {
     document.getElementById('streak').innerText = score;
 }
 
-// --- POPULATE SCREENS ---
+// --- POPULATE ---
 function populateVault() {
     const list = document.getElementById('vault-content');
-    let html = "";
-    const groups = {};
+    let html = ""; const groups = {};
     allQuestions.forEach(q => { if(!groups[q.chapter]) groups[q.chapter] = []; groups[q.chapter].push(q); });
     for (const c in groups) {
         html += `<h3 class="label" style="margin-top:20px">${c.toUpperCase()}</h3>`;
@@ -181,46 +174,28 @@ function populateVault() {
         });
     }
     list.innerHTML = html;
-    safeMath();
+    triggerMathUpdates();
 }
 
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
     const sorted = Object.entries(formulaAnalytics).sort(([,a],[,b])=>b-a);
-    container.innerHTML = sorted.map(([f,c]) => `
-        <div class="fail-log-item">
-            <div class="fail-formula" style="font-size:0.8rem">\\(${f}\\)</div>
-            <div class="fail-count-badge">${c}</div>
-        </div>
-    `).join('') || "<p class='label'>No debt detected.</p>";
-    safeMath();
+    container.innerHTML = sorted.map(([f,c]) => `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge">${c}</div></div>`).join('') || "<p class='label'>CLEAN_LOGS</p>";
+    triggerMathUpdates();
 }
 
 async function init() {
     try {
-        const [fRes, rRes] = await Promise.all([
-            fetch('mathformula.txt').catch(()=>null),
-            fetch('roast.txt').catch(()=>null)
-        ]);
-        
-        if (fRes && fRes.ok) {
-            const lines = (await fRes.text()).split('\n');
-            allQuestions = lines.filter(l => l.includes('::')).map(l => {
+        const [fRes, rRes] = await Promise.all([fetch('mathformula.txt'), fetch('roast.txt')]);
+        if (fRes.ok) {
+            allQuestions = (await fRes.text()).split('\n').filter(l => l.includes('::')).map(l => {
                 const p = l.split('::');
                 return { chapter: p[0].trim(), q: p[1].trim(), correct: p[2].trim(), options: [p[2].trim(), p[3].trim(), p[4].trim(), p[5].trim()] };
             });
         }
-        
-        if (allQuestions.length === 0) {
-            allQuestions = [{chapter:"CALCULUS", q:"\\int x^n dx", correct:"\\frac{x^{n+1}}{n+1}+C", options:["\\frac{x^{n+1}}{n+1}+C", "nx^{n-1}", "x^n", "0"]}];
-        }
-
-        if (rRes && rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
-        else roasts = ["Brain buffer overflow?", "Identity mismatch detected."];
-        
-    } catch(e) { console.log("Init error", e); }
-    
+        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
+    } catch(e) {}
+    if (allQuestions.length === 0) allQuestions = [{chapter:"SYSTEM", q:"1+1", correct:"2", options:["2","3","4","5"]}];
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
-
 init();
