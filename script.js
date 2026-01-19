@@ -41,17 +41,23 @@ function playTone(freq, type, duration, volume, decay = true) {
 }
 
 // Satisfying "Mechanical" Click
+/ Satisfying mechanical click logic
 window.uiClick = () => {
-    // Layer 1: The sharp plastic click (High freq)
-    playTone(1200, 'sine', 0.05, 0.1); 
-    // Layer 2: The "depth" / switch weight (Lower freq triangle)
-    playTone(150, 'triangle', 0.1, 0.15); 
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    // LAYER 1: The mechanical "snap" (High Frequency)
+    playSound(1400, 'sine', 0.05, 0.08); 
+    
+    // LAYER 2: The button "depth/thump" (Low Frequency Triangle)
+    setTimeout(() => {
+        playSound(160, 'triangle', 0.1, 0.12);
+    }, 10);
 };
 
-// Success "Chime"
+// Success Sound Update (Polite Chime)
 const successSound = () => {
-    playTone(600, 'sine', 0.2, 0.1);
-    setTimeout(() => playTone(900, 'sine', 0.3, 0.08), 50);
+    playSound(800, 'sine', 0.1, 0.1);
+    setTimeout(() => playSound(1200, 'sine', 0.15, 0.07), 40);
 };
 
 // Failure "Error"
@@ -238,5 +244,6 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
 
 
