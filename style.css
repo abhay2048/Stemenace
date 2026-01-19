@@ -53,7 +53,11 @@ body {
     animation: screenEnter 0.4s ease forwards;
 }
 
-.hidden { display: none !important; }
+.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
 
 @keyframes screenEnter { 
     from { opacity: 0; transform: translateY(10px); } 
@@ -261,3 +265,4 @@ body {
 
 .nav-stack { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
 .sub-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
