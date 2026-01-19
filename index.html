@@ -3,32 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Neural Ace</title>
+    <title>STEMANACE | Neural Calibrator</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
-    <!-- Corrected MathJax 3.x Configuration -->
-<script>
-    window.MathJax = {
-        tex: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']],
-            displayMath: [['$$', '$$'], ['\\[', '\\]']],
-            processEscapes: true
-        },
-        options: {
-            enableMenu: false
-        },
-        chtml: {
-            displayAlign: 'center'
-        }
-    };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <!-- Corrected MathJax 3 Configuration -->
+    <script>
+        window.MathJax = {
+            tex: { 
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: { enableMenu: false },
+            chtml: { displayAlign: 'center', adaptiveCSS: true }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="panic-overlay" class="hidden"></div>
+    
     <div class="app-container">
-        
         <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
             <div class="brand-area">
@@ -36,7 +31,7 @@
                 <p class="tagline">NEURAL_INTERFACE_v2.1</p>
             </div>
             <div class="login-box">
-                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
+                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
                 <button class="btn-primary" onclick="submitLogin()">INITIALIZE</button>
             </div>
         </div>
@@ -80,13 +75,11 @@
                 <div class="hud-item"><span class="label">COMBO</span><span id="streak">0</span></div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div id="formula-chamber">
-                <div id="formula-display"></div>
-            </div>
+            <div id="formula-chamber"><div id="formula-display"></div></div>
             <div id="options-grid" class="options-stack"></div>
         </div>
 
-        <!-- MODALS -->
+        <!-- ROAST OVERLAY -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">SYNC_ERROR</div>
@@ -99,14 +92,14 @@
             </div>
         </div>
 
-        <!-- SELECTION SCREENS -->
+        <!-- CHAPTERS & DIFFICULTY -->
         <div id="screen-chapters" class="screen hidden">
             <button class="back-btn" onclick="showScreen('screen-home')">← EXIT</button>
             <h2 class="screen-title">TARGET_DOMAIN</h2>
             <div class="nav-stack">
                 <button class="btn-primary" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                 <button class="btn-primary" onclick="selectChapter('calculus')">CALCULUS</button>
-                <button id="priority-btn" class="btn-secondary pulse-border" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
+                <button id="priority-btn" class="btn-secondary" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
             </div>
         </div>
 
@@ -140,4 +133,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
