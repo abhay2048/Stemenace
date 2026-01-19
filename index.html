@@ -114,15 +114,17 @@
 
         <!-- CONTENT SCREENS -->
         <div id="screen-learn" class="screen hidden">
-    <!-- Back Button stays fixed at top -->
-    <button class="back-btn" onclick="showScreen('screen-home')">← BACK TO CORE</button>
-    <h2 class="label">NEURAL_VAULT</h2>
-    <!-- Only this div scrolls -->
+    <div style="flex-shrink: 0; padding-bottom: 10px;">
+        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
+        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Neural_Vault</h2>
+    </div>
     <div id="vault-content" class="scroll-area"></div>
 </div>
         <div id="screen-diagnostics" class="screen hidden">
-    <button class="back-btn" onclick="showScreen('screen-home')">← BACK TO CORE</button>
-    <h2 class="label">FAILURE_LOGS</h2>
+    <div style="flex-shrink: 0; padding-bottom: 10px;">
+        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
+        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Failure_Logs</h2>
+    </div>
     <div id="diagnostic-results" class="scroll-area"></div>
 </div>
         <!-- GAME OVER -->
@@ -142,4 +144,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
