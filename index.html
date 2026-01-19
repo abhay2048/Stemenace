@@ -28,8 +28,13 @@
         <div id="screen-login" class="screen">
     <div class="brand-area">
         <h1 class="logo-large">STEM<span>ANACE</span></h1>
-        <p class="tagline">NEURAL_INTERFACE_v2.1</p>
     </div>
+    <div class="login-box">
+        <!-- THE ID MUST BE: callsign-input -->
+        <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" style="display:block !important; visibility:visible !important;">
+        <button class="btn-primary" onclick="window.submitLogin()">INITIALIZE</button>
+    </div>
+</div>
     <div class="login-box">
         <!-- MAKE SURE THIS ID IS CORRECT -->
         <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
@@ -152,6 +157,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
