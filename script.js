@@ -74,16 +74,21 @@ window.showScreen = function(id) {
 };
 
 window.submitLogin = function() {
-    const input = document.getElementById('callsign-input');
-    if (input && input.value.trim().length > 1) {
+    // Try to find the input in two different ways just in case
+    const input = document.getElementById('callsign-input') || document.querySelector('input[type="text"]');
+    
+    console.log("Input found:", input);
+    
+    if (input && input.value.trim() !== "") {
         callsign = input.value.trim().toUpperCase();
         localStorage.setItem('stemanaceCallsign', callsign);
+        
+        // Success! Move to home screen
         window.showScreen('screen-home');
     } else {
-        alert("Enter a valid Operator Callsign.");
+        alert("PLEASE ENTER A NAME IN THE BOX");
     }
 };
-
 function updateHomeDashboard() {
     document.getElementById('user-callsign').innerText = callsign || "GUEST";
     document.getElementById('high-score').innerText = highScore;
@@ -237,3 +242,4 @@ async function startApp() {
 
 // Run as soon as page loads
 window.onload = startApp;
+
