@@ -117,12 +117,18 @@ function resetTimer() {
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) {
-        score++; xp += 20; successSound();
-        correctHistory.global.correct++;
-        correctHistory[currentQ.chapter].correct++;
-        if (score % 10 === 0 && lives < 3) lives++;
-        updateHUD(); nextRound();
-    } else handleWrong();
+    // Visual Pulse for Correct Answer
+    const chamber = document.getElementById('formula-chamber');
+    chamber.style.borderColor = 'var(--accent)';
+    chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.2)';
+    
+    setTimeout(() => {
+        chamber.style.borderColor = 'var(--glass-border)';
+        chamber.style.boxShadow = 'none';
+    }, 300);
+    
+    // ... rest of your score/xp logic
+} else handleWrong();
 }
 
 function handleWrong() {
@@ -199,3 +205,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
