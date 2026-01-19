@@ -205,14 +205,25 @@ function updateHUD() {
 // --- POPULATE ---
 function populateVault() {
     const list = document.getElementById('vault-content');
-    let html = ""; const groups = {};
-    allQuestions.forEach(q => { if(!groups[q.chapter]) groups[q.chapter] = []; groups[q.chapter].push(q); });
+    let html = "";
+    const groups = {};
+    
+    allQuestions.forEach(q => {
+        if(!groups[q.chapter]) groups[q.chapter] = [];
+        groups[q.chapter].push(q);
+    });
+
     for (const c in groups) {
-        html += `<h3 class="label" style="margin-top:20px">${c.toUpperCase()}</h3>`;
+        html += `<h3 class="label" style="margin: 30px 0 15px 10px; color: var(--primary)">// ${c.toUpperCase()}</h3>`;
         groups[c].forEach(q => {
-            html += `<div class="vault-card" onclick="uiClick(); this.classList.toggle('revealed')">
+            html += `
+            <div class="vault-card" onclick="this.classList.toggle('revealed'); uiClick();">
+                <div class="label" style="margin-bottom:10px; opacity:0.5">NEURAL_PROMPT</div>
                 <div class="vault-q">\\(${q.q}\\)</div>
-                <div class="vault-a">\\(${q.correct}\\)</div>
+                <div class="vault-a">
+                    <div class="label" style="margin-bottom:10px; color:var(--accent)">IDENTITY_CONFIRMED</div>
+                    \\(${q.correct}\\)
+                </div>
             </div>`;
         });
     }
@@ -246,4 +257,5 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
 
