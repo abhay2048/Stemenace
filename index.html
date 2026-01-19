@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEMANACE | Neural Calibrator</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    
-    <!-- Corrected MathJax 3 Configuration -->
     <script>
         window.MathJax = {
-            tex: { 
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
             options: { enableMenu: false },
             chtml: { displayAlign: 'center', adaptiveCSS: true }
         };
@@ -22,17 +17,17 @@
 </head>
 <body>
     <div id="panic-overlay" class="hidden"></div>
-    
     <div class="app-container">
+        
         <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
             <div class="brand-area">
                 <h1 class="logo-large">STEM<span>ANACE</span></h1>
-                <p class="tagline">NEURAL_INTERFACE_v2.1</p>
+                <p class="tagline">// NEURAL_INTERFACE_AUTH_REQUIRED</p>
             </div>
             <div class="login-box">
-                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
-                <button class="btn-primary" onclick="submitLogin()">INITIALIZE</button>
+                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
+                <button class="btn-primary" onclick="submitLogin()">INITIALIZE_SESSION</button>
             </div>
         </div>
 
@@ -48,8 +43,9 @@
                     <div class="xp-bar-wrap"><div id="xp-fill"></div></div>
                 </div>
             </header>
+            
             <div class="stat-grid">
-                <div class="stat-tile" onclick="changeCallsign()">
+                <div class="stat-tile clickable" onclick="changeCallsign()">
                     <div class="label">PEAK_STREAK</div>
                     <div id="high-score" class="value">0</div>
                 </div>
@@ -58,75 +54,76 @@
                     <div id="global-proficiency" class="value">0%</div>
                 </div>
             </div>
+
             <div class="nav-stack">
-                <button class="btn-primary" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
-                <div class="sub-nav">
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
+                <button class="btn-primary main-launch" onclick="showScreen('screen-chapters')">ENTER ARENA</button>
+                <div class="sub-nav-grid">
+                    <button class="btn-secondary" onclick="showScreen('screen-learn')">THE_VAULT</button>
+                    <button class="btn-secondary" onclick="showScreen('screen-diagnostics')">SYS_LOGS</button>
                 </div>
-                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
+                <button id="mute-btn" class="mute-btn" onclick="toggleMute()">AUDIO: ON</button>
             </div>
         </div>
 
         <!-- ARENA -->
         <div id="screen-game" class="screen hidden">
             <div class="arena-hud">
-                <div class="hud-item"><span class="label">VIT</span><span id="lives">❤️❤️❤️</span></div>
-                <div class="hud-item"><span class="label">COMBO</span><span id="streak">0</span></div>
+                <div class="hud-item"><span class="label">VIT</span><span id="lives" class="value-hud">❤️❤️❤️</span></div>
+                <div class="hud-item"><span class="label">COMBO</span><span id="streak" class="value-hud">0</span></div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div id="formula-chamber"><div id="formula-display"></div></div>
+            <div id="formula-chamber">
+                <div id="formula-display"></div>
+            </div>
             <div id="options-grid" class="options-stack"></div>
         </div>
 
-        <!-- ROAST OVERLAY -->
+        <!-- ROAST OVERLAY (Sync Error) -->
         <div id="roast-popup" class="overlay hidden">
-            <div class="modal">
-                <div class="modal-header">SYNC_ERROR</div>
-                <p id="roast-message"></p>
-                <div class="correction-zone">
-                    <span class="label" style="color:var(--primary)">REQUIRED_IDENTITY</span>
-                    <div id="correction-display"></div>
+            <div class="terminal-modal">
+                <div class="terminal-header">! CRITICAL_SYNC_FAILURE</div>
+                <div class="roast-content">
+                    <p id="roast-message"></p>
+                    <div class="correction-box">
+                        <span class="label" style="color:var(--primary)">REQUIRED_IDENTITY</span>
+                        <div id="correction-display"></div>
+                    </div>
                 </div>
-                <button class="btn-primary" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
+                <button class="btn-primary" style="width:100%" onclick="resumeAfterRoast()">RE-CALIBRATE</button>
             </div>
         </div>
 
         <!-- CHAPTERS & DIFFICULTY -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← EXIT</button>
-            <h2 class="screen-title">TARGET_DOMAIN</h2>
+            <button class="back-btn" onclick="showScreen('screen-home')">← EXIT_TO_CORE</button>
+            <h2 class="label" style="margin-top:20px">TARGET_DOMAIN</h2>
             <div class="nav-stack">
                 <button class="btn-primary" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
                 <button class="btn-primary" onclick="selectChapter('calculus')">CALCULUS</button>
-                <button id="priority-btn" class="btn-secondary" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
+                <button id="priority-btn" class="btn-priority hidden" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
             </div>
         </div>
 
         <div id="screen-difficulty" class="screen hidden">
-            <h2 class="screen-title">STRESS_LEVEL</h2>
+            <h2 class="label">STRESS_LEVEL</h2>
             <div class="nav-stack">
-                <button class="btn-primary" onclick="selectDifficulty(30)">STABLE (30s)</button>
-                <button class="btn-primary" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
+                <button class="btn-secondary" style="color:white; border-color:#333" onclick="selectDifficulty(30)">STABLE (30s)</button>
+                <button class="btn-secondary" style="color:white; border-color:#555" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
                 <button class="btn-accent" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
             </div>
         </div>
 
-        <!-- CONTENT SCREENS -->
+        <!-- VAULT & LOGS -->
         <div id="screen-learn" class="screen hidden">
-    <div style="flex-shrink: 0; padding-bottom: 10px;">
-        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
-        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Neural_Vault</h2>
-    </div>
-    <div id="vault-content" class="scroll-area"></div>
-</div>
+            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
+            <div id="vault-content" class="scroll-area"></div>
+        </div>
+
         <div id="screen-diagnostics" class="screen hidden">
-    <div style="flex-shrink: 0; padding-bottom: 10px;">
-        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
-        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Failure_Logs</h2>
-    </div>
-    <div id="diagnostic-results" class="scroll-area"></div>
-</div>
+            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
+            <div id="diagnostic-results" class="scroll-area"></div>
+        </div>
+
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
@@ -137,12 +134,10 @@
             <div id="debt-list" class="scroll-area revision-box"></div>
             <div class="nav-stack" style="margin-top:auto">
                 <button class="btn-primary" onclick="showScreen('screen-difficulty')">RE-INIT</button>
-                <button class="btn-secondary" onclick="showScreen('screen-home')">CORE_SYSTEM</button>
+                <button class="btn-secondary" onclick="showScreen('screen-home')">EXIT_TO_CORE</button>
             </div>
         </div>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-
-
