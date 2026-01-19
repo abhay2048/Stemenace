@@ -26,9 +26,9 @@
 
     <div class="main-layout">
         <aside class="nexus-sidebar glass">
-            <div class="sidebar-top">
+            <div class="sidebar-brand">
                 <h1 class="logo-sm">STEM<span>ANACE</span></h1>
-                <p class="sidebar-tagline">NEURAL_CALIBRATOR_V2</p>
+                <p class="tagline-mini">NEURAL_CALIBRATOR_V2</p>
             </div>
             
             <div class="sidebar-stats">
@@ -61,7 +61,7 @@
                 </div>
                 <div class="login-box">
                     <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
-                    <button class="primary-btn pulse-btn" onclick="submitLogin()">INITIALIZE_SESSION</button>
+                    <button class="primary-btn pulse-btn" onclick="uiClick(); submitLogin()">INITIALIZE_SESSION</button>
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                 </header>
                 
                 <div class="dashboard">
-                    <div class="stat-card clickable" onclick="changeCallsign()">
+                    <div class="stat-card clickable" onclick="uiClick(); changeCallsign()">
                         <div class="stat-label">NEURAL_ID</div>
                         <div id="user-callsign" class="stat-value-sm">---</div>
                     </div>
@@ -85,8 +85,8 @@
 
                 <div class="nav-stack">
                     <button class="primary-btn" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
-                    <button class="secondary-btn" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
-                    <button class="secondary-btn" onclick="uiClick(); showScreen('screen-diagnostics')">DIAGNOSTICS</button>
+                    <button class="secondary-btn" onclick="uiClick(); showVault()">THE VAULT</button>
+                    <button class="secondary-btn" onclick="uiClick(); showDiagnostics()">DIAGNOSTICS</button>
                     <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO_ON</button>
                 </div>
             </div>
@@ -103,31 +103,31 @@
             </div>
 
             <div id="screen-learn" class="screen glass hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_VAULT</button>
+                <button class="back-link" onclick="uiClick(); showScreen('screen-home')">← EXIT_VAULT</button>
                 <div id="vault-content" class="internal-scroll"></div>
             </div>
 
             <div id="screen-diagnostics" class="screen glass hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">← EXIT_DIAG</button>
+                <button class="back-link" onclick="uiClick(); showScreen('screen-home')">← EXIT_DIAG</button>
                 <div id="diagnostic-results" class="internal-scroll"></div>
             </div>
 
             <div id="screen-chapters" class="screen glass hidden">
-                <button class="back-link" onclick="showScreen('screen-home')">←</button>
-                <h2 class="menu-title">TARGET_DOMAIN</h2>
+                <button class="back-link" onclick="uiClick(); showScreen('screen-home')">←</button>
+                <h2 class="menu-title">SELECT_DOMAIN</h2>
                 <div class="nav-stack">
-                    <button class="primary-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                    <button class="primary-btn" onclick="selectChapter('calculus')">CALCULUS</button>
-                    <button id="priority-btn" class="secondary-btn" style="display:none; color:var(--accent)" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
+                    <button class="primary-btn" onclick="uiClick(); selectChapter('trigonometry')">TRIGONOMETRY</button>
+                    <button class="primary-btn" onclick="uiClick(); selectChapter('calculus')">CALCULUS</button>
+                    <button id="priority-btn" class="secondary-btn" style="display:none; color:var(--primary)" onclick="uiClick(); selectPriorityDrill()">REPAIR_DEBT</button>
                 </div>
             </div>
 
             <div id="screen-difficulty" class="screen glass hidden">
                 <h2 class="menu-title">STRESS_LEVEL</h2>
                 <div class="nav-stack">
-                    <button class="primary-btn" onclick="selectDifficulty(30)">STABLE (30s)</button>
-                    <button class="primary-btn" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
-                    <button class="accent-btn" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
+                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(30)">STABLE (30s)</button>
+                    <button class="primary-btn" onclick="uiClick(); selectDifficulty(15)">VOLATILE (15s)</button>
+                    <button class="accent-btn" onclick="uiClick(); selectDifficulty(8)">CRITICAL (8s)</button>
                 </div>
             </div>
 
@@ -137,8 +137,8 @@
                 <div class="revision-label">NEURAL_DEBT_RECAP</div>
                 <div class="revision-box internal-scroll"><div id="debt-list"></div></div>
                 <div class="nav-stack" style="margin-top:auto">
-                    <button class="primary-btn" onclick="showScreen('screen-difficulty')">RE-INIT</button>
-                    <button class="secondary-btn" onclick="showScreen('screen-home')">HOME</button>
+                    <button class="primary-btn" onclick="uiClick(); showScreen('screen-difficulty')">RE-INIT</button>
+                    <button class="secondary-btn" onclick="uiClick(); showScreen('screen-home')">HOME</button>
                 </div>
             </div>
         </main>
