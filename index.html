@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Neural Calibrator</title>
+    <title>STEMANACE | Neural Ace</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     
     <script>
         window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
-            options: { enableMenu: false },
-            chtml: { displayAlign: 'center', linebreaks: { automatic: true } }
+            tex: { 
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: { 
+                enableMenu: false 
+            },
+            chtml: { 
+                displayAlign: 'center',
+                adaptiveCSS: true
+            }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
@@ -18,17 +26,17 @@
 </head>
 <body>
     <div id="panic-overlay" class="hidden"></div>
-    
     <div class="app-container">
+        
         <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
             <div class="brand-area">
                 <h1 class="logo-large">STEM<span>ANACE</span></h1>
-                <p class="tagline">NEURAL_INTERFACE_v2.0</p>
+                <p class="tagline">NEURAL_INTERFACE_v2.1</p>
             </div>
             <div class="login-box">
-                <input type="text" id="callsign-input" placeholder="OPERATOR_NAME" maxlength="15">
-                <button class="btn-primary" onclick="submitLogin()">INITIALIZE_SESSION</button>
+                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME" maxlength="15">
+                <button class="btn-primary" onclick="submitLogin()">INITIALIZE</button>
             </div>
         </div>
 
@@ -40,14 +48,10 @@
                     <span id="user-callsign" class="callsign-display">---</span>
                 </div>
                 <div class="xp-container">
-                    <div class="xp-labels">
-                        <span class="label">NEURAL_SYNC</span>
-                        <span id="level-display" class="value">LVL 1</span>
-                    </div>
+                    <div class="xp-labels"><span class="label">NEURAL_SYNC</span><span id="level-display" class="value">LVL 1</span></div>
                     <div class="xp-bar-wrap"><div id="xp-fill"></div></div>
                 </div>
             </header>
-            
             <div class="stat-grid">
                 <div class="stat-tile" onclick="changeCallsign()">
                     <div class="label">PEAK_STREAK</div>
@@ -58,13 +62,10 @@
                     <div id="global-proficiency" class="value">0%</div>
                 </div>
             </div>
-
-            <div id="achievement-rack" class="achievement-rack"></div>
-
             <div class="nav-stack">
                 <button class="btn-primary" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
                 <div class="sub-nav">
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">THE VAULT</button>
+                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
                     <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
                 </div>
                 <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
@@ -76,29 +77,30 @@
             <div class="arena-hud">
                 <div class="hud-item"><span class="label">VIT</span><span id="lives">❤️❤️❤️</span></div>
                 <div class="hud-item"><span class="label">COMBO</span><span id="streak">0</span></div>
-                <div class="hud-item"><span class="label">SYNC</span><span id="efficiency">100%</span></div>
             </div>
             <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div id="formula-chamber"><div id="formula-display"></div></div>
+            <div id="formula-chamber">
+                <div id="formula-display"></div>
+            </div>
             <div id="options-grid" class="options-stack"></div>
         </div>
 
-        <!-- ROAST/CORRECTION -->
+        <!-- MODALS -->
         <div id="roast-popup" class="overlay hidden">
             <div class="modal">
                 <div class="modal-header">SYNC_ERROR</div>
                 <p id="roast-message"></p>
                 <div class="correction-zone">
-                    <span class="label" style="color:var(--primary)">REQUIRED_MAPPING</span>
+                    <span class="label" style="color:var(--primary)">REQUIRED_IDENTITY</span>
                     <div id="correction-display"></div>
                 </div>
                 <button class="btn-primary" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
             </div>
         </div>
 
-        <!-- CHAPTERS -->
+        <!-- SELECTION SCREENS -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← BACK</button>
+            <button class="back-btn" onclick="showScreen('screen-home')">← EXIT</button>
             <h2 class="screen-title">TARGET_DOMAIN</h2>
             <div class="nav-stack">
                 <button class="btn-primary" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
@@ -107,7 +109,6 @@
             </div>
         </div>
 
-        <!-- DIFFICULTY -->
         <div id="screen-difficulty" class="screen hidden">
             <h2 class="screen-title">STRESS_LEVEL</h2>
             <div class="nav-stack">
@@ -117,38 +118,21 @@
             </div>
         </div>
 
-        <!-- VAULT -->
-        <div id="screen-learn" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">←</button>
-            <h2 class="screen-title">THE_VAULT</h2>
-            <div id="vault-content" class="scroll-area"></div>
-        </div>
-
-        <!-- DIAGNOSTICS -->
-        <div id="screen-diagnostics" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">←</button>
-            <h2 class="screen-title">SYSTEM_LOGS</h2>
-            <div id="diagnostic-results" class="scroll-area"></div>
-        </div>
+        <!-- CONTENT SCREENS -->
+        <div id="screen-learn" class="screen hidden"><button class="back-btn" onclick="showScreen('screen-home')">←</button><div id="vault-content" class="scroll-area"></div></div>
+        <div id="screen-diagnostics" class="screen hidden"><button class="back-btn" onclick="showScreen('screen-home')">←</button><div id="diagnostic-results" class="scroll-area"></div></div>
 
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
             <h1 class="failure-msg">FLATLINED</h1>
-            <div id="final-rank-badge" class="rank-tag">CONSTANT</div>
             <div class="stat-grid" style="margin: 20px 0;">
-                <div class="stat-tile">
-                    <div class="label">SCORE</div>
-                    <div id="final-streak" class="value">0</div>
-                </div>
-                <div class="stat-tile">
-                    <div class="label">XP_GAINED</div>
-                    <div id="xp-gained" class="value">+0</div>
-                </div>
+                <div class="stat-tile"><div class="label">SCORE</div><div id="final-streak" class="value">0</div></div>
+                <div class="stat-tile"><div class="label">RANK</div><div id="final-rank-badge" class="value" style="font-size:0.8rem">CONSTANT</div></div>
             </div>
             <div id="debt-list" class="scroll-area revision-box"></div>
             <div class="nav-stack" style="margin-top:auto">
                 <button class="btn-primary" onclick="showScreen('screen-difficulty')">RE-INIT</button>
-                <button class="btn-secondary" onclick="showScreen('screen-home')">EXIT_TO_CORE</button>
+                <button class="btn-secondary" onclick="showScreen('screen-home')">CORE_SYSTEM</button>
             </div>
         </div>
     </div>
