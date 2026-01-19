@@ -42,6 +42,16 @@ body::after {
     pointer-events: none;
     z-index: 10000;
 }
+/* --- PREMIUM GLASS PANELS --- */
+.app-container, .stat-tile, .xp-container, #formula-chamber, 
+.vault-card, .modal, .fail-log-item, .revision-box {
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
 
 .app-container {
     width: 100%;
@@ -132,14 +142,24 @@ body::after {
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 #formula-chamber::-webkit-scrollbar { display: none; }
-/* --- TACTILE BUTTONS --- */
-.btn-primary, .btn-secondary, .btn-accent, .opt-btn {
+/* --- TACTILE BUTTON PHYSICS --- */
+.btn-primary, .btn-secondary, .btn-accent, .opt-btn, .mute-toggle, .back-btn {
+    transition: transform 0.1s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.1s, background 0.2s;
+    cursor: pointer;
     position: relative;
-    transition: transform 0.1s cubic-bezier(0.17, 0.67, 0.83, 0.67), box-shadow 0.1s;
-    transform: translateY(0);
-    border-bottom: 4px solid rgba(0,0,0,0.3) !important; /* The "Depth" edge */
+    outline: none;
+}
+/* Hover: Lift Up */
+.btn-primary:hover, .btn-secondary:hover, .btn-accent:hover, .opt-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
 
+/* Active: Click Down */
+.btn-primary:active, .btn-secondary:active, .btn-accent:active, .opt-btn:active {
+    transform: translateY(2px);
+    filter: brightness(0.9);
+}
 .options-stack { display: grid; gap: 10px; flex: 1; margin-bottom: 10px; }
 .opt-btn {
     background: var(--surface);
@@ -180,15 +200,12 @@ body::after {
 
 /* --- BUTTONS --- */
 .nav-stack { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+/* Specific Shadow for Primary Button */
 .btn-primary {
-    background: var(--primary);
-    box-shadow: 0 6px 0 #b31d43, 0 12px 20px rgba(255, 46, 99, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 46, 99, 0.2);
 }
-
 .btn-primary:active {
-    transform: translateY(4px);
-    box-shadow: 0 2px 0 #b31d43, 0 4px 10px rgba(255, 46, 99, 0.3);
-    background: #e6295a;
+    box-shadow: 0 2px 5px rgba(255, 46, 99, 0.1);
 }
 
 .btn-secondary {
@@ -241,4 +258,5 @@ body::after {
 }
 @keyframes panicPulse { from { opacity: 0.2; } to { opacity: 0.7; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 
