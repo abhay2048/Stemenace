@@ -7,66 +7,51 @@ let formulaAnalytics = JSON.parse(localStorage.getItem('stemanaceFormulaAnalytic
 let correctHistory = JSON.parse(localStorage.getItem('stemanaceHistory')) || { global:{correct:0,total:0}, calculus:{correct:0,total:0}, trigonometry:{correct:0,total:0} };
 let timerId = null, timeLimit = 30, timeLeft = 30, isMuted = false;
 
-// --- THE FIX: MATH RENDERING ---
+// --- MATH RENDERING ---
 function triggerMathUpdates() {
     if (window.MathJax && window.MathJax.typesetPromise) {
         window.MathJax.typesetPromise().catch(err => console.log("MathJax busy..."));
     }
 }
 
-// --- AUDIO ---
-// --- IMPROVED AUDIO ENGINE ---
+// --- AUDIO ENGINE (FIXED & LAYERED) ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function playTone(freq, type, duration, volume, decay = true) {
-    if (isMuted) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-    if (decay) {
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-    }
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+function playSound(f, t, d, v = 0.1) {
+    if (isMuted || audioCtx.state === 'suspended') return;
+    try {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; 
+        o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch(e) {}
 }
 
-// Satisfying "Mechanical" Click
-/ Satisfying mechanical click logic
+// Satisfying Mechanical Click
 window.uiClick = () => {
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    // LAYER 1: The mechanical "snap" (High Frequency)
+    // High frequency snap + Low frequency thump
     playSound(1400, 'sine', 0.05, 0.08); 
-    
-    // LAYER 2: The button "depth/thump" (Low Frequency Triangle)
-    setTimeout(() => {
-        playSound(160, 'triangle', 0.1, 0.12);
-    }, 10);
+    setTimeout(() => playSound(160, 'triangle', 0.1, 0.12), 10);
 };
 
-// Success Sound Update (Polite Chime)
 const successSound = () => {
     playSound(800, 'sine', 0.1, 0.1);
     setTimeout(() => playSound(1200, 'sine', 0.15, 0.07), 40);
 };
 
-// Failure "Error"
 const failSound = () => {
-    playTone(120, 'square', 0.3, 0.1);
-    playTone(80, 'square', 0.4, 0.1);
+    playSound(120, 'square', 0.3, 0.1);
+    playSound(80, 'square', 0.4, 0.1);
 };
 
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO: OFF" : "🔊 AUDIO: ON"; };
+window.toggleMute = () => { 
+    isMuted = !isMuted; 
+    document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO: OFF" : "🔊 AUDIO: ON"; 
+};
 
 // --- NAVIGATION ---
 window.submitLogin = () => {
@@ -80,7 +65,11 @@ window.submitLogin = () => {
 
 window.changeCallsign = () => {
     const n = prompt("ENTER CALLSIGN:");
-    if(n) { callsign = n.toUpperCase(); localStorage.setItem('stemanaceCallsign', callsign); updateHomeDashboard(); }
+    if(n) { 
+        callsign = n.toUpperCase(); 
+        localStorage.setItem('stemanaceCallsign', callsign); 
+        updateHomeDashboard(); 
+    }
 };
 
 window.showScreen = (id) => {
@@ -132,7 +121,7 @@ function nextRound() {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerHTML = `\\( ${opt} \\)`;
-        btn.onclick = () => handleChoice(opt);
+        btn.onclick = (e) => handleChoice(opt, e);
         grid.appendChild(btn);
     });
     triggerMathUpdates();
@@ -150,19 +139,16 @@ function resetTimer() {
     }, 100);
 }
 
-function handleChoice(choice) {
+function handleChoice(choice, event) {
+    uiClick();
     if (choice === currentQ.correct) {
         successSound();
         score++;
         xp += 25;
-        
         const chamber = document.getElementById('formula-chamber');
         chamber.style.borderColor = 'var(--accent)';
-        chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.3)';
-        
         setTimeout(() => {
             chamber.style.borderColor = 'var(--glass-border)';
-            chamber.style.boxShadow = 'none';
             nextRound();
         }, 200);
     } else {
@@ -170,6 +156,7 @@ function handleChoice(choice) {
     }
     updateHUD();
 }
+
 function handleWrong() {
     lives--; clearInterval(timerId); failSound();
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
@@ -185,6 +172,7 @@ function handleWrong() {
 }
 
 window.resumeAfterRoast = () => {
+    uiClick();
     document.getElementById('roast-popup').classList.add('hidden');
     if (lives <= 0) endGame(); else nextRound();
 };
@@ -212,7 +200,7 @@ function populateVault() {
     for (const c in groups) {
         html += `<h3 class="label" style="margin-top:20px">${c.toUpperCase()}</h3>`;
         groups[c].forEach(q => {
-            html += `<div class="vault-card" onclick="this.classList.toggle('revealed')">
+            html += `<div class="vault-card" onclick="uiClick(); this.classList.toggle('revealed')">
                 <div class="vault-q">\\(${q.q}\\)</div>
                 <div class="vault-a">\\(${q.correct}\\)</div>
             </div>`;
@@ -233,17 +221,18 @@ async function init() {
     try {
         const [fRes, rRes] = await Promise.all([fetch('mathformula.txt'), fetch('roast.txt')]);
         if (fRes.ok) {
-            allQuestions = (await fRes.text()).split('\n').filter(l => l.includes('::')).map(l => {
+            const text = await fRes.text();
+            allQuestions = text.split('\n').filter(l => l.includes('::')).map(l => {
                 const p = l.split('::');
                 return { chapter: p[0].trim(), q: p[1].trim(), correct: p[2].trim(), options: [p[2].trim(), p[3].trim(), p[4].trim(), p[5].trim()] };
             });
         }
-        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
-    } catch(e) {}
+        if (rRes.ok) {
+            const rText = await rRes.text();
+            roasts = rText.split('\n').filter(l => l.trim() !== "");
+        }
+    } catch(e) { console.error("Init Error:", e); }
     if (allQuestions.length === 0) allQuestions = [{chapter:"SYSTEM", q:"1+1", correct:"2", options:["2","3","4","5"]}];
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
-
-
-
