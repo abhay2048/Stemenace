@@ -15,56 +15,21 @@ function triggerMathUpdates() {
 }
 
 // --- AUDIO ---
-// --- IMPROVED AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-function playTone(freq, type, duration, volume, decay = true) {
-    if (isMuted) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-    if (decay) {
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-    }
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+function playSound(f, t, d, v = 0.1) {
+    if (isMuted || audioCtx.state === 'suspended') return;
+    try {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch(e) {}
 }
-
-// Satisfying "Mechanical" Click
-/ Satisfying mechanical click logic
-window.uiClick = () => {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    // LAYER 1: The mechanical "snap" (High Frequency)
-    playSound(1400, 'sine', 0.05, 0.08); 
-    
-    // LAYER 2: The button "depth/thump" (Low Frequency Triangle)
-    setTimeout(() => {
-        playSound(160, 'triangle', 0.1, 0.12);
-    }, 10);
-};
-
-// Success Sound Update (Polite Chime)
-const successSound = () => {
-    playSound(800, 'sine', 0.1, 0.1);
-    setTimeout(() => playSound(1200, 'sine', 0.15, 0.07), 40);
-};
-
-// Failure "Error"
-const failSound = () => {
-    playTone(120, 'square', 0.3, 0.1);
-    playTone(80, 'square', 0.4, 0.1);
-};
+window.uiClick = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
+const successSound = () => playSound(1200, 'sine', 0.15, 0.1);
+const failSound = () => { playSound(100, 'sine', 0.4, 0.2); playSound(60, 'sine', 0.4, 0.2); };
 
 window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇 AUDIO: OFF" : "🔊 AUDIO: ON"; };
 
@@ -97,7 +62,7 @@ function updateHomeDashboard() {
     document.getElementById('high-score').innerText = highScore;
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     document.getElementById('global-proficiency').innerText = prof + "%";
-    document.getElementById('level-display').innerText = LVL ${Math.floor(xp / 1000) + 1};
+    document.getElementById('level-display').innerText = `LVL ${Math.floor(xp / 1000) + 1}`;
     document.getElementById('xp-fill').style.width = (xp % 1000) / 10 + "%";
     const rank = highScore > 50 ? "NEURAL ACE" : highScore > 20 ? "OPERATOR" : "CONSTANT";
     document.getElementById('current-rank').innerText = "RANK: " + rank;
@@ -125,13 +90,13 @@ function nextRound() {
     if (timerId) clearInterval(timerId);
     document.getElementById('panic-overlay').classList.add('hidden');
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
-    document.getElementById('formula-display').innerHTML = \\[ ${currentQ.q} \\];
+    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
     [...currentQ.options].sort(() => 0.5 - Math.random()).forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
-        btn.innerHTML = \\( ${opt} \\);
+        btn.innerHTML = `\\( ${opt} \\)`;
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
@@ -152,24 +117,20 @@ function resetTimer() {
 
 function handleChoice(choice) {
     if (choice === currentQ.correct) {
-        successSound();
-        score++;
-        xp += 25;
-        
-        const chamber = document.getElementById('formula-chamber');
-        chamber.style.borderColor = 'var(--accent)';
-        chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.3)';
-        
-        setTimeout(() => {
-            chamber.style.borderColor = 'var(--glass-border)';
-            chamber.style.boxShadow = 'none';
-            nextRound();
-        }, 200);
-    } else {
-        handleWrong();
-    }
-    updateHUD();
+    // Visual Pulse for Correct Answer
+    const chamber = document.getElementById('formula-chamber');
+    chamber.style.borderColor = 'var(--accent)';
+    chamber.style.boxShadow = '0 0 30px rgba(8, 217, 214, 0.2)';
+    
+    setTimeout(() => {
+        chamber.style.borderColor = 'var(--glass-border)';
+        chamber.style.boxShadow = 'none';
+    }, 300);
+    
+    // ... rest of your score/xp logic
+} else handleWrong();
 }
+
 function handleWrong() {
     lives--; clearInterval(timerId); failSound();
     formulaAnalytics[currentQ.q] = (formulaAnalytics[currentQ.q] || 0) + 1;
@@ -179,7 +140,7 @@ function handleWrong() {
     localStorage.setItem('stemanaceHistory', JSON.stringify(correctHistory));
     neuralDebt.push({ q: currentQ.q, a: currentQ.correct });
     document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "SYNC_FAILED";
-    document.getElementById('correction-display').innerHTML = \\[ ${currentQ.correct} \\];
+    document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.correct} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
     triggerMathUpdates();
 }
@@ -194,7 +155,7 @@ function endGame() {
     localStorage.setItem('stemanaceXP', xp);
     document.getElementById('final-streak').innerText = score;
     document.getElementById('final-rank-badge').innerText = score > 20 ? "OPERATOR" : "CONSTANT";
-    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => <div class="vault-card" style="font-size:0.7rem">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>).join('');
+    document.getElementById('debt-list').innerHTML = neuralDebt.map(d => `<div class="vault-card" style="font-size:0.7rem">\\(${d.q}\\) → <b>\\(${d.a}\\)</b></div>`).join('');
     triggerMathUpdates();
     showScreen('screen-over');
 }
@@ -210,7 +171,7 @@ function populateVault() {
     let html = ""; const groups = {};
     allQuestions.forEach(q => { if(!groups[q.chapter]) groups[q.chapter] = []; groups[q.chapter].push(q); });
     for (const c in groups) {
-        html += <h3 class="label" style="margin-top:20px">${c.toUpperCase()}</h3>;
+        html += `<h3 class="label" style="margin-top:20px">${c.toUpperCase()}</h3>`;
         groups[c].forEach(q => {
             html += `<div class="vault-card" onclick="this.classList.toggle('revealed')">
                 <div class="vault-q">\\(${q.q}\\)</div>
@@ -225,7 +186,7 @@ function populateVault() {
 function populateDiagnostics() {
     const container = document.getElementById('diagnostic-results');
     const sorted = Object.entries(formulaAnalytics).sort(([,a],[,b])=>b-a);
-    container.innerHTML = sorted.map(([f,c]) => <div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge">${c}</div></div>).join('') || "<p class='label'>CLEAN_LOGS</p>";
+    container.innerHTML = sorted.map(([f,c]) => `<div class="fail-log-item"><div class="fail-formula">\\(${f}\\)</div><div class="fail-count-badge">${c}</div></div>`).join('') || "<p class='label'>CLEAN_LOGS</p>";
     triggerMathUpdates();
 }
 
@@ -244,3 +205,4 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
