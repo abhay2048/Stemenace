@@ -24,32 +24,27 @@
     <div id="panic-overlay" class="hidden"></div>
     
     <div class="app-container">
-        <!-- LOGIN SCREEN --
         <!-- LOGIN SCREEN -->
-<div id="screen-login" class="screen">
-    <div class="brand-area" style="text-align:center; margin-top:40px">
-        <h1 class="logo-large">STEM<span>ANACE</span></h1>
-        <p class="tagline">NEURAL_INTERFACE_v3.0</p>
-    </div>
-    
-    <div class="login-box" style="margin-top:auto; margin-bottom:40px">
-        <!-- THE ID MUST BE EXACTLY: callsign-input -->
-        <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
-        <button class="btn-primary" style="width:100%" onclick="window.submitLogin()">INITIALIZE</button>
-    </div>
-</div>
+        <div id="screen-login" class="screen">
+            <div class="brand-area">
+                <h1 class="logo-large">STEM<span>ANACE</span></h1>
+                <p class="tagline">NEURAL_INTERFACE_v2.1</p>
+            </div>
+            <div class="login-box">
+                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
+                <button class="btn-primary" onclick="submitLogin()">INITIALIZE</button>
+            </div>
+        </div>
+
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen hidden">
             <header class="home-header">
                 <div class="user-meta">
-                    <span id="current-rank" class="rank-tag">RANK: OPERATOR</span>
-                    <span id="user-callsign" class="value" style="font-size:1rem">---</span>
+                    <span id="current-rank" class="rank-tag">RANK: CONSTANT</span>
+                    <span id="user-callsign" class="callsign-display">---</span>
                 </div>
                 <div class="xp-container">
-                    <div style="display:flex; justify-content:space-between">
-                        <span class="label">NEURAL_SYNC</span>
-                        <span id="level-display" class="label" style="color:white">LVL 1</span>
-                    </div>
+                    <div class="xp-labels"><span class="label">NEURAL_SYNC</span><span id="level-display" class="value">LVL 1</span></div>
                     <div class="xp-bar-wrap"><div id="xp-fill"></div></div>
                 </div>
             </header>
@@ -63,18 +58,15 @@
                     <div id="global-proficiency" class="value">0%</div>
                 </div>
             </div>
-<div class="nav-stack">
-    <!-- Main Action -->
-    <button class="btn-primary" onclick="window.submitLogin()">INITIALIZE</button>
-    
-    <!-- Symmetrical Pair to fix congestion -->
-    <div class="sub-nav" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
-        <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
-    </div>
-    
-    <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
-</div>
+            <div class="nav-stack">
+                <button class="btn-primary" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
+                <div class="sub-nav">
+                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
+                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
+                </div>
+                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
+            </div>
+        </div>
 
         <!-- ARENA -->
         <div id="screen-game" class="screen hidden">
@@ -121,24 +113,19 @@
         </div>
 
         <!-- CONTENT SCREENS -->
-<!-- VAULT SCREEN -->
-<div id="screen-learn" class="screen hidden">
-    <div class="screen-header">
-        <button class="back-btn" onclick="showScreen('screen-home')">← CORE_SYSTEM</button>
-        <h2 class="label">Neural_Vault</h2>
+        <div id="screen-learn" class="screen hidden">
+    <div style="flex-shrink: 0; padding-bottom: 10px;">
+        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
+        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Neural_Vault</h2>
     </div>
-    <div id="vault-content" class="scroll-area">
-        <!-- JS will inject cards here -->
-    </div>
+    <div id="vault-content" class="scroll-area"></div>
 </div>
         <div id="screen-diagnostics" class="screen hidden">
-    <div class="screen-header">
-        <button class="back-btn" onclick="showScreen('screen-home')">← CORE_SYSTEM</button>
-        <h2 class="label">Failure_Logs</h2>
+    <div style="flex-shrink: 0; padding-bottom: 10px;">
+        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
+        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Failure_Logs</h2>
     </div>
-    <div id="diagnostic-results" class="scroll-area">
-        <!-- JS will inject logs here -->
-    </div>
+    <div id="diagnostic-results" class="scroll-area"></div>
 </div>
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
@@ -157,13 +144,5 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
