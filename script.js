@@ -58,15 +58,19 @@ window.showScreen = (id) => {
 };
 
 function updateHomeDashboard() {
-    document.getElementById('user-callsign').innerText = callsign || "GUEST";
+    document.getElementById('user-callsign').innerText = callsign || "Operator";
     document.getElementById('high-score').innerText = highScore;
+    
+    // Circular Progress Logic
+    const progress = (xp % 1000) / 1000;
+    const ring = document.getElementById('xp-ring');
+    const offset = 283 - (progress * 283);
+    ring.style.strokeDashoffset = offset;
+
+    document.getElementById('level-display').innerText = `Level ${Math.floor(xp / 1000) + 1}`;
+    
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     document.getElementById('global-proficiency').innerText = prof + "%";
-    document.getElementById('level-display').innerText = `LVL ${Math.floor(xp / 1000) + 1}`;
-    document.getElementById('xp-fill').style.width = (xp % 1000) / 10 + "%";
-    const rank = highScore > 50 ? "NEURAL ACE" : highScore > 20 ? "OPERATOR" : "CONSTANT";
-    document.getElementById('current-rank').innerText = "RANK: " + rank;
-    document.getElementById('priority-btn').style.display = Object.keys(formulaAnalytics).length > 0 ? 'block' : 'none';
 }
 
 // --- GAME CORE ---
@@ -205,4 +209,5 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
 
