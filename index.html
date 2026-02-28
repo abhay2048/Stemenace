@@ -3,16 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Neural Calibrator</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <title>STEMANACE | Minimalist Math</title>
     
-    <!-- Corrected MathJax 3 Configuration -->
     <script>
         window.MathJax = {
-            tex: { 
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
             options: { enableMenu: false },
             chtml: { displayAlign: 'center', adaptiveCSS: true }
         };
@@ -26,123 +21,136 @@
     <div class="app-container">
         <!-- LOGIN SCREEN -->
         <div id="screen-login" class="screen">
-            <div class="brand-area">
-                <h1 class="logo-large">STEM<span>ANACE</span></h1>
-                <p class="tagline">NEURAL_INTERFACE_v2.1</p>
+            <div class="hero-section">
+                <h1 class="logo">STEM<span>ANACE</span></h1>
+                <p class="subtitle">Focus on the formulas.</p>
             </div>
-            <div class="login-box">
-                <input type="text" id="callsign-input" placeholder="ENTER_OPERATOR_NAME">
-                <button class="btn-primary" onclick="submitLogin()">INITIALIZE</button>
+            <div class="input-group">
+                <input type="text" id="callsign-input" placeholder="Operator Name">
+                <button class="btn-main" onclick="submitLogin()">Begin Session</button>
             </div>
         </div>
 
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen hidden">
-            <header class="home-header">
-                <div class="user-meta">
-                    <span id="current-rank" class="rank-tag">RANK: CONSTANT</span>
-                    <span id="user-callsign" class="callsign-display">---</span>
+            <header class="main-header">
+                <div class="user-info">
+                    <span id="user-callsign">---</span>
+                    <span id="current-rank" class="badge">Rank: Constant</span>
                 </div>
-                <div class="xp-container">
-                    <div class="xp-labels"><span class="label">NEURAL_SYNC</span><span id="level-display" class="value">LVL 1</span></div>
-                    <div class="xp-bar-wrap"><div id="xp-fill"></div></div>
+                <div class="level-box">
+                    <span id="level-display">Lvl 1</span>
+                    <div class="progress-track"><div id="xp-fill"></div></div>
                 </div>
             </header>
-            <div class="stat-grid">
-                <div class="stat-tile" onclick="changeCallsign()">
-                    <div class="label">PEAK_STREAK</div>
-                    <div id="high-score" class="value">0</div>
+
+            <div class="stats-row">
+                <div class="stat-card" onclick="changeCallsign()">
+                    <span class="stat-label">Peak Streak</span>
+                    <span id="high-score" class="stat-value">0</span>
                 </div>
-                <div class="stat-tile">
-                    <div class="label">PROFICIENCY</div>
-                    <div id="global-proficiency" class="value">0%</div>
+                <div class="stat-card">
+                    <span class="stat-label">Proficiency</span>
+                    <span id="global-proficiency" class="stat-value">0%</span>
                 </div>
             </div>
-            <div class="nav-stack">
-                <button class="btn-primary" onclick="uiClick(); showScreen('screen-chapters')">ENTER ARENA</button>
-                <div class="sub-nav">
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-learn')">VAULT</button>
-                    <button class="btn-secondary" onclick="uiClick(); showScreen('screen-diagnostics')">LOGS</button>
+
+            <div class="menu-actions">
+                <button class="btn-main" onclick="uiClick(); showScreen('screen-chapters')">Start Practice</button>
+                <div class="btn-grid">
+                    <button class="btn-outline" onclick="uiClick(); showScreen('screen-learn')">Vault</button>
+                    <button class="btn-outline" onclick="uiClick(); showScreen('screen-diagnostics')">Logs</button>
                 </div>
-                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊 AUDIO: ON</button>
+                <button id="mute-btn" class="btn-text" onclick="toggleMute()">Audio: On</button>
             </div>
         </div>
 
         <!-- ARENA -->
         <div id="screen-game" class="screen hidden">
-            <div class="arena-hud">
-                <div class="hud-item"><span class="label">VIT</span><span id="lives">❤️❤️❤️</span></div>
-                <div class="hud-item"><span class="label">COMBO</span><span id="streak">0</span></div>
+            <div class="game-hud">
+                <div class="hud-pill"><span id="lives">❤️❤️❤️</span></div>
+                <div class="hud-pill">Combo: <span id="streak">0</span></div>
             </div>
-            <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div id="formula-chamber"><div id="formula-display"></div></div>
-            <div id="options-grid" class="options-stack"></div>
+            <div class="timer-container"><div id="timer-fill"></div></div>
+            
+            <div class="question-container">
+                <div id="formula-display"></div>
+            </div>
+            
+            <div id="options-grid" class="options-container"></div>
         </div>
 
-        <!-- ROAST OVERLAY -->
+        <!-- ROAST OVERLAY (Now a clean Bottom Sheet) -->
         <div id="roast-popup" class="overlay hidden">
-            <div class="modal">
-                <div class="modal-header">SYNC_ERROR</div>
+            <div class="bottom-sheet">
+                <div class="sheet-handle"></div>
                 <p id="roast-message"></p>
-                <div class="correction-zone">
-                    <span class="label" style="color:var(--primary)">REQUIRED_IDENTITY</span>
+                <div class="answer-reveal">
+                    <span class="label">Correct Identity:</span>
                     <div id="correction-display"></div>
                 </div>
-                <button class="btn-primary" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
+                <button class="btn-main" onclick="resumeAfterRoast()">Acknowledge</button>
             </div>
         </div>
 
-        <!-- CHAPTERS & DIFFICULTY -->
+        <!-- SELECTION SCREENS -->
         <div id="screen-chapters" class="screen hidden">
-            <button class="back-btn" onclick="showScreen('screen-home')">← EXIT</button>
-            <h2 class="screen-title">TARGET_DOMAIN</h2>
-            <div class="nav-stack">
-                <button class="btn-primary" onclick="selectChapter('trigonometry')">TRIGONOMETRY</button>
-                <button class="btn-primary" onclick="selectChapter('calculus')">CALCULUS</button>
-                <button id="priority-btn" class="btn-secondary" style="display:none;" onclick="selectPriorityDrill()">REPAIR_DEBT</button>
+            <div class="screen-header">
+                <button class="back-link" onclick="showScreen('screen-home')">← Back</button>
+                <h2>Choose Domain</h2>
+            </div>
+            <div class="selection-list">
+                <button class="btn-selection" onclick="selectChapter('trigonometry')">Trigonometry</button>
+                <button class="btn-selection" onclick="selectChapter('calculus')">Calculus</button>
+                <button id="priority-btn" class="btn-selection special" style="display:none;" onclick="selectPriorityDrill()">Repair Debt</button>
             </div>
         </div>
 
         <div id="screen-difficulty" class="screen hidden">
-            <h2 class="screen-title">STRESS_LEVEL</h2>
-            <div class="nav-stack">
-                <button class="btn-primary" onclick="selectDifficulty(30)">STABLE (30s)</button>
-                <button class="btn-primary" onclick="selectDifficulty(15)">VOLATILE (15s)</button>
-                <button class="btn-accent" onclick="selectDifficulty(8)">CRITICAL (8s)</button>
+            <div class="screen-header">
+                <button class="back-link" onclick="showScreen('screen-chapters')">← Back</button>
+                <h2>Stress Level</h2>
+            </div>
+            <div class="selection-list">
+                <button class="btn-selection" onclick="selectDifficulty(30)">Stable (30s)</button>
+                <button class="btn-selection" onclick="selectDifficulty(15)">Volatile (15s)</button>
+                <button class="btn-selection high-stress" onclick="selectDifficulty(8)">Critical (8s)</button>
             </div>
         </div>
 
         <!-- CONTENT SCREENS -->
         <div id="screen-learn" class="screen hidden">
-    <div style="flex-shrink: 0; padding-bottom: 10px;">
-        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
-        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Neural_Vault</h2>
-    </div>
-    <div id="vault-content" class="scroll-area"></div>
-</div>
+            <div class="screen-header">
+                <button class="back-link" onclick="showScreen('screen-home')">← Back</button>
+                <h2>Neural Vault</h2>
+            </div>
+            <div id="vault-content" class="scroll-box"></div>
+        </div>
+
         <div id="screen-diagnostics" class="screen hidden">
-    <div style="flex-shrink: 0; padding-bottom: 10px;">
-        <button class="back-btn" onclick="showScreen('screen-home')" style="color:var(--accent); background:none; border:none; padding:10px 0; cursor:pointer; font-weight:800;">← CORE_SYSTEM</button>
-        <h2 class="label" style="margin: 0; font-size: 1.2rem; color: white;">Failure_Logs</h2>
-    </div>
-    <div id="diagnostic-results" class="scroll-area"></div>
-</div>
+            <div class="screen-header">
+                <button class="back-link" onclick="showScreen('screen-home')">← Back</button>
+                <h2>Failure Logs</h2>
+            </div>
+            <div id="diagnostic-results" class="scroll-box"></div>
+        </div>
+
         <!-- GAME OVER -->
         <div id="screen-over" class="screen hidden">
-            <h1 class="failure-msg">FLATLINED</h1>
-            <div class="stat-grid" style="margin: 20px 0;">
-                <div class="stat-tile"><div class="label">SCORE</div><div id="final-streak" class="value">0</div></div>
-                <div class="stat-tile"><div class="label">RANK</div><div id="final-rank-badge" class="value" style="font-size:0.8rem">CONSTANT</div></div>
+            <div class="hero-section">
+                <h1 class="failure-title">Session Ended</h1>
+                <div class="final-stats">
+                    <div class="stat-mini">Score: <span id="final-streak">0</span></div>
+                    <div id="final-rank-badge" class="badge">Rank: Constant</div>
+                </div>
             </div>
-            <div id="debt-list" class="scroll-area revision-box"></div>
-            <div class="nav-stack" style="margin-top:auto">
-                <button class="btn-primary" onclick="showScreen('screen-difficulty')">RE-INIT</button>
-                <button class="btn-secondary" onclick="showScreen('screen-home')">CORE_SYSTEM</button>
+            <div id="debt-list" class="scroll-box-mini"></div>
+            <div class="menu-actions">
+                <button class="btn-main" onclick="showScreen('screen-difficulty')">Retry</button>
+                <button class="btn-outline" onclick="showScreen('screen-home')">Exit</button>
             </div>
         </div>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-
-
