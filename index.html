@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEMANACE | Neural Fitness</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>STEMANACE | Celestial Navigator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -21,47 +21,47 @@
         <div id="screen-home" class="screen">
             <header class="user-header">
                 <div class="greeting">
-                    <p class="date-label">Neural Summary</p>
-                    <h1 id="user-callsign">Operator</h1>
+                    <p class="date-label">Galactic Position</p>
+                    <h1 id="user-callsign">Navigator</h1>
                 </div>
-                <div class="profile-circle"></div>
+                <div class="constellation-icon"></div>
             </header>
 
-            <div class="progress-section">
-                <div class="progress-circle">
+            <div class="orbit-section">
+                <div class="orbit-ring">
                     <svg viewBox="0 0 100 100">
-                        <circle class="bg" cx="50" cy="50" r="45"></circle>
-                        <circle id="xp-ring" class="prog" cx="50" cy="50" r="45"></circle>
+                        <circle class="bg" cx="50" cy="50" r="48"></circle>
+                        <circle id="xp-ring" class="prog" cx="50" cy="50" r="48"></circle>
                     </svg>
-                    <div class="progress-content">
+                    <div class="orbit-content">
                         <span id="level-display">1</span>
-                        <small>Neural Level</small>
+                        <small>Orbit Level</small>
                     </div>
                 </div>
             </div>
 
             <div class="stat-grid">
                 <div class="stat-card">
-                    <label>Peak Streak</label>
+                    <label>Lightyears</label>
                     <div id="high-score" class="value">0</div>
                 </div>
                 <div class="stat-card">
-                    <label>Accuracy</label>
+                    <label>Alignment</label>
                     <div id="global-proficiency" class="value">0%</div>
                 </div>
             </div>
 
-            <button class="btn-main" onclick="showScreen('screen-chapters')">Start Practice Session</button>
+            <button class="btn-main" onclick="showScreen('screen-chapters')">Begin Navigation</button>
 
             <nav class="bottom-nav">
                 <div class="nav-item active" onclick="showScreen('screen-home')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </div>
                 <div class="nav-item" onclick="showScreen('screen-learn')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2L20 2v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21l-8-4V7l8-4 8 4v10l-8 4z"/><path d="M12 3v18"/></svg>
                 </div>
                 <div class="nav-item" onclick="showScreen('screen-diagnostics')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
             </nav>
         </div>
@@ -69,12 +69,12 @@
         <!-- CHAPTER SELECTION -->
         <div id="screen-chapters" class="screen hidden">
             <div class="screen-header">
-                <button class="btn-back" onclick="showScreen('screen-home')">← Back</button>
-                <h2>Target Domain</h2>
+                <button class="btn-back" onclick="showScreen('screen-home')">← System</button>
+                <h2>Select Coordinates</h2>
             </div>
             <div class="selection-list">
-                <button class="btn-selection" onclick="selectChapter('trigonometry')">Trigonometry</button>
-                <button class="btn-selection" onclick="selectChapter('calculus')">Calculus</button>
+                <button class="btn-selection" onclick="selectChapter('trigonometry')">Trigonometric Sector</button>
+                <button class="btn-selection" onclick="selectChapter('calculus')">Calculus Nebula</button>
             </div>
         </div>
 
@@ -82,38 +82,38 @@
         <div id="screen-game" class="screen hidden">
             <div class="game-hud">
                 <div class="hud-pill"><span id="lives">❤️❤️❤️</span></div>
-                <div class="timer-track"><div id="timer-fill"></div></div>
-                <div class="hud-pill">Score: <span id="streak">0</span></div>
+                <div class="energy-bar"><div id="timer-fill"></div></div>
+                <div class="hud-pill">Dist: <span id="streak">0</span>ly</div>
             </div>
-            <div class="question-canvas">
+            <div class="coordinate-canvas">
                 <div id="formula-display"></div>
             </div>
             <div id="options-grid" class="options-layout"></div>
         </div>
 
-        <!-- VAULT & LOGS (Minimalist Lists) -->
+        <!-- VAULT & LOGS -->
         <div id="screen-learn" class="screen hidden">
-            <button class="btn-back" onclick="showScreen('screen-home')">← Home</button>
-            <h2>Neural Vault</h2>
+            <button class="btn-back" onclick="showScreen('screen-home')">← Bridge</button>
+            <h2>Star Atlas</h2>
             <div id="vault-content" class="scroll-area"></div>
         </div>
 
         <div id="screen-diagnostics" class="screen hidden">
-            <button class="btn-back" onclick="showScreen('screen-home')">← Home</button>
-            <h2>Failure Logs</h2>
+            <button class="btn-back" onclick="showScreen('screen-home')">← Bridge</button>
+            <h2>Black Box Logs</h2>
             <div id="diagnostic-results" class="scroll-area"></div>
         </div>
     </div>
 
     <!-- ROAST OVERLAY -->
     <div id="roast-popup" class="overlay hidden">
-        <div class="bottom-sheet">
+        <div class="cosmic-modal">
             <p id="roast-message"></p>
             <div class="correction-box">
-                <small>Correct Identity</small>
+                <small>True Coordinate</small>
                 <div id="correction-display"></div>
             </div>
-            <button class="btn-main" onclick="resumeAfterRoast()">Acknowledge</button>
+            <button class="btn-main" onclick="resumeAfterRoast()">Recalibrate</button>
         </div>
     </div>
 
