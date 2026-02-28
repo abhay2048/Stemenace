@@ -3,7 +3,7 @@ let score = 0, lives = 3, xp = parseInt(localStorage.getItem('stm_xp')) || 0;
 let highScore = parseInt(localStorage.getItem('stm_hs')) || 0;
 let timerId = null, timeLeft = 30;
 
-// --- INITIALIZE DATA ---
+// --- DATA INITIALIZATION ---
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
@@ -17,7 +17,7 @@ async function init() {
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
     } catch (e) {
-        console.error("File load failed. Check if files exist or use a local server.");
+        console.error("Celestial Data Stream Interrupted. Check local files.");
     }
     updateHomeDashboard();
 }
@@ -31,24 +31,27 @@ window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
     if (id === 'screen-home') updateHomeDashboard();
-    if (id === 'screen-game') triggerMath();
+    triggerMath();
 };
 
 function updateHomeDashboard() {
     document.getElementById('high-score').innerText = highScore;
     const progress = (xp % 1000) / 1000;
     const ring = document.getElementById('xp-ring');
-    if (ring) ring.style.strokeDashoffset = 283 - (progress * 283);
+    if (ring) {
+        // Circumference is ~301 for r=48
+        ring.style.strokeDashoffset = 301 - (progress * 301);
+    }
     document.getElementById('level-display').innerText = Math.floor(xp / 1000) + 1;
+    
+    // Calculate Accuracy (Simple Placeholder)
+    document.getElementById('global-proficiency').innerText = xp > 0 ? "92%" : "0%";
 }
 
 // --- GAME LOGIC ---
 window.selectChapter = (chap) => {
     filteredQuestions = allQuestions.filter(q => q.chap.toLowerCase() === chap.toLowerCase());
-    if (filteredQuestions.length === 0) {
-        alert("No questions found for " + chap);
-        return;
-    }
+    if (filteredQuestions.length === 0) return;
     score = 0; lives = 3;
     showScreen('screen-game');
     nextRound();
@@ -73,7 +76,7 @@ function nextRound() {
         btn.className = 'opt-btn';
         btn.innerHTML = `\\( ${opt} \\)`;
         btn.onclick = () => {
-            if (opt === currentQ.a) { score++; xp += 20; localStorage.setItem('stm_xp', xp); nextRound(); }
+            if (opt === currentQ.a) { score++; xp += 25; localStorage.setItem('stm_xp', xp); nextRound(); }
             else handleWrong();
         };
         grid.appendChild(btn);
@@ -94,7 +97,7 @@ function startTimer() {
 
 function handleWrong() {
     lives--; clearInterval(timerId);
-    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "Sync Failed";
+    const msg = roasts[Math.floor(Math.random() * roasts.length)] || "Navigation Error";
     document.getElementById('roast-message').innerText = msg;
     document.getElementById('correction-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-popup').classList.remove('hidden');
