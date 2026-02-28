@@ -72,7 +72,6 @@ function updateHomeDashboard() {
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     document.getElementById('global-proficiency').innerText = prof + "%";
 }
-
 // --- GAME CORE ---
 window.selectChapter = (chap) => {
     filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap);
@@ -209,5 +208,6 @@ async function init() {
     if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
 }
 init();
+
 
 
