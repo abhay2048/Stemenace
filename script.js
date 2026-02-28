@@ -72,37 +72,76 @@ function updateHomeDashboard() {
     const prof = correctHistory.global.total > 0 ? Math.round((correctHistory.global.correct / correctHistory.global.total) * 100) : 0;
     document.getElementById('global-proficiency').innerText = prof + "%";
 }
-// --- GAME CORE ---
+// --- IMPROVED CHAPTER SELECTION ---
 window.selectChapter = (chap) => {
-    filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap);
+    // Force lowercase comparison to avoid naming mismatches
+    filteredQuestions = allQuestions.filter(q => q.chapter.toLowerCase() === chap.toLowerCase());
+    
+    if (filteredQuestions.length === 0) {
+        alert("CRITICAL: No questions found for domain: " + chap);
+        showScreen('screen-home');
+        return;
+    }
     showScreen('screen-difficulty');
 };
 
 window.selectPriorityDrill = () => {
     const failedIds = Object.keys(formulaAnalytics);
     filteredQuestions = allQuestions.filter(q => failedIds.indexOf(q.q) !== -1);
+    
+    if (filteredQuestions.length === 0) {
+        alert("NEURAL DEBT CLEAR: No repairs needed.");
+        showScreen('screen-home');
+        return;
+    }
     showScreen('screen-difficulty');
 };
+
 
 window.selectDifficulty = (sec) => {
     timeLimit = sec; lives = 3; score = 0; neuralDebt = [];
     updateHUD(); showScreen('screen-game'); nextRound();
 };
 
+// --- ROBUST NEXT ROUND ---
 function nextRound() {
     if (timerId) clearInterval(timerId);
+    
+    // SAFETY CHECK: If for some reason the list is empty, abort to avoid crash
+    if (!filteredQuestions || filteredQuestions.length === 0) {
+        console.error("Game aborted: filteredQuestions is empty.");
+        showScreen('screen-home');
+        return;
+    }
+
     document.getElementById('panic-overlay').classList.add('hidden');
-    currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
+    
+    // Pick a random question
+    const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
+    currentQ = filteredQuestions[randomIndex];
+
+    // Double-check currentQ exists
+    if (!currentQ) {
+        showScreen('screen-home');
+        return;
+    }
+
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    
     const grid = document.getElementById('options-grid');
     grid.innerHTML = "";
-    [...currentQ.options].sort(() => 0.5 - Math.random()).forEach(opt => {
+
+    // Shuffle options
+    const shuffledOptions = [...currentQ.options].sort(() => 0.5 - Math.random());
+    
+    shuffledOptions.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerHTML = `\\( ${opt} \\)`;
         btn.onclick = () => handleChoice(opt);
         grid.appendChild(btn);
     });
+
     triggerMathUpdates();
     resetTimer();
 }
@@ -193,21 +232,48 @@ function populateDiagnostics() {
     triggerMathUpdates();
 }
 
+// --- INITIALIZATION FALLBACK ---
 async function init() {
     try {
-        const [fRes, rRes] = await Promise.all([fetch('mathformula.txt'), fetch('roast.txt')]);
+        const [fRes, rRes] = await Promise.all([
+            fetch('mathformula.txt').catch(e => ({ok: false})), 
+            fetch('roast.txt').catch(e => ({ok: false}))
+        ]);
+
         if (fRes.ok) {
-            allQuestions = (await fRes.text()).split('\n').filter(l => l.includes('::')).map(l => {
-                const p = l.split('::');
-                return { chapter: p[0].trim(), q: p[1].trim(), correct: p[2].trim(), options: [p[2].trim(), p[3].trim(), p[4].trim(), p[5].trim()] };
-            });
+            const text = await fRes.text();
+            allQuestions = text.split('\n')
+                .filter(l => l.includes('::'))
+                .map(l => {
+                    const p = l.split('::').map(s => s.trim());
+                    return { 
+                        chapter: p[0], 
+                        q: p[1], 
+                        correct: p[2], 
+                        options: [p[2], p[3], p[4], p[5]] 
+                    };
+                });
         }
-        if (rRes.ok) roasts = (await rRes.text()).split('\n').filter(l => l.trim() !== "");
-    } catch(e) {}
-    if (allQuestions.length === 0) allQuestions = [{chapter:"SYSTEM", q:"1+1", correct:"2", options:["2","3","4","5"]}];
-    if (!callsign) showScreen('screen-login'); else showScreen('screen-home');
+
+        if (rRes.ok) {
+            const rText = await rRes.text();
+            roasts = rText.split('\n').filter(l => l.trim() !== "");
+        }
+    } catch(e) {
+        console.error("Initialization Error:", e);
+    }
+
+    // FINAL FALLBACK: If file loading failed, don't leave the array empty
+    if (allQuestions.length === 0) {
+        allQuestions = [
+            {chapter: "trigonometry", q: "\\sin^2 x + \\cos^2 x", correct: "1", options: ["1", "0", "\\tan x", "-1"]},
+            {chapter: "calculus", q: "\\frac{d}{dx} x^2", correct: "2x", options: ["2x", "x", "x^2", "1"]}
+        ];
+    }
+
+    if (!callsign) showScreen('screen-login'); 
+    else showScreen('screen-home');
 }
-init();
 
 
 
