@@ -9,27 +9,24 @@
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center', scale: 1.1 }
+            chtml: { displayAlign: 'center', scale: 1.25 }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="panic-overlay" class="hidden"></div>
-    
     <div class="app-container">
         <!-- HOME SCREEN -->
         <div id="screen-home" class="screen">
             <header class="user-header">
                 <div class="greeting">
-                    <p class="date-label">Daily Summary</p>
+                    <p class="date-label">Neural Summary</p>
                     <h1 id="user-callsign">Operator</h1>
                 </div>
-                <div class="profile-circle" onclick="changeCallsign()"></div>
+                <div class="profile-circle"></div>
             </header>
 
-            <!-- CIRCULAR PROGRESS -->
             <div class="progress-section">
                 <div class="progress-circle">
                     <svg viewBox="0 0 100 100">
@@ -37,66 +34,82 @@
                         <circle id="xp-ring" class="prog" cx="50" cy="50" r="45"></circle>
                     </svg>
                     <div class="progress-content">
-                        <span id="level-display">Level 1</span>
-                        <small>Neural Sync</small>
+                        <span id="level-display">1</span>
+                        <small>Neural Level</small>
                     </div>
                 </div>
             </div>
 
-            <!-- STAT CARDS -->
             <div class="stat-grid">
                 <div class="stat-card">
                     <label>Peak Streak</label>
                     <div id="high-score" class="value">0</div>
                 </div>
                 <div class="stat-card">
-                    <label>Proficiency</label>
+                    <label>Accuracy</label>
                     <div id="global-proficiency" class="value">0%</div>
                 </div>
             </div>
 
-            <div class="action-list">
-                <button class="btn-main" onclick="showScreen('screen-chapters')">Enter Practice Arena</button>
-            </div>
+            <button class="btn-main" onclick="showScreen('screen-chapters')">Start Practice Session</button>
 
-            <!-- BOTTOM NAVIGATION -->
             <nav class="bottom-nav">
                 <div class="nav-item active" onclick="showScreen('screen-home')">
-                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 </div>
                 <div class="nav-item" onclick="showScreen('screen-learn')">
-                    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2L20 2v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2L20 2v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 </div>
                 <div class="nav-item" onclick="showScreen('screen-diagnostics')">
-                    <svg viewBox="0 0 24 24"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                 </div>
             </nav>
         </div>
 
-        <!-- PRACTICE SCREEN -->
-        <div id="screen-game" class="screen hidden">
-            <div class="game-top">
-                <div class="hud-pill"><span id="lives">❤️❤️❤️</span></div>
-                <div class="timer-bar-wrap"><div id="timer-fill"></div></div>
+        <!-- CHAPTER SELECTION -->
+        <div id="screen-chapters" class="screen hidden">
+            <div class="screen-header">
+                <button class="btn-back" onclick="showScreen('screen-home')">← Back</button>
+                <h2>Target Domain</h2>
             </div>
+            <div class="selection-list">
+                <button class="btn-selection" onclick="selectChapter('trigonometry')">Trigonometry</button>
+                <button class="btn-selection" onclick="selectChapter('calculus')">Calculus</button>
+            </div>
+        </div>
 
+        <!-- ARENA -->
+        <div id="screen-game" class="screen hidden">
+            <div class="game-hud">
+                <div class="hud-pill"><span id="lives">❤️❤️❤️</span></div>
+                <div class="timer-track"><div id="timer-fill"></div></div>
+                <div class="hud-pill">Score: <span id="streak">0</span></div>
+            </div>
             <div class="question-canvas">
                 <div id="formula-display"></div>
             </div>
-
             <div id="options-grid" class="options-layout"></div>
-            
-            <button class="btn-text" onclick="showScreen('screen-home')">End Session</button>
         </div>
 
-        <!-- OTHER SCREENS (CHAPTERS, OVER) ARE HANDLED DYNAMICALLY VIA JS -->
+        <!-- VAULT & LOGS (Minimalist Lists) -->
+        <div id="screen-learn" class="screen hidden">
+            <button class="btn-back" onclick="showScreen('screen-home')">← Home</button>
+            <h2>Neural Vault</h2>
+            <div id="vault-content" class="scroll-area"></div>
+        </div>
+
+        <div id="screen-diagnostics" class="screen hidden">
+            <button class="btn-back" onclick="showScreen('screen-home')">← Home</button>
+            <h2>Failure Logs</h2>
+            <div id="diagnostic-results" class="scroll-area"></div>
+        </div>
     </div>
-    
-    <!-- MODAL FOR ROASTS -->
+
+    <!-- ROAST OVERLAY -->
     <div id="roast-popup" class="overlay hidden">
-        <div class="bottom-card">
+        <div class="bottom-sheet">
             <p id="roast-message"></p>
-            <div class="identity-box">
+            <div class="correction-box">
                 <small>Correct Identity</small>
                 <div id="correction-display"></div>
             </div>
