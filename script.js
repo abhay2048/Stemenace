@@ -5,6 +5,7 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30, isMuted = false;
 
+// Audio context
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSfx(f, t, d) {
     if (isMuted) return;
@@ -43,7 +44,7 @@ function showScreen(id) {
     if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
     if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
     if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
-    if (window.MathJax) window.MathJax.typeset();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.submitLogin = () => {
@@ -61,11 +62,20 @@ function updateDash() {
     document.getElementById('best-val').innerText = best;
     const progress = (xp % 1000) / 1000;
     document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 301.59 - (progress * 301.59);
+    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
     document.getElementById('rank-tag').innerText = "Mastery: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+    
+    // Space Management: Update Weakness Preview
+    const previewList = document.getElementById('preview-list');
+    const gaps = Object.keys(failLogs);
+    if (gaps.length > 0) {
+        const lastGap = gaps[gaps.length - 1];
+        previewList.innerHTML = `<div class="math-rail" style="font-size:0.8rem">\\( ${lastGap} \\)</div>`;
+        document.getElementById('repair-btn').style.display = 'block';
+    }
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.selectChapter = (c) => {
@@ -94,7 +104,7 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'opt-btn';
+        b.className = 'opt-btn prestige-card';
         b.innerHTML = `<div class="math-rail">\\( ${o} \\)</div>`;
         b.onclick = () => {
             history.total++;
@@ -105,7 +115,7 @@ function nextRound() {
         };
         stack.appendChild(b);
     });
-    if (window.MathJax) window.MathJax.typeset();
+    if (window.MathJax) window.MathJax.typesetPromise();
     startTimer();
 }
 
@@ -121,10 +131,10 @@ function startTimer() {
 function handleFail() {
     lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus required.";
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study required.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
-    if (window.MathJax) window.MathJax.typeset();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.closeRoast = () => {
@@ -135,14 +145,14 @@ window.closeRoast = () => {
 function populateVault() {
     const cont = document.getElementById('vault-list');
     cont.innerHTML = allQ.map(q => `
-        <div class="list-card" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
+        <div class="list-card prestige-card" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
             <div class="math-rail">\\( ${q.q} \\)</div>
             <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">
                 <div class="math-rail">\\( ${q.a} \\)</div>
             </div>
         </div>
     `).join('');
-    if (window.MathJax) window.MathJax.typeset();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 function populateLogs() {
@@ -153,7 +163,7 @@ function populateLogs() {
             <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
         </div>
     `).join('') || "<p class='label'>No records found.</p>";
-    if (window.MathJax) window.MathJax.typeset();
+    if (window.MathJax) window.MathJax.typesetPromise();
 }
 
 window.startRepair = () => {
