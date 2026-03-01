@@ -2,10 +2,9 @@ let allQuestions = [], filteredQuestions = [], roasts = [], failLogs = {};
 let currentQ = null, score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
 let callsign = localStorage.getItem('ax_callsign') || "";
-let history = JSON.parse(localStorage.getItem('ax_hist')) || { total:0, correct:0 };
-let timerId = null, timeLeft = 30, isMuted = false, timeLimit = 30;
+let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
+let timerId = null, timeLimit = 30, isMuted = false;
 
-// --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, t, d) {
     if (isMuted) return;
@@ -16,10 +15,7 @@ function playSound(f, t, d) {
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(audioCtx.currentTime + d);
 }
-window.uiClick = () => { if(audioCtx.state==='suspended') audioCtx.resume(); playSound(600, 'sine', 0.1); };
-window.toggleMute = () => { isMuted = !isMuted; document.getElementById('mute-btn').innerText = isMuted ? "🔇" : "🔊"; };
 
-// --- INIT ---
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
@@ -31,7 +27,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Sync Error."); }
+    } catch (e) { console.error("Sync Failed"); }
     
     if (!callsign) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
@@ -39,14 +35,12 @@ async function init() {
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.dock-tab').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
-    if (id === 'screen-home') updateDashboard();
-    if (id === 'screen-library') populateLibrary();
-    if (id === 'screen-gaps') populateGaps();
     
-    const idx = { 'screen-home': 0, 'screen-library': 1, 'screen-gaps': 2 }[id];
-    if (idx !== undefined) document.querySelectorAll('.dock-item')[idx].classList.add('active');
+    if (id === 'screen-home') { updateDashboard(); document.querySelectorAll('.dock-tab')[0].classList.add('active'); }
+    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-tab')[1].classList.add('active'); }
+    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-tab')[2].classList.add('active'); }
     if (window.MathJax) window.MathJax.typeset();
 }
 
@@ -60,71 +54,26 @@ window.submitLogin = () => {
     }
 };
 
-window.changeCallsign = () => {
-    const n = prompt("UPDATE_IDENTITY:");
-    if(n) { callsign = n.toUpperCase(); localStorage.setItem('ax_callsign', callsign); updateDashboard(); }
-};
-
 function updateDashboard() {
     document.getElementById('user-display').innerText = callsign;
     document.getElementById('best-streak').innerText = best;
+    const level = Math.floor(xp / 1000) + 1;
     const progress = (xp % 1000) / 1000;
-    document.getElementById('lvl-num').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
+    document.getElementById('lvl-display').innerText = level;
+    document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
-    document.getElementById('accuracy-pct').innerText = acc + "%";
-    const rank = best > 50 ? "NEURAL ACE" : best > 20 ? "OPERATOR" : "CONSTANT";
-    document.getElementById('current-rank').innerText = "ORDER: " + rank;
-    document.getElementById('priority-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+    document.getElementById('accuracy-val').innerText = acc + "%";
+    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+    document.getElementById('user-rank').innerText = "Rank: " + (best > 50 ? "Ace" : best > 20 ? "Operator" : "Constant");
 }
 
-function populateLibrary() {
-    const container = document.getElementById('vault-list');
-    const grouped = {};
-    allQuestions.forEach(q => { if(!grouped[q.chap]) grouped[q.chap]=[]; grouped[q.chap].push(q); });
-    container.innerHTML = Object.entries(grouped).map(([chap, qs]) => `
-        <div class="vault-header" style="color:var(--accent); font-size:0.7rem; letter-spacing:2px; margin:20px 0 10px; font-weight:800">${chap.toUpperCase()}</div>
-        ${qs.map(q => `
-            <div class="stat-depth" style="margin-bottom:12px; cursor:pointer; text-align:left;" onclick="this.classList.toggle('active-flash')">
-                <div style="font-size:1rem">\\( ${q.q} \\)</div>
-                <div class="ans-hidden" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">\\( ${q.a} \\)</div>
-            </div>
-        `).join('')}
-    `).join('');
-    // CSS for flashcards handled via JS toggle
-    document.querySelectorAll('.active-flash').forEach(el => el.querySelector('.ans-hidden').style.display = 'block');
-    if (window.MathJax) window.MathJax.typeset();
-}
-
-// Flashcard toggle help
-document.addEventListener('click', (e) => {
-    const card = e.target.closest('.stat-depth');
-    if (card && card.parentElement.id === 'vault-list') {
-        const ans = card.querySelector('.ans-hidden');
-        ans.style.display = ans.style.display === 'none' ? 'block' : 'none';
-        if (window.MathJax) window.MathJax.typeset();
-    }
-});
-
-function populateGaps() {
-    const container = document.getElementById('logs-list');
-    const sorted = Object.entries(failLogs).sort((a,b)=>b[1]-a[1]);
-    container.innerHTML = sorted.map(([m, c]) => `
-        <div class="stat-depth" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:0.8rem">\\( ${m} \\)</div>
-            <span style="color:var(--accent); font-weight:800">x${c}</span>
-        </div>
-    `).join('') || "<p class='label'>CLEAN_LOGS</p>";
-    if (window.MathJax) window.MathJax.typeset();
-}
-
-window.selectChapter = (c) => {
-    filteredQuestions = allQuestions.filter(q => q.chap.toLowerCase() === c.toLowerCase());
+window.selectSubject = (sub) => {
+    filteredQuestions = allQuestions.filter(q => q.chap.toLowerCase() === sub.toLowerCase());
     showScreen('screen-difficulty');
 };
 
-window.selectDifficulty = (s) => {
-    timeLimit = s; score = 0; lives = 3;
+window.setDifficulty = (sec) => {
+    timeLimit = sec; score = 0; lives = 3;
     showScreen('screen-game');
     nextRound();
 };
@@ -135,20 +84,21 @@ function nextRound() {
         showScreen('screen-home');
         return;
     }
-    currentQ = filteredQuestions[Math.floor(Math.random()*filteredQuestions.length)];
-    document.getElementById('math-target').innerHTML = `\\[ ${currentQ.q} \\]`;
-    document.getElementById('game-streak').innerText = score;
-    document.getElementById('game-lives').innerText = "❤️".repeat(lives);
+    currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
+    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    document.getElementById('streak-display').innerText = score;
+    document.getElementById('lives-display').innerText = "❤️".repeat(lives);
+
     const stack = document.getElementById('options-stack');
     stack.innerHTML = "";
-    [...currentQ.opts].sort(()=>Math.random()-0.5).forEach(o => {
+    [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
         b.className = 'opt-btn';
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
-            if(o === currentQ.a) { score++; xp += 25; history.correct++; playSound(1000, 'sine', 0.1); nextRound(); }
-            else { handleFail(); }
+            if (o === currentQ.a) { score++; xp += 20; history.correct++; playSound(800, 'sine', 0.1); nextRound(); }
+            else handleFail();
             localStorage.setItem('ax_xp', xp);
             localStorage.setItem('ax_hist', JSON.stringify(history));
         };
@@ -162,23 +112,51 @@ function startTimer() {
     clearInterval(timerId); let cur = timeLimit;
     timerId = setInterval(() => {
         cur -= 0.1;
-        document.getElementById('timer-bar').style.width = (cur/timeLimit)*100 + "%";
-        if(cur <= 0) handleFail();
+        document.getElementById('timer-bar').style.width = (cur / timeLimit) * 100 + "%";
+        if (cur <= 0) handleFail();
     }, 100);
 }
 
 function handleFail() {
-    lives--; clearInterval(timerId); playSound(200, 'sawtooth', 0.3);
+    lives--; clearInterval(timerId); playSound(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    document.getElementById('roast-text').innerText = roasts[Math.floor(Math.random()*roasts.length)] || "SYNC_ERROR";
-    document.getElementById('math-correction').innerHTML = `\\[ ${currentQ.a} \\]`;
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Try Again.";
+    document.getElementById('correct-formula-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     if (window.MathJax) window.MathJax.typeset();
 }
 
-window.resumeAfterRoast = () => {
+window.resumeGame = () => {
     document.getElementById('roast-overlay').classList.add('hidden');
     nextRound();
+};
+
+function populateVault() {
+    const cont = document.getElementById('vault-content');
+    cont.innerHTML = allQuestions.map(q => `
+        <div class="flashcard" onclick="const a = this.querySelector('.flash-a'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
+            <div style="font-weight:600">\\( ${q.q} \\)</div>
+            <div class="flash-a">\\( ${q.a} \\)</div>
+        </div>
+    `).join('');
+    if (window.MathJax) window.MathJax.typeset();
+}
+
+function populateLogs() {
+    const cont = document.getElementById('logs-content');
+    cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
+        <div class="stat-card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem">\\( ${q} \\)</div>
+            <span style="color:var(--accent); font-weight:800">x${c}</span>
+        </div>
+    `).join('') || "<p class='label'>No Gaps Logged</p>";
+    if (window.MathJax) window.MathJax.typeset();
+}
+
+window.startRepair = () => {
+    const bad = Object.keys(failLogs);
+    filteredQuestions = allQuestions.filter(q => bad.includes(q.q));
+    showScreen('screen-difficulty');
 };
 
 init();
