@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXIOM | Complete</title>
+    <title>AXIOM | Depth Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
@@ -17,17 +17,18 @@
 </head>
 <body>
     <div class="scribble-bg"></div>
+    <div class="vignette"></div>
 
     <div class="app-container">
-        <!-- 1. LOGIN SCREEN -->
+        <!-- 1. AUTH SCREEN -->
         <div id="screen-login" class="screen">
             <div class="brand-hero">
                 <h1>AXIOM</h1>
-                <p class="label">v4.0 Complete Interface</p>
+                <p class="label">COGNITIVE_INTERFACE_v4.2</p>
             </div>
-            <div class="glass-card login-box">
-                <input type="text" id="callsign-input" placeholder="Operator Name...">
-                <button class="btn-cta" onclick="submitLogin()">Initialize</button>
+            <div class="depth-card login-box">
+                <input type="text" id="callsign-input" placeholder="OPERATOR_IDENTITY">
+                <button class="btn-cta" onclick="submitLogin()">AUTH_INIT</button>
             </div>
         </div>
 
@@ -35,10 +36,10 @@
         <div id="screen-home" class="screen hidden">
             <header class="main-nav">
                 <div class="brand">
-                    <span id="current-rank" class="rank-badge">Rank: Constant</span>
+                    <span id="current-rank" class="rank-badge">ORDER: CONSTANT</span>
                     <h1 id="user-display">---</h1>
                 </div>
-                <button id="mute-btn" class="icon-btn-small" onclick="toggleMute()">🔊</button>
+                <button id="mute-btn" class="mute-toggle" onclick="toggleMute()">🔊</button>
             </header>
 
             <div class="hero-circle">
@@ -49,50 +50,50 @@
                     </svg>
                     <div class="ring-content">
                         <span id="lvl-num">1</span>
-                        <small>Efficiency</small>
+                        <small>EFFICIENCY</small>
                     </div>
                 </div>
             </div>
 
             <div class="stats-row">
-                <div class="stat-glass" onclick="changeCallsign()">
-                    <label>Best Streak</label>
+                <div class="stat-depth" onclick="changeCallsign()">
+                    <label>PEAK_SYNC</label>
                     <span id="best-streak" class="val">0</span>
                 </div>
-                <div class="stat-glass">
-                    <label>Accuracy</label>
+                <div class="stat-depth">
+                    <label>PRECISION</label>
                     <span id="accuracy-pct" class="val">0%</span>
                 </div>
             </div>
 
             <div class="action-stack">
-                <button class="btn-cta" onclick="uiClick(); showScreen('screen-chapters')">Enter Arena</button>
-                <button id="priority-btn" class="btn-glass" style="display:none;" onclick="selectPriorityDrill()">Repair Debt</button>
+                <button class="btn-cta" onclick="uiClick(); showScreen('screen-chapters')">INITIATE_DRILL</button>
+                <button id="priority-btn" class="btn-ghost" style="display:none;" onclick="selectPriorityDrill()">COGNITIVE_REPAIR</button>
             </div>
         </div>
 
-        <!-- 3. CHAPTERS -->
+        <!-- 3. DOMAINS -->
         <div id="screen-chapters" class="screen hidden">
             <div class="page-header">
-                <button class="btn-back" onclick="showScreen('screen-home')">← Dashboard</button>
-                <h2>Domains</h2>
+                <button class="btn-back" onclick="showScreen('screen-home')">← DASHBOARD</button>
+                <h2>SELECT_DOMAIN</h2>
             </div>
             <div class="stack-list">
-                <button class="glass-btn" onclick="selectChapter('trigonometry')">Trigonometry</button>
-                <button class="glass-btn" onclick="selectChapter('calculus')">Calculus</button>
+                <button class="depth-btn" onclick="selectChapter('trigonometry')">TRIGONOMETRIC_SECTOR</button>
+                <button class="depth-btn" onclick="selectChapter('calculus')">CALCULUS_NEBULA</button>
             </div>
         </div>
 
-        <!-- 4. DIFFICULTY -->
+        <!-- 4. STRESS LEVEL -->
         <div id="screen-difficulty" class="screen hidden">
             <div class="page-header">
-                <button class="btn-back" onclick="showScreen('screen-chapters')">← Domains</button>
-                <h2>Stress Level</h2>
+                <button class="btn-back" onclick="showScreen('screen-chapters')">← DOMAINS</button>
+                <h2>STRESS_LEVEL</h2>
             </div>
             <div class="stack-list">
-                <button class="glass-btn" onclick="selectDifficulty(30)">Stable (30s)</button>
-                <button class="glass-btn" onclick="selectDifficulty(15)">Volatile (15s)</button>
-                <button class="glass-btn critical" onclick="selectDifficulty(8)">Critical (8s)</button>
+                <button class="depth-btn" onclick="selectDifficulty(30)">NOMINAL (30S)</button>
+                <button class="depth-btn" onclick="selectDifficulty(15)">FLUX (15S)</button>
+                <button class="depth-btn entropic" onclick="selectDifficulty(8)">ENTROPY (8S)</button>
             </div>
         </div>
 
@@ -103,41 +104,41 @@
                 <div class="timer-rail"><div id="timer-bar"></div></div>
                 <div id="game-streak" class="streak-tag">0</div>
             </div>
-            <div class="canvas-glass">
+            <div class="canvas-depth">
                 <div id="math-target"></div>
             </div>
             <div id="options-stack" class="options-vertical"></div>
         </div>
 
-        <!-- 6. LIBRARY (Vault) -->
+        <!-- 6. SYLLABARY (Vault) -->
         <div id="screen-library" class="screen hidden">
-            <div class="page-header"><h2>Library</h2><p class="label">Reference Flashcards</p></div>
+            <div class="page-header"><h2>SYLLABARY</h2><p class="label">REFERENCE_FLASHCARDS</p></div>
             <div id="vault-list" class="scroll-area"></div>
         </div>
 
-        <!-- 7. GAPS (Logs) -->
+        <!-- 7. DIVERGENCE (Logs) -->
         <div id="screen-gaps" class="screen hidden">
-            <div class="page-header"><h2>Gaps</h2><p class="label">Knowledge Repair Logs</p></div>
+            <div class="page-header"><h2>DIVERGENCE</h2><p class="label">REPAIR_LOGS</p></div>
             <div id="logs-list" class="scroll-area"></div>
         </div>
 
         <!-- NAVIGATION DOCK -->
         <nav class="dock hidden" id="main-dock">
-            <div class="dock-item active" onclick="showScreen('screen-home')">⌂<span>Home</span></div>
-            <div class="dock-item" onclick="showScreen('screen-library')">▤<span>Library</span></div>
-            <div class="dock-item" onclick="showScreen('screen-gaps')">◒<span>Gaps</span></div>
+            <div class="dock-item active" onclick="showScreen('screen-home')">⌂<span>DASH</span></div>
+            <div class="dock-item" onclick="showScreen('screen-library')">▤<span>SYLLAB</span></div>
+            <div class="dock-item" onclick="showScreen('screen-gaps')">◒<span>LOGS</span></div>
         </nav>
     </div>
 
     <!-- ROAST OVERLAY -->
     <div id="roast-overlay" class="overlay hidden">
-        <div class="glass-sheet">
+        <div class="sheet-depth">
             <p id="roast-text"></p>
             <div class="answer-box">
-                <small>Required Identity</small>
+                <small>REQUIRED_IDENTITY</small>
                 <div id="math-correction"></div>
             </div>
-            <button class="btn-cta" style="width:100%" onclick="resumeAfterRoast()">Acknowledge</button>
+            <button class="btn-cta" style="width:100%" onclick="resumeAfterRoast()">ACKNOWLEDGE</button>
         </div>
     </div>
 
