@@ -1,33 +1,38 @@
-let allQuestions = [], filteredQuestions = [], roasts = [], failLogs = {};
+// --- STATE ---
+let allQ = [], filteredQ = [], roasts = [], failLogs = {};
 let currentQ = null, score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
-let callsign = localStorage.getItem('ax_callsign') || "";
+let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30, isMuted = false;
 
+// --- AUDIO ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(f, t, d) {
+function playSfx(f, t, d) {
     if (isMuted) return;
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
+    try {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch(e){}
 }
 
+// --- INIT ---
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
             fetch('mathformula.txt').then(r => r.text()),
             fetch('roast.txt').then(r => r.text())
         ]);
-        allQuestions = fRes.split('\n').filter(l => l.includes('::')).map(l => {
+        allQ = fRes.split('\n').filter(l => l.includes('::')).map(l => {
             const p = l.split('::').map(s => s.trim());
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Sync Failed"); }
+    } catch (e) { console.error("Data Sync Interrupted"); }
     
     if (!callsign) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
@@ -38,7 +43,7 @@ function showScreen(id) {
     document.querySelectorAll('.dock-tab').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDashboard(); document.querySelectorAll('.dock-tab')[0].classList.add('active'); }
+    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-tab')[0].classList.add('active'); }
     if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-tab')[1].classList.add('active'); }
     if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-tab')[2].classList.add('active'); }
     if (window.MathJax) window.MathJax.typeset();
@@ -48,32 +53,32 @@ window.submitLogin = () => {
     const val = document.getElementById('callsign-input').value.trim();
     if (val) {
         callsign = val.toUpperCase();
-        localStorage.setItem('ax_callsign', callsign);
+        localStorage.setItem('ax_id', callsign);
         document.getElementById('main-dock').classList.remove('hidden');
         showScreen('screen-home');
     }
 };
 
-function updateDashboard() {
-    document.getElementById('user-display').innerText = callsign;
-    document.getElementById('best-streak').innerText = best;
-    const level = Math.floor(xp / 1000) + 1;
+function updateDash() {
+    document.getElementById('display-name').innerText = callsign;
+    document.getElementById('best-val').innerText = best;
     const progress = (xp % 1000) / 1000;
-    document.getElementById('lvl-display').innerText = level;
-    document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
+    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
+    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
+    document.getElementById('rank-tag').innerText = "Rank: " + (best > 50 ? "Ace" : best > 20 ? "Operator" : "Constant");
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
-    document.getElementById('user-rank').innerText = "Rank: " + (best > 50 ? "Ace" : best > 20 ? "Operator" : "Constant");
 }
 
-window.selectSubject = (sub) => {
-    filteredQuestions = allQuestions.filter(q => q.chap.toLowerCase() === sub.toLowerCase());
+// --- GAME LOGIC ---
+window.selectChapter = (c) => {
+    filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
     showScreen('screen-difficulty');
 };
 
-window.setDifficulty = (sec) => {
-    timeLimit = sec; score = 0; lives = 3;
+window.setDiff = (s) => {
+    timeLimit = s; score = 0; lives = 3;
     showScreen('screen-game');
     nextRound();
 };
@@ -84,12 +89,12 @@ function nextRound() {
         showScreen('screen-home');
         return;
     }
-    currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
+    currentQ = filteredQ[Math.floor(Math.random() * filteredQ.length)];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    document.getElementById('streak-display').innerText = score;
-    document.getElementById('lives-display').innerText = "❤️".repeat(lives);
+    document.getElementById('streak-box').innerText = score;
+    document.getElementById('lives-box').innerText = "❤️".repeat(lives);
 
-    const stack = document.getElementById('options-stack');
+    const stack = document.getElementById('options-grid');
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
@@ -97,7 +102,7 @@ function nextRound() {
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
-            if (o === currentQ.a) { score++; xp += 20; history.correct++; playSound(800, 'sine', 0.1); nextRound(); }
+            if (o === currentQ.a) { score++; xp += 20; history.correct++; playSfx(800, 'sine', 0.1); nextRound(); }
             else handleFail();
             localStorage.setItem('ax_xp', xp);
             localStorage.setItem('ax_hist', JSON.stringify(history));
@@ -112,50 +117,51 @@ function startTimer() {
     clearInterval(timerId); let cur = timeLimit;
     timerId = setInterval(() => {
         cur -= 0.1;
-        document.getElementById('timer-bar').style.width = (cur / timeLimit) * 100 + "%";
+        document.getElementById('timer-fill').style.width = (cur / timeLimit) * 100 + "%";
         if (cur <= 0) handleFail();
     }, 100);
 }
 
 function handleFail() {
-    lives--; clearInterval(timerId); playSound(200, 'sawtooth', 0.2);
+    lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Try Again.";
-    document.getElementById('correct-formula-display').innerHTML = `\\[ ${currentQ.a} \\]`;
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus Required.";
+    document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     if (window.MathJax) window.MathJax.typeset();
 }
 
-window.resumeGame = () => {
+window.closeRoast = () => {
     document.getElementById('roast-overlay').classList.add('hidden');
     nextRound();
 };
 
+// --- FEATURES ---
 function populateVault() {
-    const cont = document.getElementById('vault-content');
-    cont.innerHTML = allQuestions.map(q => `
-        <div class="flashcard" onclick="const a = this.querySelector('.flash-a'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
-            <div style="font-weight:600">\\( ${q.q} \\)</div>
-            <div class="flash-a">\\( ${q.a} \\)</div>
+    const cont = document.getElementById('vault-list');
+    cont.innerHTML = allQ.map(q => `
+        <div class="tile-btn" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
+            <div class="scroll-wrapper">\\( ${q.q} \\)</div>
+            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">\\( ${q.a} \\)</div>
         </div>
     `).join('');
     if (window.MathJax) window.MathJax.typeset();
 }
 
 function populateLogs() {
-    const cont = document.getElementById('logs-content');
+    const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:0.8rem">\\( ${q} \\)</div>
-            <span style="color:var(--accent); font-weight:800">x${c}</span>
+        <div class="stat-tile" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
+            <div class="scroll-wrapper" style="font-size:0.85rem">\\( ${q} \\)</div>
+            <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
         </div>
-    `).join('') || "<p class='label'>No Gaps Logged</p>";
+    `).join('') || "<p class='label'>No Data Found</p>";
     if (window.MathJax) window.MathJax.typeset();
 }
 
 window.startRepair = () => {
     const bad = Object.keys(failLogs);
-    filteredQuestions = allQuestions.filter(q => bad.includes(q.q));
+    filteredQ = allQ.filter(q => bad.includes(q.q));
     showScreen('screen-difficulty');
 };
 
