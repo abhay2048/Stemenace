@@ -32,7 +32,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Data Sync Interrupted"); }
+    } catch (e) { console.error("Archive Access Failed"); }
     
     if (!callsign) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
@@ -40,12 +40,12 @@ async function init() {
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-tab')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-tab')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-tab')[2].classList.add('active'); }
+    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.nav-item')[0].classList.add('active'); }
+    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
+    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
     if (window.MathJax) window.MathJax.typeset();
 }
 
@@ -64,10 +64,10 @@ function updateDash() {
     document.getElementById('best-val').innerText = best;
     const progress = (xp % 1000) / 1000;
     document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
+    document.getElementById('xp-ring').style.strokeDashoffset = 301.59 - (progress * 301.59);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('rank-tag').innerText = "Rank: " + (best > 50 ? "Ace" : best > 20 ? "Operator" : "Constant");
+    document.getElementById('rank-tag').innerText = "Mastery: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
@@ -99,7 +99,7 @@ function nextRound() {
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
         b.className = 'opt-btn';
-        b.innerHTML = `\\( ${o} \\)`;
+        b.innerHTML = `<div class="math-scroll-container">\\( ${o} \\)</div>`;
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { score++; xp += 20; history.correct++; playSfx(800, 'sine', 0.1); nextRound(); }
@@ -125,7 +125,7 @@ function startTimer() {
 function handleFail() {
     lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus Required.";
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study required.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     if (window.MathJax) window.MathJax.typeset();
@@ -136,13 +136,15 @@ window.closeRoast = () => {
     nextRound();
 };
 
-// --- FEATURES ---
+// --- LIBRARY ---
 function populateVault() {
     const cont = document.getElementById('vault-list');
     cont.innerHTML = allQ.map(q => `
-        <div class="tile-btn" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
-            <div class="scroll-wrapper">\\( ${q.q} \\)</div>
-            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">\\( ${q.a} \\)</div>
+        <div class="category-card" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
+            <div class="math-scroll-container">\\( ${q.q} \\)</div>
+            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">
+                <div class="math-scroll-container">\\( ${q.a} \\)</div>
+            </div>
         </div>
     `).join('');
     if (window.MathJax) window.MathJax.typeset();
@@ -151,11 +153,11 @@ function populateVault() {
 function populateLogs() {
     const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-tile" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
-            <div class="scroll-wrapper" style="font-size:0.85rem">\\( ${q} \\)</div>
+        <div class="stat-box" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
+            <div class="math-scroll-container" style="font-size:0.85rem">\\( ${q} \\)</div>
             <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
         </div>
-    `).join('') || "<p class='label'>No Data Found</p>";
+    `).join('') || "<p class='label'>No records discovered.</p>";
     if (window.MathJax) window.MathJax.typeset();
 }
 
