@@ -3,127 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXIOM | Math Mastery</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>AXIOM | Obsidian</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center', scale: 1.15 }
+            chtml: { displayAlign: 'center', scale: 1.2 }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Subtle Background Scribble -->
-    <div class="math-scribble-overlay"></div>
+    <!-- Subtle Scribble Layer -->
+    <div class="scribble-bg"></div>
 
     <div class="app-container">
         
-        <!-- DASHBOARD (Home) -->
+        <!-- DASHBOARD -->
         <div id="screen-home" class="screen">
-            <header class="top-nav">
+            <header class="main-nav">
                 <div class="brand">
-                    <span class="label">Session Status</span>
+                    <p class="label">Session Status</p>
                     <h1>AXIOM</h1>
                 </div>
-                <div class="user-pill">OP-01</div>
+                <div class="user-id">OP_01</div>
             </header>
 
-            <div class="hero-progress">
-                <div class="ring-container">
+            <div class="hero-circle">
+                <div class="ring-box">
                     <svg viewBox="0 0 100 100">
-                        <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-                        <circle id="xp-ring" class="ring-prog" cx="50" cy="50" r="45"></circle>
+                        <circle class="ring-track" cx="50" cy="50" r="46"></circle>
+                        <circle id="xp-ring" class="ring-fill" cx="50" cy="50" r="46"></circle>
                     </svg>
-                    <div class="ring-label">
-                        <span id="lvl-display">1</span>
+                    <div class="ring-content">
+                        <span id="lvl-num">1</span>
                         <small>Efficiency</small>
                     </div>
                 </div>
             </div>
 
-            <div class="stat-grid">
-                <div class="stat-tile">
+            <div class="stats-row">
+                <div class="stat-glass">
                     <label>Peak Streak</label>
-                    <div id="best-streak" class="val">0</div>
+                    <span id="best-streak" class="val">0</span>
                 </div>
-                <div class="stat-tile">
+                <div class="stat-glass">
                     <label>Accuracy</label>
-                    <div id="accuracy-pct" class="val">0%</div>
+                    <span id="accuracy-pct" class="val">0%</span>
                 </div>
             </div>
 
-            <button class="action-btn" onclick="showScreen('screen-chapters')">Initiate Drill</button>
+            <button class="btn-cta" onclick="showScreen('screen-drill')">Initiate Drill</button>
         </div>
 
-        <!-- LIBRARY (Vault / Flashcards) -->
+        <!-- LIBRARY (Vault) -->
         <div id="screen-library" class="screen hidden">
-            <div class="screen-header">
+            <div class="page-header">
                 <h2>Library</h2>
-                <p class="label">Reference and flashcards</p>
+                <p class="label">Reference Flashcards</p>
             </div>
             <div id="vault-list" class="scroll-area"></div>
         </div>
 
         <!-- GAPS (Logs) -->
         <div id="screen-gaps" class="screen hidden">
-            <div class="screen-header">
+            <div class="page-header">
                 <h2>Gaps</h2>
-                <p class="label">Knowledge repair needed</p>
+                <p class="label">Knowledge Repair Needed</p>
             </div>
-            <div id="analytics-list" class="scroll-area"></div>
+            <div id="logs-list" class="scroll-area"></div>
         </div>
 
-        <!-- SELECTION -->
-        <div id="screen-chapters" class="screen hidden">
-            <div class="screen-header">
-                <button class="back-link" onclick="showScreen('screen-home')">← Dashboard</button>
-                <h2>Domains</h2>
+        <!-- DRILL MENU -->
+        <div id="screen-drill" class="screen hidden">
+            <div class="page-header">
+                <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
+                <h2>Choose Domain</h2>
             </div>
-            <div class="stack">
-                <button class="select-btn" onclick="startSession('trigonometry')">Trigonometry</button>
-                <button class="select-btn" onclick="startSession('calculus')">Calculus</button>
+            <div class="stack-list">
+                <button class="glass-btn" onclick="startArena('trigonometry')">Trigonometry</button>
+                <button class="glass-btn" onclick="startArena('calculus')">Calculus</button>
             </div>
         </div>
 
         <!-- ARENA -->
         <div id="screen-game" class="screen hidden">
-            <div class="arena-hud">
+            <div class="arena-top">
                 <div id="game-lives">❤️❤️❤️</div>
                 <div class="timer-rail"><div id="timer-bar"></div></div>
-                <div id="game-score">0</div>
+                <div id="game-streak" class="streak-tag">0</div>
             </div>
-            <div class="formula-canvas">
+            <div class="canvas-glass">
                 <div id="math-target"></div>
             </div>
-            <div id="options-grid" class="options-grid"></div>
+            <div id="options-stack" class="options-vertical"></div>
         </div>
 
-        <!-- PERSISTENT MOBILE NAV -->
-        <nav class="mobile-nav">
-            <div class="nav-btn active" onclick="showScreen('screen-home')">
+        <!-- MOBILE NAV -->
+        <nav class="dock">
+            <div class="dock-item active" onclick="showScreen('screen-home')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
             </div>
-            <div class="nav-btn" onclick="showScreen('screen-library')">
+            <div class="dock-item" onclick="showScreen('screen-library')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2L20 2v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
-            <div class="nav-btn" onclick="showScreen('screen-gaps')">
+            <div class="dock-item" onclick="showScreen('screen-gaps')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
             </div>
         </nav>
     </div>
 
-    <!-- ROAST SHEET -->
+    <!-- FEEDBACK OVERLAY -->
     <div id="roast-overlay" class="overlay hidden">
-        <div class="bottom-sheet">
-            <p id="roast-message"></p>
-            <div class="answer-card">
-                <small>Required Answer</small>
+        <div class="glass-sheet">
+            <p id="roast-text"></p>
+            <div class="answer-box">
+                <small>Identity Required</small>
                 <div id="math-correction"></div>
             </div>
-            <button class="action-btn" onclick="closeRoast()">Acknowledge</button>
+            <button class="btn-cta" onclick="closeRoast()">Recalibrate</button>
         </div>
     </div>
 
