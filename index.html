@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXIOM | Obsidian</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>AXIOM | Complete</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center', scale: 1.2 }
+            chtml: { displayAlign: 'center', scale: 1.15 }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Subtle Scribble Layer -->
     <div class="scribble-bg"></div>
 
     <div class="app-container">
-        
-        <!-- DASHBOARD -->
-        <div id="screen-home" class="screen">
+        <!-- 1. LOGIN SCREEN -->
+        <div id="screen-login" class="screen">
+            <div class="brand-hero">
+                <h1>AXIOM</h1>
+                <p class="label">v4.0 Complete Interface</p>
+            </div>
+            <div class="glass-card login-box">
+                <input type="text" id="callsign-input" placeholder="Operator Name...">
+                <button class="btn-cta" onclick="submitLogin()">Initialize</button>
+            </div>
+        </div>
+
+        <!-- 2. DASHBOARD -->
+        <div id="screen-home" class="screen hidden">
             <header class="main-nav">
                 <div class="brand">
-                    <p class="label">Session Status</p>
-                    <h1>AXIOM</h1>
+                    <span id="current-rank" class="rank-badge">Rank: Constant</span>
+                    <h1 id="user-display">---</h1>
                 </div>
-                <div class="user-id">OP_01</div>
+                <button id="mute-btn" class="icon-btn-small" onclick="toggleMute()">🔊</button>
             </header>
 
             <div class="hero-circle">
@@ -45,8 +55,8 @@
             </div>
 
             <div class="stats-row">
-                <div class="stat-glass">
-                    <label>Peak Streak</label>
+                <div class="stat-glass" onclick="changeCallsign()">
+                    <label>Best Streak</label>
                     <span id="best-streak" class="val">0</span>
                 </div>
                 <div class="stat-glass">
@@ -55,40 +65,38 @@
                 </div>
             </div>
 
-            <button class="btn-cta" onclick="showScreen('screen-drill')">Initiate Drill</button>
-        </div>
-
-        <!-- LIBRARY (Vault) -->
-        <div id="screen-library" class="screen hidden">
-            <div class="page-header">
-                <h2>Library</h2>
-                <p class="label">Reference Flashcards</p>
+            <div class="action-stack">
+                <button class="btn-cta" onclick="uiClick(); showScreen('screen-chapters')">Enter Arena</button>
+                <button id="priority-btn" class="btn-glass" style="display:none;" onclick="selectPriorityDrill()">Repair Debt</button>
             </div>
-            <div id="vault-list" class="scroll-area"></div>
         </div>
 
-        <!-- GAPS (Logs) -->
-        <div id="screen-gaps" class="screen hidden">
+        <!-- 3. CHAPTERS -->
+        <div id="screen-chapters" class="screen hidden">
             <div class="page-header">
-                <h2>Gaps</h2>
-                <p class="label">Knowledge Repair Needed</p>
-            </div>
-            <div id="logs-list" class="scroll-area"></div>
-        </div>
-
-        <!-- DRILL MENU -->
-        <div id="screen-drill" class="screen hidden">
-            <div class="page-header">
-                <button class="btn-icon" onclick="showScreen('screen-home')">←</button>
-                <h2>Choose Domain</h2>
+                <button class="btn-back" onclick="showScreen('screen-home')">← Dashboard</button>
+                <h2>Domains</h2>
             </div>
             <div class="stack-list">
-                <button class="glass-btn" onclick="startArena('trigonometry')">Trigonometry</button>
-                <button class="glass-btn" onclick="startArena('calculus')">Calculus</button>
+                <button class="glass-btn" onclick="selectChapter('trigonometry')">Trigonometry</button>
+                <button class="glass-btn" onclick="selectChapter('calculus')">Calculus</button>
             </div>
         </div>
 
-        <!-- ARENA -->
+        <!-- 4. DIFFICULTY -->
+        <div id="screen-difficulty" class="screen hidden">
+            <div class="page-header">
+                <button class="btn-back" onclick="showScreen('screen-chapters')">← Domains</button>
+                <h2>Stress Level</h2>
+            </div>
+            <div class="stack-list">
+                <button class="glass-btn" onclick="selectDifficulty(30)">Stable (30s)</button>
+                <button class="glass-btn" onclick="selectDifficulty(15)">Volatile (15s)</button>
+                <button class="glass-btn critical" onclick="selectDifficulty(8)">Critical (8s)</button>
+            </div>
+        </div>
+
+        <!-- 5. ARENA -->
         <div id="screen-game" class="screen hidden">
             <div class="arena-top">
                 <div id="game-lives">❤️❤️❤️</div>
@@ -101,29 +109,35 @@
             <div id="options-stack" class="options-vertical"></div>
         </div>
 
-        <!-- MOBILE NAV -->
-        <nav class="dock">
-            <div class="dock-item active" onclick="showScreen('screen-home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            </div>
-            <div class="dock-item" onclick="showScreen('screen-library')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2L20 2v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
-            <div class="dock-item" onclick="showScreen('screen-gaps')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-            </div>
+        <!-- 6. LIBRARY (Vault) -->
+        <div id="screen-library" class="screen hidden">
+            <div class="page-header"><h2>Library</h2><p class="label">Reference Flashcards</p></div>
+            <div id="vault-list" class="scroll-area"></div>
+        </div>
+
+        <!-- 7. GAPS (Logs) -->
+        <div id="screen-gaps" class="screen hidden">
+            <div class="page-header"><h2>Gaps</h2><p class="label">Knowledge Repair Logs</p></div>
+            <div id="logs-list" class="scroll-area"></div>
+        </div>
+
+        <!-- NAVIGATION DOCK -->
+        <nav class="dock hidden" id="main-dock">
+            <div class="dock-item active" onclick="showScreen('screen-home')">⌂<span>Home</span></div>
+            <div class="dock-item" onclick="showScreen('screen-library')">▤<span>Library</span></div>
+            <div class="dock-item" onclick="showScreen('screen-gaps')">◒<span>Gaps</span></div>
         </nav>
     </div>
 
-    <!-- FEEDBACK OVERLAY -->
+    <!-- ROAST OVERLAY -->
     <div id="roast-overlay" class="overlay hidden">
         <div class="glass-sheet">
             <p id="roast-text"></p>
             <div class="answer-box">
-                <small>Identity Required</small>
+                <small>Required Identity</small>
                 <div id="math-correction"></div>
             </div>
-            <button class="btn-cta" onclick="closeRoast()">Recalibrate</button>
+            <button class="btn-cta" style="width:100%" onclick="resumeAfterRoast()">Acknowledge</button>
         </div>
     </div>
 
