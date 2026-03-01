@@ -1,10 +1,8 @@
 let allQuestions = [], filteredQuestions = [], roasts = [], failLogs = {};
-let currentQ = null, score = 0, lives = 3;
-let xp = parseInt(localStorage.getItem('ax_xp')) || 0;
+let currentQ = null, score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
 let timerId = null, timeLeft = 30;
 
-// --- INIT DATA ---
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
@@ -16,7 +14,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Could not sync with local files."); }
+    } catch (e) { console.error("Data Sync Failure"); }
     updateDashboard();
     populateLibrary();
 }
@@ -25,25 +23,23 @@ function typeset() { if (window.MathJax) window.MathJax.typeset(); }
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    // Bottom Nav Sync
-    if(id === 'screen-home') document.querySelectorAll('.nav-btn')[0].classList.add('active');
-    if(id === 'screen-library') document.querySelectorAll('.nav-btn')[1].classList.add('active');
-    if(id === 'screen-gaps') { document.querySelectorAll('.nav-btn')[2].classList.add('active'); populateGaps(); }
+    if(id === 'screen-home') document.querySelectorAll('.dock-item')[0].classList.add('active');
+    if(id === 'screen-library') document.querySelectorAll('.dock-item')[1].classList.add('active');
+    if(id === 'screen-gaps') { document.querySelectorAll('.dock-item')[2].classList.add('active'); populateGaps(); }
     typeset();
 }
 
 function updateDashboard() {
     document.getElementById('best-streak').innerText = best;
     const progress = (xp % 1000) / 1000;
-    document.getElementById('lvl-display').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
+    document.getElementById('lvl-num').innerText = Math.floor(xp / 1000) + 1;
+    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
     document.getElementById('accuracy-pct').innerText = xp > 0 ? "92%" : "0%";
 }
 
-// --- LIBRARY & GAPS ---
 function populateLibrary() {
     const container = document.getElementById('vault-list');
     container.innerHTML = allQuestions.map(q => `
@@ -56,26 +52,25 @@ function populateLibrary() {
 }
 
 function populateGaps() {
-    const container = document.getElementById('analytics-list');
+    const container = document.getElementById('logs-list');
     const sorted = Object.entries(failLogs).sort((a,b) => b[1] - a[1]);
-    container.innerHTML = sorted.map(([math, count]) => `
-        <div class="stat-tile" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:0.8rem">\\( ${math} \\)</div>
-            <span style="color:var(--accent); font-weight:700">x${count}</span>
+    container.innerHTML = sorted.map(([m, c]) => `
+        <div class="stat-glass" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; padding:15px;">
+            <div style="font-size:0.8rem">\\( ${m} \\)</div>
+            <span style="color:var(--accent); font-weight:800">x${c}</span>
         </div>
-    `).join('') || "<p class='label'>No data logged.</p>";
+    `).join('') || "<p class='label'>Clear records.</p>";
     typeset();
 }
 
-// --- CORE GAME ---
-function startSession(chap) {
+function startArena(chap) {
     filteredQuestions = allQuestions.filter(q => q.chap.toLowerCase() === chap.toLowerCase());
     score = 0; lives = 3;
     showScreen('screen-game');
-    nextQuestion();
+    nextRound();
 }
 
-function nextQuestion() {
+function nextRound() {
     if (lives <= 0) {
         if (score > best) { best = score; localStorage.setItem('ax_best', best); }
         showScreen('screen-home');
@@ -83,20 +78,20 @@ function nextQuestion() {
     }
     currentQ = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
     document.getElementById('math-target').innerHTML = `\\[ ${currentQ.q} \\]`;
-    document.getElementById('game-score').innerText = score;
+    document.getElementById('game-streak').innerText = score;
     document.getElementById('game-lives').innerText = "❤️".repeat(lives);
 
-    const grid = document.getElementById('options-grid');
-    grid.innerHTML = "";
+    const stack = document.getElementById('options-stack');
+    stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
         b.className = 'opt-btn';
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
-            if (o === currentQ.a) { score++; xp += 20; localStorage.setItem('ax_xp', xp); nextQuestion(); }
+            if (o === currentQ.a) { score++; xp += 20; localStorage.setItem('ax_xp', xp); nextRound(); }
             else handleFail();
         };
-        grid.appendChild(b);
+        stack.appendChild(b);
     });
     typeset();
     startTimer();
@@ -114,7 +109,7 @@ function startTimer() {
 function handleFail() {
     lives--; clearInterval(timerId);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    document.getElementById('roast-message').innerText = roasts[Math.floor(Math.random()*roasts.length)] || "Failed.";
+    document.getElementById('roast-text').innerText = roasts[Math.floor(Math.random()*roasts.length)] || "Failed.";
     document.getElementById('math-correction').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     typeset();
@@ -122,7 +117,7 @@ function handleFail() {
 
 window.closeRoast = () => {
     document.getElementById('roast-overlay').classList.add('hidden');
-    nextQuestion();
+    nextRound();
 };
 
 init();
