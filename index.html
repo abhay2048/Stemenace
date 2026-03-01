@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXIOM | Mathematical Focus</title>
+    <title>AXIOM | Pulse</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             options: { enableMenu: false },
-            chtml: { displayAlign: 'center', scale: 1.2 }
+            chtml: { displayAlign: 'center', scale: 1.15 }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
@@ -19,125 +19,126 @@
     <div class="scribble-bg"></div>
 
     <div class="app-container">
-        <!-- LOGIN -->
+        <!-- AUTH SCREEN -->
         <div id="screen-login" class="screen">
-            <div class="brand-box">
-                <h1>AXIOM</h1>
-                <p class="label">v5.0 Mastery Interface</p>
-            </div>
-            <div class="glass-input-card">
-                <input type="text" id="callsign-input" placeholder="Enter Operator Name">
-                <button class="btn-primary" onclick="submitLogin()">Initialize</button>
+            <div class="auth-box">
+                <div class="auth-pulse">A</div>
+                <div class="auth-info">
+                    <h1>AXIOM</h1>
+                    <p class="label">Mathematical Navigator</p>
+                </div>
+                <div class="elevated-card login-input">
+                    <input type="text" id="callsign-input" placeholder="Operator Identity" autocomplete="off">
+                    <button class="btn-main" onclick="submitLogin()">Initialize</button>
+                </div>
             </div>
         </div>
 
         <!-- DASHBOARD -->
         <div id="screen-home" class="screen hidden">
-            <header class="dashboard-header">
-                <div class="user-block">
-                    <span id="user-rank" class="rank-tag">Rank: Constant</span>
-                    <h2 id="user-display">Operator</h2>
+            <header class="app-header">
+                <div class="user-info">
+                    <span id="rank-tag" class="rank-badge">Rank: Constant</span>
+                    <h2 id="display-name">---</h2>
                 </div>
-                <button id="mute-btn" class="circle-btn" onclick="toggleMute()">🔊</button>
+                <button id="mute-btn" class="util-btn" onclick="toggleMute()">🔊</button>
             </header>
 
-            <div class="progress-display">
-                <div class="progress-ring">
+            <div class="central-metric">
+                <div class="ring-wrapper">
                     <svg viewBox="0 0 100 100">
-                        <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-                        <circle id="xp-ring" class="ring-fill" cx="50" cy="50" r="45"></circle>
+                        <circle class="track" cx="50" cy="50" r="46"></circle>
+                        <circle id="xp-ring" class="fill" cx="50" cy="50" r="46"></circle>
                     </svg>
-                    <div class="ring-label">
-                        <span id="lvl-display">1</span>
+                    <div class="ring-data">
+                        <span id="level-val">1</span>
                         <small>Efficiency</small>
                     </div>
                 </div>
             </div>
 
             <div class="stat-grid">
-                <div class="stat-card" onclick="changeCallsign()">
-                    <label>Best Streak</label>
-                    <div id="best-streak" class="val">0</div>
+                <div class="stat-tile" onclick="changeCallsign()">
+                    <label>Peak Streak</label>
+                    <span id="best-val">0</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-tile">
                     <label>Accuracy</label>
-                    <div id="accuracy-val" class="val">0%</div>
+                    <span id="accuracy-val">0%</span>
                 </div>
             </div>
 
-            <div class="action-stack">
-                <button class="btn-primary" onclick="showScreen('screen-drill')">Start Drill</button>
-                <button id="repair-btn" class="btn-outline" style="display:none;" onclick="startRepair()">Repair Gaps</button>
+            <div class="action-menu">
+                <button class="btn-main" onclick="showScreen('screen-chapters')">Start New Drill</button>
+                <button id="repair-btn" class="btn-secondary" style="display:none;" onclick="startRepair()">Repair Gaps</button>
             </div>
         </div>
 
-        <!-- DRILL SELECTION -->
-        <div id="screen-drill" class="screen hidden">
-            <div class="header-simple">
-                <button class="back-link" onclick="showScreen('screen-home')">← Dashboard</button>
-                <h2>Choose Subject</h2>
-            </div>
-            <div class="menu-stack">
-                <button class="menu-item-glass" onclick="selectSubject('trigonometry')">Trigonometry</button>
-                <button class="menu-item-glass" onclick="selectSubject('calculus')">Calculus</button>
-            </div>
-        </div>
-
-        <!-- DIFFICULTY -->
-        <div id="screen-difficulty" class="screen hidden">
-            <div class="header-simple">
-                <button class="back-link" onclick="showScreen('screen-drill')">← Subjects</button>
-                <h2>Choose Speed</h2>
-            </div>
-            <div class="menu-stack">
-                <button class="menu-item-glass" onclick="setDifficulty(30)">Standard (30s)</button>
-                <button class="menu-item-glass" onclick="setDifficulty(15)">Rapid (15s)</button>
-                <button class="menu-item-glass absolute-mode" onclick="setDifficulty(8)">Absolute (8s)</button>
-            </div>
-        </div>
-
-        <!-- ARENA -->
+        <!-- GAME ARENA -->
         <div id="screen-game" class="screen hidden">
-            <div class="arena-hud">
-                <div id="lives-display">❤️❤️❤️</div>
-                <div class="timer-track"><div id="timer-bar"></div></div>
-                <div id="streak-display">0</div>
+            <div class="arena-header">
+                <div id="lives-box">❤️❤️❤️</div>
+                <div class="timer-rail"><div id="timer-fill"></div></div>
+                <div id="streak-box">0</div>
             </div>
-            <div class="math-canvas">
-                <div id="formula-display"></div>
+            
+            <!-- Mobile-Optimized Scrollable Math Area -->
+            <div class="math-chamber">
+                <div class="scroll-wrapper">
+                    <div id="formula-display"></div>
+                </div>
             </div>
-            <div id="options-stack" class="vertical-options"></div>
+
+            <div id="options-grid" class="options-vertical"></div>
         </div>
 
-        <!-- VAULT (LIBRARY) -->
-        <div id="screen-vault" class="screen hidden">
-            <div class="header-simple"><h2>Library</h2></div>
-            <div id="vault-content" class="scroll-area"></div>
-        </div>
-
-        <!-- GAPS (LOGS) -->
-        <div id="screen-logs" class="screen hidden">
-            <div class="header-simple"><h2>Gaps</h2></div>
-            <div id="logs-content" class="scroll-area"></div>
-        </div>
-
-        <!-- NAVIGATION -->
+        <!-- SHARED BOTTOM NAV -->
         <nav class="bottom-dock hidden" id="main-dock">
             <div class="dock-tab active" onclick="showScreen('screen-home')">⌂<span>Home</span></div>
             <div class="dock-tab" onclick="showScreen('screen-vault')">▤<span>Library</span></div>
             <div class="dock-tab" onclick="showScreen('screen-logs')">◒<span>Gaps</span></div>
         </nav>
+        
+        <!-- OTHER SCREENS (CHAPTERS, LOGS, VAULT) -->
+        <div id="screen-chapters" class="screen hidden">
+            <header class="page-header"><button class="btn-back" onclick="showScreen('screen-home')">←</button><h2>Domains</h2></header>
+            <div class="selection-stack" id="chapter-list">
+                <button class="tile-btn" onclick="selectChapter('trigonometry')">Trigonometry</button>
+                <button class="tile-btn" onclick="selectChapter('calculus')">Calculus</button>
+            </div>
+        </div>
+
+        <div id="screen-difficulty" class="screen hidden">
+            <header class="page-header"><button class="btn-back" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
+            <div class="selection-stack">
+                <button class="tile-btn" onclick="setDiff(30)">Standard (30s)</button>
+                <button class="tile-btn" onclick="setDiff(15)">Rapid (15s)</button>
+                <button class="tile-btn critical" onclick="setDiff(8)">Absolute (8s)</button>
+            </div>
+        </div>
+
+        <div id="screen-vault" class="screen hidden">
+            <header class="page-header"><h2>Library</h2></header>
+            <div id="vault-list" class="scroll-area"></div>
+        </div>
+
+        <div id="screen-logs" class="screen hidden">
+            <header class="page-header"><h2>Gaps</h2></header>
+            <div id="logs-list" class="scroll-area"></div>
+        </div>
     </div>
 
-    <!-- ROAST OVERLAY -->
+    <!-- FEEDBACK OVERLAY -->
     <div id="roast-overlay" class="overlay hidden">
-        <div class="bottom-sheet">
+        <div class="feedback-sheet">
             <p id="roast-msg"></p>
-            <div class="correct-answer-box">
-                <small>Correct Formula</small>
-                <div id="correct-formula-display"></div>
+            <div class="identity-card">
+                <small>Correct Identity</small>
+                <div class="scroll-wrapper">
+                    <div id="correct-display"></div>
+                </div>
             </div>
-            <button class="btn-primary" onclick="resumeGame()">Acknowledge</button>
+            <button class="btn-main" style="width:100%" onclick="closeRoast()">Recalibrate</button>
         </div>
     </div>
 
