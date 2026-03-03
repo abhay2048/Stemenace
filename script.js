@@ -6,22 +6,9 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30, isMuted = false;
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSfx(f, t, d) {
-    if (isMuted) return;
-    try {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e){}
-}
-
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().catch(e => console.log("Rendering..."));
+        window.MathJax.typesetPromise().catch(e => {});
     }
 }
 
@@ -36,7 +23,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Database error."); }
+    } catch (e) { console.error("Database Error"); }
     
     if (!callsign) window.showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
@@ -45,14 +32,20 @@ async function init() {
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.remove('hidden');
     
-    const target = document.getElementById(id);
-    if (target) target.classList.remove('hidden');
-    
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
-    
+    if (id === 'screen-home') { 
+        updateDash(); 
+        document.querySelectorAll('.dock-item')[0].classList.add('active'); 
+    }
+    if (id === 'screen-vault') { 
+        populateVault(); 
+        document.querySelectorAll('.dock-item')[1].classList.add('active'); 
+    }
+    if (id === 'screen-logs') { 
+        populateLogs(); 
+        document.querySelectorAll('.dock-item')[2].classList.add('active'); 
+    }
     safeTypeset();
 };
 
@@ -90,10 +83,11 @@ window.setDiff = (s) => {
 };
 
 function nextRound() {
-    if (lives <= 0) { showResults("Archive Depleted", "Your retention failed."); return; }
+    clearInterval(timerId); // Stop previous timer
+    if (lives <= 0) { showResults("Archive Depleted", "Retention failed."); return; }
     if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities verified."); return; }
 
-    currentQ = sessionQueue[0]; 
+    currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
     document.getElementById('lives-box').innerText = "❤️".repeat(lives);
@@ -108,10 +102,11 @@ function nextRound() {
             history.total++;
             if (o === currentQ.a) { 
                 score++; xp += 20; history.correct++; 
-                playSfx(800, 'sine', 0.1); sessionQueue.shift(); 
+                sessionQueue.shift(); // Remove correct answer
                 nextRound(); 
             } else handleFail();
-            localStorage.setItem('ax_xp', xp); localStorage.setItem('ax_hist', JSON.stringify(history));
+            localStorage.setItem('ax_xp', xp);
+            localStorage.setItem('ax_hist', JSON.stringify(history));
         };
         stack.appendChild(b);
     });
@@ -120,19 +115,25 @@ function nextRound() {
 }
 
 function startTimer() {
-    clearInterval(timerId); let cur = timeLimit;
+    let cur = timeLimit;
+    const bar = document.getElementById('timer-fill');
     timerId = setInterval(() => {
         cur -= 0.1;
-        document.getElementById('timer-fill').style.width = (cur / timeLimit) * 100 + "%";
+        bar.style.width = (cur / timeLimit) * 100 + "%";
         if (cur <= 0) handleFail();
     }, 100);
 }
 
 function handleFail() {
-    lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
+    clearInterval(timerId);
+    lives--;
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    const failedQ = sessionQueue.shift(); sessionQueue.push(failedQ);
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus.";
+    
+    // Logic fix: move current to end of queue
+    const failedQ = sessionQueue.shift();
+    sessionQueue.push(failedQ);
+
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     safeTypeset();
@@ -144,10 +145,8 @@ window.closeRoast = () => {
 };
 
 function showResults(title, subtitle) {
-    clearInterval(timerId);
     if (score > best) { best = score; localStorage.setItem('ax_best', best); }
     document.getElementById('results-title').innerText = title;
-    document.getElementById('results-subtitle').innerText = subtitle;
     document.getElementById('res-score').innerText = score;
     document.getElementById('res-xp').innerText = `+${score * 20}`;
     document.getElementById('results-overlay').classList.remove('hidden');
@@ -163,24 +162,20 @@ function populateVault() {
     cont.innerHTML = allQ.map(q => `
         <div class="list-card" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
             <div class="math-rail">\\( ${q.q} \\)</div>
-            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">
-                <div class="math-rail">\\( ${q.a} \\)</div>
-            </div>
+            <div class="ans" style="display:none; margin-top:10px; color:var(--accent)">\\( ${q.a} \\)</div>
         </div>
     `).join('');
-    cont.scrollTop = 0;
     safeTypeset();
 }
 
 function populateLogs() {
     const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-box" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
-            <div class="math-rail" style="font-size:0.85rem">\\( ${q} \\)</div>
-            <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
+        <div class="stat-box" style="text-align:left;">
+            <div class="math-rail">\\( ${q} \\)</div>
+            <div class="label" style="color:var(--accent)">Missed: ${c} times</div>
         </div>
-    `).join('') || "<p class='label' style='padding:40px; text-align:center;'>No records found.</p>";
-    cont.scrollTop = 0;
+    `).join('') || "<p class='label' style='padding:20px'>Clear Archive.</p>";
     safeTypeset();
 }
 
@@ -188,11 +183,6 @@ window.startRepair = () => {
     const bad = Object.keys(failLogs);
     filteredQ = allQ.filter(q => bad.includes(q.q));
     window.showScreen('screen-difficulty');
-};
-
-window.toggleMute = () => {
-    isMuted = !isMuted;
-    document.getElementById('mute-btn').innerText = isMuted ? "Sound Off" : "Quiet Mode";
 };
 
 init();
