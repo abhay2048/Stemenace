@@ -17,34 +17,42 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Scholars Background -->
     <div class="scholarly-bg">
-        <span class="float-math">Ψ</span><span class="float-math">Ω</span><span class="float-math">λ</span>
-        <span class="float-math">∫</span><span class="float-math">∬</span><span class="float-math">∮</span>
+        <span class="float-math">Ψ</span><span class="float-math">Ω</span><span class="float-math">∫</span>
+        <span class="float-math">∬</span><span class="float-math">∮</span><span class="float-math">Δ</span>
     </div>
 
-    <div class="app-container">
-        <!-- SIDEBAR / NAV -->
-        <aside class="sidebar" id="sidebar">
-            <div class="brand"><h1>AXIOM</h1></div>
-            <div class="retention-status">
-                <label class="label">Retention Index</label>
-                <div class="ring-container">
-                    <svg viewBox="0 0 100 100">
-                        <circle class="track" cx="50" cy="50" r="45"></circle>
-                        <circle id="xp-ring" class="fill" cx="50" cy="50" r="45"></circle>
-                    </svg>
-                    <div class="ring-text"><span id="level-val">1</span></div>
+    <div class="app-wrapper">
+        <!-- SIDEBAR (Desktop) / NAV (Mobile) -->
+        <aside class="sidebar" id="main-nav">
+            <div class="sidebar-top">
+                <div class="brand"><h1>AXIOM</h1></div>
+                <div class="retention-status desktop-only">
+                    <label class="label">Retention Index</label>
+                    <div class="ring-container">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="track" cx="50" cy="50" r="45"></circle>
+                            <circle id="xp-ring" class="fill" cx="50" cy="50" r="45"></circle>
+                        </svg>
+                        <div class="ring-text"><span id="level-val">1</span></div>
+                    </div>
                 </div>
             </div>
+            
             <nav class="nav-links">
-                <button class="nav-item active" onclick="showScreen('screen-home')">Library</button>
-                <button class="nav-item" onclick="showScreen('screen-vault')">The Archive</button>
-                <button class="nav-item" onclick="showScreen('screen-logs')">Knowledge Gaps</button>
+                <button class="nav-item active" onclick="showScreen('screen-home')">
+                    <span class="icon">🏛️</span><span class="nav-text">Library</span>
+                </button>
+                <button class="nav-item" onclick="showScreen('screen-vault')">
+                    <span class="icon">📜</span><span class="nav-text">Archive</span>
+                </button>
+                <button class="nav-item" onclick="showScreen('screen-logs')">
+                    <span class="icon">📔</span><span class="nav-text">Gaps</span>
+                </button>
             </nav>
         </aside>
 
-        <!-- MAIN AREA -->
+        <!-- MAIN CONTENT AREA -->
         <main class="main-content">
             <!-- DASHBOARD -->
             <div id="screen-home" class="screen">
@@ -53,67 +61,72 @@
                         <h2 class="serif-title" id="display-name">Scholar</h2>
                         <span class="rank-label" id="rank-tag">Rank: Novice</span>
                     </div>
+                    <div class="mobile-only mobile-ring">
+                        <span id="level-val-m">1</span>
+                    </div>
                 </header>
+                
                 <div class="scroll-area">
                     <div class="stat-grid">
                         <div class="stat-card"><label class="label">Accuracy</label><span id="accuracy-val">0%</span></div>
-                        <div class="stat-card"><label class="label">Mastery Streak</label><span id="best-val">0</span></div>
+                        <div class="stat-card"><label class="label">Best</label><span id="best-val">0</span></div>
                     </div>
+                    
                     <div class="category-grid">
-                        <button class="cat-card" onclick="selectChapter('trigonometry')"><h3>Trigonometry</h3><p>Circular & Periodic Functions</p></button>
-                        <button class="cat-card" onclick="selectChapter('calculus')"><h3>Calculus</h3><p>Differentiation & Integration</p></button>
+                        <button class="cat-card" onclick="selectChapter('trigonometry')"><h3>Trigonometry</h3><p>Periodic Functions</p></button>
+                        <button class="cat-card" onclick="selectChapter('calculus')"><h3>Calculus</h3><p>Infinitesimal Math</p></button>
                     </div>
-                    <button id="repair-btn" class="btn-repair" style="display:none;" onclick="startRepair()">Address Weaknesses</button>
+                    <button id="repair-btn" class="btn-repair" style="display:none;" onclick="startRepair()">Repair Weaknesses</button>
                 </div>
             </div>
 
             <!-- GAME ARENA -->
             <div id="screen-game" class="screen hidden">
                 <div class="arena-hud">
-                    <div id="lives-box" class="hud-item">Integrity: III</div>
+                    <div id="lives-box" class="hud-item">III</div>
                     <div class="timer-rail"><div id="timer-fill"></div></div>
-                    <div id="streak-box" class="hud-item">0</div>
+                    <div id="streak-box" class="hud-item streak-count">0</div>
                 </div>
                 <div class="arena-content">
                     <div class="formula-card">
-                        <label class="label">Identify the resolution</label>
+                        <label class="label">Identify Resolution</label>
                         <div id="formula-display" class="math-main"></div>
                     </div>
                     <div id="options-stack" class="options-grid"></div>
                 </div>
             </div>
 
-            <!-- VAULT / LOGS (Shared List Style) -->
+            <!-- SHARED LIST SCREENS -->
             <div id="screen-vault" class="screen hidden">
-                <h2 class="serif-title">Mathematical Archive</h2>
+                <h2 class="serif-title">Vault</h2>
                 <div class="scroll-area" id="vault-list"></div>
             </div>
             <div id="screen-logs" class="screen hidden">
-                <h2 class="serif-title">Inaccurate Recalls</h2>
+                <h2 class="serif-title">Gaps</h2>
                 <div class="scroll-area" id="logs-list"></div>
             </div>
         </main>
     </div>
 
-    <!-- CORRECTION OVERLAY (The Roast) -->
+    <!-- ROAST OVERLAY -->
     <div id="roast-overlay" class="overlay hidden">
         <div class="recall-sheet">
             <p id="roast-msg" class="roast-text"></p>
             <div class="correction-box">
-                <label class="label">True Resolution</label>
+                <label class="label">Identity</label>
                 <div id="correct-display"></div>
             </div>
-            <button class="btn-primary" onclick="closeRoast()">Return to Study</button>
+            <button class="btn-primary" onclick="closeRoast()">Resume Study</button>
         </div>
     </div>
 
-    <!-- LOGIN OVERLAY -->
+    <!-- LOGIN -->
     <div id="screen-login" class="overlay">
         <div class="login-card">
             <h1 class="serif-title">AXIOM</h1>
-            <p class="label">Library Access Authorization</p>
-            <input type="text" id="callsign-input" placeholder="Enter Scholar Identity..." autocomplete="off">
-            <button class="btn-primary" onclick="submitLogin()">Authorize</button>
+            <p class="label">Archive Authorization</p>
+            <input type="text" id="callsign-input" placeholder="Scholar Identity" autocomplete="off">
+            <button class="btn-primary" onclick="submitLogin()">Access</button>
         </div>
     </div>
 
