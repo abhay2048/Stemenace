@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AXIOM | Mathematical Archive</title>
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-    <!-- Fonts -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23a594f9%22>Ψ</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -19,130 +16,110 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Subtle Scholarly Decor -->
     <div class="scholarly-bg">
-        <span class="float-math">Ψ</span><span class="float-math">Ω</span><span class="float-math">∫</span>
-        <span class="float-math">λ</span><span class="float-math">Δ</span><span class="float-math">π</span>
+        <span class="symbol top-left">∫</span>
+        <span class="symbol top-right">π</span>
+        <span class="symbol bottom-left">Δ</span>
+        <span class="symbol bottom-right">Ω</span>
     </div>
 
     <div class="app-container">
-        <!-- DESKTOP SIDEBAR -->
-        <aside class="sidebar desktop-only">
-            <div class="brand"><h1>AXIOM</h1></div>
-            <nav class="nav-links">
-                <button class="nav-item active" onclick="showScreen('screen-home')">Library</button>
-                <button class="nav-item" onclick="showScreen('screen-vault')">Archive</button>
-                <button class="nav-item" onclick="showScreen('screen-logs')">Gaps</button>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="retention-mini">
-                    <label class="label">Retention</label>
-                    <span id="level-val-d">1</span>
+        <!-- AUTH SCREEN -->
+        <div id="screen-login" class="screen">
+            <div class="auth-wrap">
+                <div class="academic-seal">A</div>
+                <h1 class="serif-title main-logo">AXIOM</h1>
+                <p class="label tracking">Scholarly Archive Authorization</p>
+                <div class="auth-input-group">
+                    <input type="text" id="callsign-input" placeholder="Scholar Identity" autocomplete="off">
+                    <button class="btn-primary" onclick="submitLogin()">Authorize Access</button>
                 </div>
             </div>
-        </aside>
+        </div>
 
-        <!-- MAIN AREA -->
-        <main class="main-content">
-            <!-- DASHBOARD -->
-            <div id="screen-home" class="screen">
-                <header class="mobile-header">
-                    <div class="user-meta">
-                        <span class="label">Scholar</span>
-                        <h2 class="serif-title" id="display-name">Identity</h2>
-                    </div>
-                    <div class="retention-badge">
-                        <span id="level-val-m">1</span>
-                    </div>
-                </header>
+        <!-- DASHBOARD -->
+        <div id="screen-home" class="screen hidden">
+            <header class="scholarly-header">
+                <div class="user-info">
+                    <p class="label">Academician</p>
+                    <h2 class="serif-title" id="display-name">Identity</h2>
+                </div>
+                <div class="retention-score">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="track" cx="50" cy="50" r="45"></circle>
+                        <circle id="xp-ring" class="fill" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <span id="level-val">1</span>
+                </div>
+            </header>
 
-                <div class="scroll-wrapper">
-                    <div class="stats-row">
-                        <div class="stat-pill"><small>ACCURACY</small><b id="accuracy-val">0%</b></div>
-                        <div class="stat-pill"><small>STREAK</small><b id="best-val">0</b></div>
-                    </div>
+            <div class="scroll-content">
+                <div class="stat-banner">
+                    <div class="stat-item"><small class="label">Accuracy</small><span id="accuracy-val">0%</span></div>
+                    <div class="stat-item"><small class="label">Best Mastery</small><span id="best-val">0</span></div>
+                </div>
 
-                    <h3 class="label section-title">Select Discipline</h3>
-                    <div class="category-stack">
-                        <button class="discipline-card" onclick="selectChapter('trigonometry')">
-                            <div class="d-info"><h4>Trigonometry</h4><p>Periodic & Circular identities</p></div>
-                            <span class="d-arrow">→</span>
-                        </button>
-                        <button class="discipline-card" onclick="selectChapter('calculus')">
-                            <div class="d-info"><h4>Calculus</h4><p>Differential & Integral forms</p></div>
-                            <span class="d-arrow">→</span>
-                        </button>
-                    </div>
-                    <button id="repair-btn" class="repair-banner" style="display:none;" onclick="startRepair()">
-                        Fix Weak Points
+                <h3 class="label section-title">Discipline Archives</h3>
+                <div class="discipline-list">
+                    <button class="card-btn" onclick="selectChapter('trigonometry')">
+                        <span class="serif-title">Trigonometry</span>
+                        <small>Circular & Analytic Identities</small>
+                    </button>
+                    <button class="card-btn" onclick="selectChapter('calculus')">
+                        <span class="serif-title">Calculus</span>
+                        <small>Infinitesimal Variations</small>
                     </button>
                 </div>
+
+                <button id="repair-btn" class="btn-outline hidden" onclick="startRepair()">Address Weaknesses</button>
+            </div>
+        </div>
+
+        <!-- ARENA -->
+        <div id="screen-game" class="screen hidden">
+            <div class="arena-hud">
+                <div class="hud-label" id="lives-box">III</div>
+                <div class="timer-rail"><div id="timer-fill"></div></div>
+                <div class="hud-label" id="streak-box">0</div>
             </div>
 
-            <!-- GAME ARENA -->
-            <div id="screen-game" class="screen hidden">
-                <div class="game-hud">
-                    <div id="lives-box" class="hud-pill">Integrity: III</div>
-                    <div class="timer-rail"><div id="timer-fill"></div></div>
-                    <div id="streak-box" class="hud-pill">0</div>
+            <div class="arena-body">
+                <div class="formula-card">
+                    <label class="label">Recall Identity</label>
+                    <div id="formula-display" class="math-main"></div>
                 </div>
-
-                <div class="arena-focus">
-                    <div class="formula-box">
-                        <label class="label">Active Recall</label>
-                        <div id="formula-display" class="math-target"></div>
-                    </div>
-                </div>
-
-                <div id="options-stack" class="options-container"></div>
+                <div id="options-stack" class="options-vertical"></div>
             </div>
+        </div>
 
-            <!-- SHARED LISTS -->
-            <div id="screen-vault" class="screen hidden">
-                <div class="list-header"><h3>Archive</h3></div>
-                <div class="scroll-wrapper" id="vault-list"></div>
-            </div>
-
-            <div id="screen-logs" class="screen hidden">
-                <div class="list-header"><h3>Gaps</h3></div>
-                <div class="scroll-wrapper" id="logs-list"></div>
-            </div>
-        </main>
-
-        <!-- MOBILE BOTTOM NAV -->
-        <nav class="mobile-nav mobile-only">
-            <button class="nav-tab active" onclick="showScreen('screen-home')">
-                <span class="n-icon">🏛️</span><small>Home</small>
-            </button>
-            <button class="nav-tab" onclick="showScreen('screen-vault')">
-                <span class="n-icon">📜</span><small>Archive</small>
-            </button>
-            <button class="nav-tab" onclick="showScreen('screen-logs')">
-                <span class="n-icon">📔</span><small>Gaps</small>
-            </button>
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav hidden" id="main-nav">
+            <button class="nav-tab active" onclick="showScreen('screen-home')">Library</button>
+            <button class="nav-tab" onclick="showScreen('screen-vault')">Vault</button>
+            <button class="nav-tab" onclick="showScreen('screen-logs')">Gaps</button>
         </nav>
-    </div>
 
-    <!-- OVERLAYS -->
-    <div id="roast-overlay" class="overlay hidden">
-        <div class="roast-sheet">
-            <div class="roast-content">
-                <p id="roast-msg" class="serif-title italic"></p>
-                <div class="correction-display">
-                    <small class="label">Resolved Form</small>
-                    <div id="correct-display"></div>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="closeRoast()">Continue Study</button>
+        <!-- SUB SCREENS -->
+        <div id="screen-vault" class="screen hidden">
+            <h2 class="serif-title">The Archive</h2>
+            <div class="scroll-content" id="vault-list"></div>
+        </div>
+        <div id="screen-logs" class="screen hidden">
+            <h2 class="serif-title">Knowledge Gaps</h2>
+            <div class="scroll-content" id="logs-list"></div>
         </div>
     </div>
 
-    <div id="screen-login" class="overlay">
-        <div class="login-sheet">
-            <div class="login-seal">Ψ</div>
-            <h1 class="serif-title">AXIOM</h1>
-            <p class="label">Scholarly Archive Access</p>
-            <input type="text" id="callsign-input" placeholder="Your Identity" autocomplete="off">
-            <button class="btn-primary" onclick="submitLogin()">Authorize</button>
+    <!-- ROAST OVERLAY -->
+    <div id="roast-overlay" class="overlay hidden">
+        <div class="recall-sheet">
+            <p id="roast-msg" class="roast-text italic"></p>
+            <div class="correction-box">
+                <label class="label">True Resolution</label>
+                <div id="correct-display"></div>
+            </div>
+            <button class="btn-primary" onclick="closeRoast()">Return to Study</button>
         </div>
     </div>
 
