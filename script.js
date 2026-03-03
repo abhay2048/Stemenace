@@ -34,8 +34,16 @@ async function init() {
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.remove('hidden');
     
+    const target = document.getElementById(id);
+    if (target) target.classList.remove('hidden');
+    
+    // Set active class on the correct nav item
+    const navItems = document.querySelectorAll('.nav-item');
+    if (id === 'screen-home') navItems[0].classList.add('active');
+    if (id === 'screen-vault') navItems[1].classList.add('active');
+    if (id === 'screen-logs') navItems[2].classList.add('active');
+
     if (id === 'screen-home') updateDash();
     if (id === 'screen-vault') populateVault();
     if (id === 'screen-logs') populateLogs();
@@ -55,9 +63,14 @@ window.submitLogin = () => {
 function updateDash() {
     document.getElementById('display-name').innerText = callsign;
     document.getElementById('best-val').innerText = best;
+    
+    const level = Math.floor(xp / 1000) + 1;
     const progress = (xp % 1000) / 1000;
-    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
+    
+    document.getElementById('level-val').innerText = level;
+    document.getElementById('level-val-m').innerText = level; // Mobile Ring
     document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
+    
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
     document.getElementById('rank-tag').innerText = "Rank: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
@@ -83,7 +96,7 @@ function nextRound() {
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
-    document.getElementById('lives-box').innerText = "Integrity: " + "I".repeat(integrity);
+    document.getElementById('lives-box').innerText = "I".repeat(integrity);
 
     const stack = document.getElementById('options-stack');
     stack.innerHTML = "";
@@ -137,7 +150,7 @@ function populateVault() {
     cont.innerHTML = allQ.map(q => `
         <div class="stat-card" style="margin-bottom:15px">
             <div class="label">${q.chap}</div>
-            <div style="font-size:1.2rem; margin:10px 0">\\( ${q.q} = ${q.a} \\)</div>
+            <div style="font-size:1.1rem; margin-top:10px">\\( ${q.q} = ${q.a} \\)</div>
         </div>
     `).join('');
     safeTypeset();
@@ -147,7 +160,7 @@ function populateLogs() {
     const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
         <div class="stat-card" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-            <div>\\( ${q} \\)</div>
+            <div style="font-size:0.9rem">\\( ${q} \\)</div>
             <div class="label" style="color:var(--accent)">Missed ${c}x</div>
         </div>
     `).join('') || "<p class='label'>No records found.</p>";
