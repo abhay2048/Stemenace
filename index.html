@@ -16,85 +16,113 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Tactical Floating Symbols -->
     <div class="scholarly-bg">
         <span class="float-math">∫</span><span class="float-math">∑</span><span class="float-math">π</span>
         <span class="float-math">∂</span><span class="float-math">∮</span><span class="float-math">∞</span>
+        <span class="float-math">θ</span><span class="float-math">Δ</span><span class="float-math">√</span>
     </div>
 
     <div class="app-container">
-        <!-- AUTH -->
+        <!-- AUTH SCREEN -->
         <div id="screen-login" class="screen">
-            <div class="auth-container">
-                <div class="academic-seal">A</div>
-                <h1 class="serif-title main-logo">AXIOM</h1>
-                <p class="label">Library Access Authorization</p>
-                <div class="auth-card">
-                    <input type="text" id="callsign-input" placeholder="Scholar Identity" autocomplete="off">
-                    <button class="btn-main" onclick="submitLogin()">Access Library</button>
+            <div class="auth-center-wrap">
+                <div class="login-seal-area">
+                    <div class="seal-outer">
+                        <div class="seal-inner">A</div>
+                    </div>
+                    <div class="seal-glow"></div>
+                </div>
+                <h1 class="serif-title axiom-logo">AXIOM</h1>
+                <p class="label tracking-widest">Scholarly Archive Access</p>
+                <div class="auth-glass-card">
+                    <div class="input-container">
+                        <input type="text" id="callsign-input" placeholder="Scholar Identity" autocomplete="off">
+                        <div class="focus-border"></div>
+                    </div>
+                    <button class="btn-main tactile" onclick="submitLogin()">Access Library</button>
                 </div>
             </div>
         </div>
 
-        <!-- HOME -->
+        <!-- HOME DASHBOARD -->
         <div id="screen-home" class="screen hidden">
             <header class="header-ui">
-                <div class="meta"><span id="rank-tag" class="label">Mastery: Novice</span><h2 id="display-name" class="serif-title">Scholar</h2></div>
-                <button class="quiet-btn" onclick="toggleMute()">Mute</button>
+                <div class="meta">
+                    <span id="rank-tag" class="label-accent">Novice Scholar</span>
+                    <h2 id="display-name" class="serif-title">Scholar</h2>
+                </div>
+                <button class="btn-icon-glass" onclick="toggleMute()">🔇</button>
             </header>
             <div class="content-scroll">
-                <div class="retention-ring">
-                    <svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="48"></circle><circle id="xp-ring" class="fill" cx="50" cy="50" r="48"></circle></svg>
-                    <div class="ring-label"><span id="level-val">1</span><small class="label">Index</small></div>
+                <div class="retention-ring-wrap">
+                    <div class="retention-ring">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="track" cx="50" cy="50" r="46"></circle>
+                            <circle id="xp-ring" class="fill" cx="50" cy="50" r="46"></circle>
+                        </svg>
+                        <div class="ring-label"><span id="level-val">1</span><small>INDEX</small></div>
+                    </div>
                 </div>
-                <div class="stat-row">
-                    <div class="stat-box"><label class="label">Best</label><span id="best-val" class="serif-title">0</span></div>
-                    <div class="stat-box"><label class="label">Acc%</label><span id="accuracy-val" class="serif-title">0%</span></div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <label class="label">Best Streak</label>
+                        <span id="best-val" class="serif-title">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <label class="label">Accuracy</label>
+                        <span id="accuracy-val" class="serif-title">0%</span>
+                    </div>
                 </div>
-                <button class="btn-main" onclick="showScreen('screen-chapters')">Start Session</button>
-                <button id="repair-btn" class="btn-outline" style="display:none;" onclick="startRepair()">Repair Gaps</button>
+                <div class="action-stack">
+                    <button class="btn-main tactile" onclick="showScreen('screen-chapters')">Commence Session</button>
+                    <button id="repair-btn" class="btn-outline-glass tactile" style="display:none;" onclick="startRepair()">Repair Weaknesses</button>
+                </div>
             </div>
         </div>
 
-        <!-- ARENA -->
+        <!-- GAME ARENA -->
         <div id="screen-game" class="screen hidden">
             <div class="arena-hud">
-                <div id="lives-box">❤️❤️❤️</div>
-                <div class="timer-container"><div id="timer-fill"></div></div>
-                <div id="streak-box" class="serif-title">0</div>
+                <div id="lives-box" class="hud-stat">❤️❤️❤️</div>
+                <div class="timer-wrap"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="hud-stat serif-title">0</div>
             </div>
             <div class="arena-content">
-                <div class="formula-card"><div class="math-rail" id="formula-display"></div></div>
-                <div id="options-stack" class="options-vertical"></div>
+                <div class="formula-display-card">
+                    <div class="math-rail" id="formula-display"></div>
+                </div>
+                <div id="options-stack" class="options-grid"></div>
             </div>
         </div>
 
-        <!-- LISTS -->
-        <div id="screen-chapters" class="screen hidden">
-            <header class="header-ui"><button class="btn-icon" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
-            <div class="content-scroll" id="chapter-list">
-                <button class="list-card serif-title" onclick="selectChapter('trigonometry')">Trigonometry</button>
-                <button class="list-card serif-title" onclick="selectChapter('calculus')">Calculus</button>
-            </div>
-        </div>
-
-        <div id="screen-difficulty" class="screen hidden">
-            <header class="header-ui"><button class="btn-icon" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
-            <div class="content-scroll">
-                <button class="list-card" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="list-card" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="list-card critical" onclick="setDiff(8)">Instant (8s)</button>
-            </div>
-        </div>
-
-        <div id="screen-vault" class="screen hidden"><header class="header-ui"><h2>Flashcards</h2></header><div class="content-scroll" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><header class="header-ui"><h2>Gaps</h2></header><div class="content-scroll" id="logs-list"></div></div>
-
-        <!-- BOTTOM NAV -->
+        <!-- NAVIGATION -->
         <nav class="bottom-dock hidden" id="main-dock">
             <div class="dock-item active" onclick="showScreen('screen-home')">Library</div>
             <div class="dock-item" onclick="showScreen('screen-vault')">Archive</div>
             <div class="dock-item" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
+
+        <!-- SUB SCREENS -->
+        <div id="screen-chapters" class="screen hidden">
+            <header class="header-ui"><button class="btn-icon-glass" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
+            <div class="content-scroll" id="chapter-list">
+                <button class="list-card-glass tactile" onclick="selectChapter('trigonometry')">Trigonometry</button>
+                <button class="list-card-glass tactile" onclick="selectChapter('calculus')">Calculus</button>
+            </div>
+        </div>
+
+        <div id="screen-difficulty" class="screen hidden">
+            <header class="header-ui"><button class="btn-icon-glass" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
+            <div class="content-scroll">
+                <button class="list-card-glass tactile" onclick="setDiff(30)">Contemplative (30s)</button>
+                <button class="list-card-glass tactile" onclick="setDiff(15)">Focused (15s)</button>
+                <button class="list-card-glass critical tactile" onclick="setDiff(8)">Instant (8s)</button>
+            </div>
+        </div>
+
+        <div id="screen-vault" class="screen hidden"><header class="header-ui"><h2>Vault</h2></header><div class="content-scroll" id="vault-list"></div></div>
+        <div id="screen-logs" class="screen hidden"><header class="header-ui"><h2>Knowledge Gaps</h2></header><div class="content-scroll" id="logs-list"></div></div>
     </div>
 
     <!-- OVERLAYS -->
@@ -102,15 +130,15 @@
         <div class="recall-sheet">
             <p id="roast-msg" class="italic-text"></p>
             <div class="answer-reveal"><small class="label">Correct Identity</small><div class="math-rail" id="correct-display"></div></div>
-            <button class="btn-main" onclick="closeRoast()">Resume</button>
+            <button class="btn-main tactile" onclick="closeRoast()">Return to Session</button>
         </div>
     </div>
 
     <div id="results-overlay" class="overlay hidden">
         <div class="recall-sheet">
-            <h2 id="results-title" class="serif-title">Mastery</h2>
-            <div class="stat-row"><div class="stat-box"><label>Score</label><span id="res-score">0</span></div><div class="stat-box"><label>XP</label><span id="res-xp">+0</span></div></div>
-            <button class="btn-main" onclick="closeResults()">Library</button>
+            <h2 id="results-title" class="serif-title">Session Concluded</h2>
+            <div class="stat-grid" style="margin: 20px 0;"><div class="stat-card"><label>Score</label><span id="res-score">0</span></div><div class="stat-card"><label>XP</label><span id="res-xp">+0</span></div></div>
+            <button class="btn-main tactile" onclick="closeResults()">Back to Library</button>
         </div>
     </div>
 
