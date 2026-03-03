@@ -11,31 +11,32 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { 
     margin: 0; background: var(--bg-dark); color: var(--text-main); 
-    font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh;
+    font-family: 'Inter', sans-serif; overflow: hidden; height: 100dvh;
 }
 
 /* Scholarly Background */
-.scholarly-bg { position: fixed; inset: 0; pointer-events: none; opacity: 0.1; z-index: 0; overflow: hidden; }
-.float-math { position: absolute; font-family: 'Source Serif 4', serif; font-size: 2.5rem; color: var(--accent); animation: float 25s infinite linear; }
-@keyframes float { 0% { transform: translateY(110vh) rotate(0deg); } 100% { transform: translateY(-10vh) rotate(360deg); } }
+.scholarly-bg { position: fixed; inset: 0; pointer-events: none; opacity: 0.1; z-index: 0; }
+.float-math { position: absolute; font-family: 'Source Serif 4', serif; font-size: 2rem; color: var(--accent); animation: float 25s infinite linear; }
+@keyframes float { 0% { transform: translateY(110vh); } 100% { transform: translateY(-10vh); } }
 
 /* Layout Architecture */
-.app-container { display: flex; height: 100vh; position: relative; z-index: 1; }
+.app-wrapper { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
 
-/* Sidebar */
+/* Sidebar (Desktop Default) */
 .sidebar { 
     width: 260px; background: var(--bg-surface); border-right: 1px solid var(--border); 
-    display: flex; flex-direction: column; padding: 40px 30px; 
+    display: flex; flex-direction: column; padding: 40px 30px; z-index: 10;
 }
 .brand h1 { font-family: 'Source Serif 4', serif; font-size: 1.2rem; letter-spacing: 5px; color: var(--accent); margin: 0 0 50px 0; }
-.nav-links { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.nav-links { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .nav-item { 
     background: none; border: none; color: var(--text-dim); text-align: left; 
-    padding: 12px 0; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
+    padding: 14px 0; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 15px;
 }
 .nav-item.active, .nav-item:hover { color: var(--accent); }
+.nav-item .icon { font-size: 1.2rem; }
 
-/* Retention Ring */
+/* Retention Ring (Desktop Only) */
 .ring-container { position: relative; width: 100px; height: 100px; margin: 20px 0 40px 0; }
 .ring-container svg { transform: rotate(-90deg); width: 100%; height: 100%; }
 .ring-container circle { fill: none; stroke-width: 4; stroke-linecap: round; }
@@ -44,64 +45,72 @@ body {
 .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Source Serif 4', serif; font-size: 1.5rem; }
 
 /* Main Content */
-.main-content { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; padding: 60px; }
+.main-content { flex: 1; display: flex; flex-direction: column; padding: 60px; position: relative; }
 .screen { display: flex; flex-direction: column; height: 100%; animation: softFade 0.6s ease; }
 @keyframes softFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.scroll-area { flex: 1; overflow-y: auto; padding-right: 20px; }
+.scroll-area { flex: 1; overflow-y: auto; padding-right: 15px; }
 
-/* Cards & Stats */
+/* Grid & Cards (Desktop) */
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
 .stat-card { background: var(--bg-card); border: 1px solid var(--border); padding: 25px; border-radius: 12px; }
-.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.cat-card { 
-    background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 12px; 
-    text-align: left; cursor: pointer; transition: 0.3s;
-}
+.category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cat-card { background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 12px; text-align: left; cursor: pointer; transition: 0.3s; }
 .cat-card:hover { border-color: var(--accent); }
-.cat-card h3 { font-family: 'Source Serif 4', serif; margin: 0 0 10px 0; color: var(--accent); }
-.cat-card p { margin: 0; font-size: 0.8rem; color: var(--text-dim); }
 
-/* Game Arena */
-.arena-hud { display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px; }
+/* Game Arena (Desktop) */
+.arena-hud { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
 .timer-rail { flex: 1; height: 2px; background: var(--border); margin: 0 30px; position: relative; }
-#timer-fill { height: 100%; background: var(--accent); width: 100%; box-shadow: 0 0 10px var(--accent); }
-.formula-card { 
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; 
-    padding: 60px; text-align: center; margin-bottom: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-.math-main { font-size: 2.2rem; margin-top: 30px; }
+#timer-fill { height: 100%; background: var(--accent); width: 100%; }
+.formula-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 60px; text-align: center; margin-bottom: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.math-main { font-size: 2rem; margin-top: 25px; }
 .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.btn-opt { 
-    background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); 
-    padding: 20px; border-radius: 10px; cursor: pointer; transition: 0.2s;
-}
-.btn-opt:hover { border-color: var(--accent); }
+.btn-opt { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); padding: 20px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
 
 /* Overlays */
-.overlay { 
-    position: fixed; inset: 0; background: rgba(10, 11, 16, 0.95); 
-    backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; 
-}
-.login-card { background: var(--bg-card); padding: 60px; border-radius: 20px; border: 1px solid var(--border); text-align: center; width: 400px; }
-#callsign-input { 
-    width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); 
-    padding: 15px; color: white; margin: 30px 0; text-align: center; outline: none;
-}
-.recall-sheet { background: var(--bg-surface); width: 500px; padding: 50px; border-radius: 20px; text-align: center; border: 1px solid var(--accent); }
-.roast-text { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1.2rem; color: var(--accent); margin-bottom: 30px; }
-.correction-box { background: rgba(0,0,0,0.2); padding: 30px; border-radius: 12px; margin-bottom: 30px; border: 1px solid var(--border); }
+.overlay { position: fixed; inset: 0; background: rgba(10, 11, 16, 0.98); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.login-card { background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); text-align: center; width: 100%; max-width: 400px; }
+.recall-sheet { background: var(--bg-surface); width: 100%; max-width: 500px; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid var(--accent); }
 
 /* Buttons */
-.btn-primary { 
-    background: var(--accent); color: var(--bg-dark); border: none; padding: 15px 40px; 
-    border-radius: 8px; font-weight: 600; cursor: pointer; 
-}
-.btn-repair { 
-    background: none; border: 1px solid var(--accent); color: var(--accent); 
-    padding: 15px; border-radius: 12px; width: 100%; margin-top: 20px; cursor: pointer;
+.btn-primary { background: var(--accent); color: var(--bg-dark); border: none; padding: 15px 35px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.btn-repair { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 15px; border-radius: 12px; width: 100%; margin-top: 20px; cursor: pointer; }
+
+/* Mobile Adaptations (The "Smaller Version") */
+@media (max-width: 768px) {
+    .app-wrapper { flex-direction: column; }
+    
+    /* Sidebar becomes Bottom Dock */
+    .sidebar { 
+        width: 100%; height: 75px; flex-direction: row; 
+        padding: 0; position: fixed; bottom: 0; border-right: none; border-top: 1px solid var(--border);
+    }
+    .sidebar-top { display: none; } /* Hide Brand & Ring on Mobile Sidebar */
+    .nav-links { flex-direction: row; justify-content: space-around; width: 100%; gap: 0; }
+    .nav-item { flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; font-size: 0.7rem; }
+    .nav-text { display: block; }
+    
+    /* Main Content adjustments */
+    .main-content { padding: 25px 25px 100px 25px; }
+    .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .mobile-ring { width: 45px; height: 45px; border: 2px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Source Serif 4', serif; color: var(--accent); }
+    
+    /* Grids stack on Mobile */
+    .stat-grid, .category-grid, .options-grid { grid-template-columns: 1fr; gap: 15px; }
+    
+    /* Arena shrinking */
+    .formula-card { padding: 40px 20px; min-height: 180px; }
+    .math-main { font-size: 1.4rem; }
+    .arena-hud { margin-bottom: 25px; }
+    .timer-rail { margin: 0 15px; }
+    
+    .desktop-only { display: none; }
 }
 
-/* Typography */
-.serif-title { font-family: 'Source Serif 4', serif; font-weight: 600; margin-bottom: 10px; }
-.label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); }
+@media (min-width: 769px) {
+    .mobile-only { display: none; }
+}
+
+/* Typography Utility */
+.serif-title { font-family: 'Source Serif 4', serif; font-weight: 600; margin: 0; }
+.label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); }
 .hidden { display: none !important; }
