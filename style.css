@@ -1,182 +1,91 @@
-let allQ = [], filteredQ = [], roasts = [], failLogs = {};
-let sessionQueue = [], currentQ = null;
-let score = 0, integrity = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
-let best = parseInt(localStorage.getItem('ax_best')) || 0;
-let callsign = localStorage.getItem('ax_id') || "";
-let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
-let timerId = null, timeLimit = 30;
-
-function safeTypeset() {
-    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().catch(e => {});
-    }
+:root {
+    --bg: #0a0b10;
+    --surface: #12141d;
+    --card: #181c28;
+    --accent: #a594f9;
+    --text: #f5f0e1;
+    --dim: #6c768a;
+    --border: rgba(255, 255, 255, 0.05);
 }
 
-async function init() {
-    try {
-        const [fRes, rRes] = await Promise.all([
-            fetch('mathformula.txt').then(r => r.text()),
-            fetch('roast.txt').then(r => r.text())
-        ]);
-        allQ = fRes.split('\n').filter(l => l.includes('::')).map(l => {
-            const p = l.split('::').map(s => s.trim());
-            return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
-        });
-        roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Archive failure."); }
-    
-    if (callsign) {
-        document.getElementById('screen-login').classList.add('hidden');
-        window.showScreen('screen-home');
-    }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { 
+    margin: 0; background: var(--bg); color: var(--text); 
+    font-family: 'Inter', sans-serif; overflow: hidden; height: 100dvh;
 }
 
-window.showScreen = (id) => {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-    
-    document.getElementById(id).classList.remove('hidden');
-    
-    // UI Update logic for nav
-    if (id === 'screen-home') {
-        document.querySelectorAll('.nav-tab')[0].classList.add('active');
-        document.querySelectorAll('.nav-item')[0].classList.add('active');
-        updateDash();
-    }
-    if (id === 'screen-vault') {
-        document.querySelectorAll('.nav-tab')[1].classList.add('active');
-        document.querySelectorAll('.nav-item')[1].classList.add('active');
-        populateVault();
-    }
-    if (id === 'screen-logs') {
-        document.querySelectorAll('.nav-tab')[2].classList.add('active');
-        document.querySelectorAll('.nav-item')[2].classList.add('active');
-        populateLogs();
-    }
-    safeTypeset();
-};
+/* Background Symbols */
+.scholarly-bg { position: fixed; inset: 0; opacity: 0.1; z-index: 0; pointer-events: none; }
+.float-math { position: absolute; font-family: 'Source Serif 4', serif; font-size: 1.8rem; color: var(--accent); animation: drift 25s infinite linear; }
+@keyframes drift { from { transform: translateY(110vh); } to { transform: translateY(-10vh); } }
 
-window.submitLogin = () => {
-    const val = document.getElementById('callsign-input').value.trim();
-    if (val) {
-        callsign = val.toUpperCase();
-        localStorage.setItem('ax_id', callsign);
-        document.getElementById('screen-login').classList.add('hidden');
-        window.showScreen('screen-home');
-    }
-};
+/* Desktop-only Sidebar */
+.app-container { display: flex; height: 100dvh; position: relative; z-index: 1; }
+.sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 40px; display: flex; flex-direction: column; }
+.sidebar .brand h1 { font-family: 'Source Serif 4', serif; letter-spacing: 4px; color: var(--accent); font-size: 1.2rem; }
+.nav-links { margin-top: 50px; display: flex; flex-direction: column; gap: 15px; flex: 1; }
+.nav-item { background: none; border: none; color: var(--dim); text-align: left; padding: 10px 0; cursor: pointer; transition: 0.3s; }
+.nav-item.active { color: var(--accent); font-weight: 600; }
 
-function updateDash() {
-    document.getElementById('display-name').innerText = callsign;
-    document.getElementById('best-val').innerText = best;
-    
-    const level = Math.floor(xp / 1000) + 1;
-    document.getElementById('level-val-m').innerText = level;
-    document.getElementById('level-val-d').innerText = level;
-    
-    const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
-    document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+/* Main Content Wrapper */
+.main-content { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.screen { flex: 1; display: flex; flex-direction: column; padding: 30px; animation: softFade 0.5s ease; }
+@keyframes softFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.scroll-wrapper { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+
+/* Mobile Top Header */
+.mobile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.retention-badge { width: 45px; height: 45px; border: 1.5px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Source Serif 4', serif; color: var(--accent); }
+
+/* Dashboard Cards */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+.stat-pill { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 12px; display: flex; flex-direction: column; }
+.stat-pill small { font-size: 0.6rem; letter-spacing: 1px; color: var(--dim); margin-bottom: 5px; }
+
+.discipline-card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 16px; width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; text-align: left; transition: 0.2s; }
+.discipline-card:active { transform: scale(0.98); background: var(--surface); }
+.discipline-card h4 { margin: 0; color: var(--accent); font-family: 'Source Serif 4', serif; }
+.discipline-card p { margin: 5px 0 0; font-size: 0.8rem; color: var(--dim); }
+
+/* Game Arena - Mobile Optimized */
+.game-hud { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+.hud-pill { font-size: 0.75rem; color: var(--dim); font-weight: 600; }
+.timer-rail { flex: 1; height: 2px; background: var(--border); margin: 0 15px; position: relative; }
+#timer-fill { height: 100%; background: var(--accent); width: 100%; box-shadow: 0 0 10px var(--accent); }
+
+.formula-box { background: var(--card); border: 1px solid var(--border); padding: 50px 20px; border-radius: 20px; text-align: center; margin-bottom: 30px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
+.math-target { font-size: 1.6rem; margin-top: 20px; }
+.options-container { display: flex; flex-direction: column; gap: 12px; }
+.btn-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 18px; border-radius: 12px; font-size: 0.95rem; text-align: left; cursor: pointer; transition: 0.2s; }
+.btn-opt:active { background: var(--accent); color: var(--bg); }
+
+/* Bottom Nav (Mobile Only) */
+.mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; z-index: 100; }
+.nav-tab { background: none; border: none; color: var(--dim); display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+.nav-tab.active { color: var(--accent); }
+.n-icon { font-size: 1.3rem; }
+.nav-tab small { font-size: 0.65rem; font-weight: 600; }
+
+/* Overlays & Login */
+.overlay { position: fixed; inset: 0; background: rgba(10, 11, 16, 0.98); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 30px; }
+.login-sheet { width: 100%; max-width: 350px; text-align: center; background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); }
+.login-seal { font-size: 3rem; color: var(--accent); margin-bottom: 15px; font-family: 'Source Serif 4', serif; }
+#callsign-input { width: 100%; background: none; border: none; border-bottom: 1px solid var(--border); color: white; padding: 15px; text-align: center; outline: none; margin: 25px 0; }
+
+.roast-sheet { width: 100%; max-width: 450px; background: var(--surface); border: 1px solid var(--accent); border-radius: 24px; padding: 40px; text-align: center; }
+.correction-display { background: rgba(0,0,0,0.2); padding: 25px; border-radius: 16px; margin: 25px 0; border: 1px solid var(--border); }
+.italic { font-style: italic; color: var(--accent); font-size: 1.1rem; }
+
+.btn-primary { background: var(--accent); color: var(--bg); border: none; padding: 15px 30px; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; }
+.repair-banner { background: none; border: 1.5px solid var(--accent); color: var(--accent); width: 100%; padding: 15px; border-radius: 12px; margin-top: 10px; font-weight: 600; cursor: pointer; }
+
+/* Responsive Utility */
+@media (min-width: 769px) { .mobile-only { display: none; } }
+@media (max-width: 768px) { 
+    .desktop-only { display: none; } 
+    .main-content { width: 100vw; }
 }
 
-window.selectChapter = (c) => {
-    filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    score = 0; integrity = 3;
-    sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    window.showScreen('screen-game');
-    nextRound();
-};
-
-function nextRound() {
-    clearInterval(timerId);
-    if (integrity <= 0 || sessionQueue.length === 0) {
-        if (score > best) { best = score; localStorage.setItem('ax_best', best); }
-        window.showScreen('screen-home');
-        return;
-    }
-
-    currentQ = sessionQueue[0];
-    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    document.getElementById('streak-box').innerText = score;
-    document.getElementById('lives-box').innerText = "Integrity: " + "I".repeat(integrity);
-
-    const stack = document.getElementById('options-stack');
-    stack.innerHTML = "";
-    [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
-        const b = document.createElement('button');
-        b.className = 'btn-opt';
-        b.innerHTML = `\\( ${o} \\)`;
-        b.onclick = () => {
-            history.total++;
-            if (o === currentQ.a) { 
-                score++; xp += 20; history.correct++; 
-                sessionQueue.shift(); nextRound(); 
-            } else handleFail();
-            localStorage.setItem('ax_xp', xp); localStorage.setItem('ax_hist', JSON.stringify(history));
-        };
-        stack.appendChild(b);
-    });
-    safeTypeset();
-    startTimer();
-}
-
-function startTimer() {
-    let cur = timeLimit;
-    const bar = document.getElementById('timer-fill');
-    timerId = setInterval(() => {
-        cur -= 0.1;
-        bar.style.width = (cur / timeLimit) * 100 + "%";
-        if (cur <= 0) handleFail();
-    }, 100);
-}
-
-function handleFail() {
-    clearInterval(timerId);
-    integrity--;
-    failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    const failedQ = sessionQueue.shift(); sessionQueue.push(failedQ);
-
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study required.";
-    document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
-    document.getElementById('roast-overlay').classList.remove('hidden');
-    safeTypeset();
-}
-
-window.closeRoast = () => {
-    document.getElementById('roast-overlay').classList.add('hidden');
-    nextRound();
-};
-
-function populateVault() {
-    const cont = document.getElementById('vault-list');
-    cont.innerHTML = allQ.map(q => `
-        <div class="stat-pill" style="margin-bottom:12px">
-            <small>${q.chap}</small>
-            <div style="font-size:1rem; margin-top:8px">\\( ${q.q} = ${q.a} \\)</div>
-        </div>
-    `).join('');
-    safeTypeset();
-}
-
-function populateLogs() {
-    const cont = document.getElementById('logs-list');
-    cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-pill" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:0.9rem">\\( ${q} \\)</div>
-            <div class="label" style="color:var(--accent)">${c}x Missed</div>
-        </div>
-    `).join('') || "<p class='label'>No records found.</p>";
-    safeTypeset();
-}
-
-window.startRepair = () => {
-    const bad = Object.keys(failLogs);
-    filteredQ = allQ.filter(q => bad.includes(q.q));
-    score = 0; integrity = 3;
-    sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    window.showScreen('screen-game');
-    nextRound();
-};
-
-init();
+.serif-title { font-family: 'Source Serif 4', serif; margin: 0; }
+.label { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); font-weight: 700; }
+.hidden { display: none !important; }
