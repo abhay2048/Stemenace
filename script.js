@@ -23,7 +23,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Archive failure."); }
+    } catch (e) { console.error("Database inaccessible."); }
     
     if (callsign) {
         document.getElementById('screen-login').classList.add('hidden');
@@ -34,26 +34,12 @@ async function init() {
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-    
     document.getElementById(id).classList.remove('hidden');
     
-    // UI Update logic for nav
-    if (id === 'screen-home') {
-        document.querySelectorAll('.nav-tab')[0].classList.add('active');
-        document.querySelectorAll('.nav-item')[0].classList.add('active');
-        updateDash();
-    }
-    if (id === 'screen-vault') {
-        document.querySelectorAll('.nav-tab')[1].classList.add('active');
-        document.querySelectorAll('.nav-item')[1].classList.add('active');
-        populateVault();
-    }
-    if (id === 'screen-logs') {
-        document.querySelectorAll('.nav-tab')[2].classList.add('active');
-        document.querySelectorAll('.nav-item')[2].classList.add('active');
-        populateLogs();
-    }
+    const tabs = document.querySelectorAll('.nav-tab');
+    if (id === 'screen-home') { tabs[0].classList.add('active'); updateDash(); document.getElementById('main-nav').classList.remove('hidden'); }
+    if (id === 'screen-vault') { tabs[1].classList.add('active'); populateVault(); }
+    if (id === 'screen-logs') { tabs[2].classList.add('active'); populateLogs(); }
     safeTypeset();
 };
 
@@ -70,14 +56,13 @@ window.submitLogin = () => {
 function updateDash() {
     document.getElementById('display-name').innerText = callsign;
     document.getElementById('best-val').innerText = best;
-    
     const level = Math.floor(xp / 1000) + 1;
-    document.getElementById('level-val-m').innerText = level;
-    document.getElementById('level-val-d').innerText = level;
-    
+    const progress = (xp % 1000) / 1000;
+    document.getElementById('level-val').innerText = level;
+    document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+    document.getElementById('repair-btn').classList.toggle('hidden', Object.keys(failLogs).length === 0);
 }
 
 window.selectChapter = (c) => {
@@ -85,6 +70,7 @@ window.selectChapter = (c) => {
     score = 0; integrity = 3;
     sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
     window.showScreen('screen-game');
+    document.getElementById('main-nav').classList.add('hidden'); // Immersive mode
     nextRound();
 };
 
@@ -95,22 +81,21 @@ function nextRound() {
         window.showScreen('screen-home');
         return;
     }
-
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
-    document.getElementById('lives-box').innerText = "Integrity: " + "I".repeat(integrity);
+    document.getElementById('lives-box').innerText = "I".repeat(integrity);
 
     const stack = document.getElementById('options-stack');
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'btn-opt';
+        b.className = 'opt-btn';
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
-                score++; xp += 20; history.correct++; 
+                score++; xp += 25; history.correct++; 
                 sessionQueue.shift(); nextRound(); 
             } else handleFail();
             localStorage.setItem('ax_xp', xp); localStorage.setItem('ax_hist', JSON.stringify(history));
@@ -136,8 +121,7 @@ function handleFail() {
     integrity--;
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
     const failedQ = sessionQueue.shift(); sessionQueue.push(failedQ);
-
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study required.";
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Try harder.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     safeTypeset();
@@ -151,9 +135,9 @@ window.closeRoast = () => {
 function populateVault() {
     const cont = document.getElementById('vault-list');
     cont.innerHTML = allQ.map(q => `
-        <div class="stat-pill" style="margin-bottom:12px">
-            <small>${q.chap}</small>
-            <div style="font-size:1rem; margin-top:8px">\\( ${q.q} = ${q.a} \\)</div>
+        <div class="stat-item" style="margin-bottom:12px">
+            <small class="label">${q.chap}</small>
+            <div style="font-size:1.1rem; margin-top:8px">\\( ${q.q} = ${q.a} \\)</div>
         </div>
     `).join('');
     safeTypeset();
@@ -162,11 +146,11 @@ function populateVault() {
 function populateLogs() {
     const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-pill" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <div class="stat-item" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
             <div style="font-size:0.9rem">\\( ${q} \\)</div>
-            <div class="label" style="color:var(--accent)">${c}x Missed</div>
+            <div class="label" style="color:var(--accent)">${c}x Gaps</div>
         </div>
-    `).join('') || "<p class='label'>No records found.</p>";
+    `).join('') || "<p class='label' style='padding:40px; text-align:center;'>No knowledge gaps.</p>";
     safeTypeset();
 }
 
