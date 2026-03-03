@@ -1,209 +1,174 @@
-let allQ = [], filteredQ = [], roasts = [], failLogs = {};
-let sessionQueue = []; // New: Tracks questions for the current round
-let currentQ = null, score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
-let best = parseInt(localStorage.getItem('ax_best')) || 0;
-let callsign = localStorage.getItem('ax_id') || "";
-let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
-let timerId = null, timeLimit = 30, isMuted = false;
-
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSfx(f, t, d) {
-    if (isMuted) return;
-    try {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e){}
-}
-
-async function init() {
-    try {
-        const [fRes, rRes] = await Promise.all([
-            fetch('mathformula.txt').then(r => r.text()),
-            fetch('roast.txt').then(r => r.text())
-        ]);
-        allQ = fRes.split('\n').filter(l => l.includes('::')).map(l => {
-            const p = l.split('::').map(s => s.trim());
-            return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
-        });
-        roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Archive inaccessible."); }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AXIOM | Scholarly Archive</title>
+    <!-- FIX FOR FAVICON ERROR -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     
-    if (!callsign) showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.remove('hidden');
-    
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
-    if (window.MathJax) window.MathJax.typeset();
-}
-
-window.submitLogin = () => {
-    const val = document.getElementById('callsign-input').value.trim();
-    if (val) {
-        callsign = val.toUpperCase();
-        localStorage.setItem('ax_id', callsign);
-        document.getElementById('main-dock').classList.remove('hidden');
-        showScreen('screen-home');
-    }
-};
-
-function updateDash() {
-    document.getElementById('display-name').innerText = callsign;
-    document.getElementById('best-val').innerText = best;
-    const progress = (xp % 1000) / 1000;
-    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 301.59 - (progress * 301.59);
-    const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
-    document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('rank-tag').innerText = "Mastery: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
-}
-
-window.selectChapter = (c) => {
-    filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    showScreen('screen-difficulty');
-};
-
-window.setDiff = (s) => {
-    timeLimit = s; score = 0; lives = 3;
-    // Feature: Cycle through all questions. Shuffle the selected chapter.
-    sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    showScreen('screen-game');
-    nextRound();
-};
-
-function nextRound() {
-    // 1. Check if player ran out of lives
-    if (lives <= 0) {
-        showResults("Archive Depleted", "Your retention was insufficient.");
-        return;
-    }
-    
-    // 2. Check if all questions in the chapter are finished
-    if (sessionQueue.length === 0) {
-        showResults("Mastery Achieved", "All identities have been verified.");
-        return;
-    }
-
-    currentQ = sessionQueue[0]; 
-    
-    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    document.getElementById('streak-box').innerText = score;
-    document.getElementById('lives-box').innerText = "❤️".repeat(lives);
-
-    const stack = document.getElementById('options-stack');
-    stack.innerHTML = "";
-    [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
-        const b = document.createElement('button');
-        b.className = 'opt-btn';
-        b.innerHTML = `<div class="math-rail">\\( ${o} \\)</div>`;
-        b.onclick = () => {
-            history.total++;
-            if (o === currentQ.a) { 
-                score++; 
-                const gain = 20;
-                xp += gain; 
-                history.correct++; 
-                playSfx(800, 'sine', 0.1); 
-                sessionQueue.shift(); // Remove correct answer
-                nextRound(); 
-            }
-            else handleFail();
-            localStorage.setItem('ax_xp', xp);
-            localStorage.setItem('ax_hist', JSON.stringify(history));
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            options: { enableMenu: false },
+            chtml: { displayAlign: 'center', scale: 1, minScale: 0.8 }
         };
-        stack.appendChild(b);
-    });
-    if (window.MathJax) window.MathJax.typeset();
-    startTimer();
-}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="scholarly-bg">
+        <span class="float-math">∫</span>
+        <span class="float-math">∑</span>
+        <span class="float-math">π</span>
+        <span class="float-math">∂</span>
+        <span class="float-math">∮</span>
+        <span class="float-math">∞</span>
+        <span class="float-math">Δ</span>
+    </div>
 
-function showResults(title, subtitle) {
-    clearInterval(timerId);
-    if (score > best) { best = score; localStorage.setItem('ax_best', best); }
-    
-    document.getElementById('results-title').innerText = title;
-    document.getElementById('results-subtitle').innerText = subtitle;
-    document.getElementById('res-score').innerText = score;
-    document.getElementById('res-xp').innerText = `+${score * 20}`;
-    
-    document.getElementById('results-overlay').classList.remove('hidden');
-}
-
-window.closeResults = () => {
-    document.getElementById('results-overlay').classList.add('hidden');
-    showScreen('screen-home');
-};
-function finishSession(msg) {
-    if (score > best) { best = score; localStorage.setItem('ax_best', best); }
-    alert(msg);
-    showScreen('screen-home');
-}
-
-function startTimer() {
-    clearInterval(timerId); let cur = timeLimit;
-    timerId = setInterval(() => {
-        cur -= 0.1;
-        document.getElementById('timer-fill').style.width = (cur / timeLimit) * 100 + "%";
-        if (cur <= 0) handleFail();
-    }, 100);
-}
-
-function handleFail() {
-    lives--; 
-    clearInterval(timerId); 
-    playSfx(200, 'sawtooth', 0.2);
-    failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    
-    // Move failed question to the end of the queue
-    const failedQ = sessionQueue.shift();
-    sessionQueue.push(failedQ);
-
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus required.";
-    document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
-    document.getElementById('roast-overlay').classList.remove('hidden');
-    if (window.MathJax) window.MathJax.typeset();
-}
-
-function populateVault() {
-    const cont = document.getElementById('vault-list');
-    cont.innerHTML = allQ.map(q => `
-        <div class="list-card" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
-            <div class="math-rail">\\( ${q.q} \\)</div>
-            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">
-                <div class="math-rail">\\( ${q.a} \\)</div>
+    <div class="app-container">
+        <!-- AUTH SCREEN -->
+        <div id="screen-login" class="screen">
+            <div class="auth-center">
+                <div class="academic-seal">A</div>
+                <h1 class="serif-title">AXIOM</h1>
+                <p class="label">Archive Access Authorization</p>
+                <div class="auth-card">
+                    <input type="text" id="callsign-input" placeholder="Scholar Identity" autocomplete="off">
+                    <button class="btn-main" onclick="submitLogin()">Access Library</button>
+                </div>
             </div>
         </div>
-    `).join('');
-    if (window.MathJax) window.MathJax.typeset();
-}
 
-function populateLogs() {
-    const cont = document.getElementById('logs-list');
-    cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-box" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
-            <div class="math-rail" style="font-size:0.85rem">\\( ${q} \\)</div>
-            <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
+        <!-- DASHBOARD -->
+        <div id="screen-home" class="screen hidden">
+            <header class="home-header">
+                <div class="meta">
+                    <span id="rank-tag" class="rank-label">Mastery: Novice</span>
+                    <h2 id="display-name" class="serif-title">Scholar</h2>
+                </div>
+                <button id="mute-btn" class="quiet-btn" onclick="toggleMute()">Quiet Mode</button>
+            </header>
+
+            <div class="central-focus">
+                <div class="retention-ring">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="track" cx="50" cy="50" r="48"></circle>
+                        <circle id="xp-ring" class="fill" cx="50" cy="50" r="48"></circle>
+                    </svg>
+                    <div class="ring-label">
+                        <span id="level-val">1</span>
+                        <small>Retention Index</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box">
+                    <label>Recall Streak</label>
+                    <span id="best-val" class="serif-title">0</span>
+                </div>
+                <div class="stat-box">
+                    <label>Accuracy</label>
+                    <span id="accuracy-val" class="serif-title">0%</span>
+                </div>
+            </div>
+
+            <div class="action-list">
+                <button class="btn-main" onclick="showScreen('screen-chapters')">Commence Study Session</button>
+                <button id="repair-btn" class="btn-outline" style="display:none;" onclick="startRepair()">Address Weaknesses</button>
+            </div>
         </div>
-    `).join('') || "<p class='label' style='padding:20px'>No records found.</p>";
-    if (window.MathJax) window.MathJax.typeset();
-}
 
-window.startRepair = () => {
-    const bad = Object.keys(failLogs);
-    filteredQ = allQ.filter(q => bad.includes(q.q));
-    showScreen('screen-difficulty');
-};
+        <!-- ARENA -->
+        <div id="screen-game" class="screen hidden">
+            <div class="arena-hud">
+                <div id="lives-box" class="hud-item">❤️❤️❤️</div>
+                <div class="timer-container"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="hud-item serif-title">0</div>
+            </div>
+            
+            <div class="formula-card">
+                <div class="math-rail">
+                    <div id="formula-display"></div>
+                </div>
+            </div>
 
-init();
+            <div id="options-stack" class="options-vertical"></div>
+        </div>
 
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-dock hidden" id="main-dock">
+            <div class="dock-item active" onclick="showScreen('screen-home')">Library</div>
+            <div class="dock-item" onclick="showScreen('screen-vault')">Archive</div>
+            <div class="dock-item" onclick="showScreen('screen-logs')">Gaps</div>
+        </nav>
+        
+        <!-- CATEGORIES -->
+        <div id="screen-chapters" class="screen hidden">
+            <header class="sub-header"><button class="btn-icon" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
+            <div class="scroll-list" id="chapter-list">
+                <button class="list-card serif-title" onclick="selectChapter('trigonometry')">Trigonometry</button>
+                <button class="list-card serif-title" onclick="selectChapter('calculus')">Calculus</button>
+            </div>
+        </div>
+
+        <div id="screen-difficulty" class="screen hidden">
+            <header class="sub-header"><button class="btn-icon" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
+            <div class="scroll-list">
+                <button class="list-card" onclick="setDiff(30)">Contemplative (30s)</button>
+                <button class="list-card" onclick="setDiff(15)">Focused (15s)</button>
+                <button class="list-card critical" onclick="setDiff(8)">Instant (8s)</button>
+            </div>
+        </div>
+
+        <div id="screen-vault" class="screen hidden">
+            <header class="sub-header"><h2>Flashcard Review</h2></header>
+            <div id="vault-list" class="scroll-list"></div>
+        </div>
+
+        <div id="screen-logs" class="screen hidden">
+            <header class="sub-header"><h2>Knowledge Gaps</h2></header>
+            <div id="logs-list" class="scroll-list"></div>
+        </div>
+    </div>
+
+    <!-- ROAST SHEET -->
+    <div id="roast-overlay" class="overlay hidden">
+        <div class="recall-sheet">
+            <p id="roast-msg" class="italic-text"></p>
+            <div class="answer-reveal">
+                <small class="label">Correct Identity</small>
+                <div class="math-rail">
+                    <div id="correct-display"></div>
+                </div>
+            </div>
+            <button class="btn-main" style="width:100%" onclick="closeRoast()">Return to Study</button>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-overlay" class="overlay hidden">
+        <div class="recall-sheet">
+            <h2 id="results-title" class="serif-title" style="font-size: 2rem; color: var(--accent);">Mastery Achieved</h2>
+            <p id="results-subtitle" class="label" style="margin-bottom: 30px;">Session Summary</p>
+            <div class="stat-row" style="margin-bottom: 30px;">
+                <div class="stat-box">
+                    <label>Score</label>
+                    <span id="res-score" class="serif-title">0</span>
+                </div>
+                <div class="stat-box">
+                    <label>XP Gained</label>
+                    <span id="res-xp" class="serif-title">+0</span>
+                </div>
+            </div>
+            <button class="btn-main" onclick="closeResults()">Return to Library</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
