@@ -1,10 +1,10 @@
 let allQ = [], filteredQ = [], roasts = [], failLogs = {};
 let sessionQueue = [], currentQ = null;
-let score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
+let score = 0, integrity = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
 let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
-let timerId = null, timeLimit = 30, isMuted = false;
+let timerId = null, timeLimit = 30;
 
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
@@ -25,18 +25,20 @@ async function init() {
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
     } catch (e) { console.error("Archive inaccessible."); }
     
-    if (!callsign) window.showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
+    if (callsign) {
+        document.getElementById('screen-login').classList.add('hidden');
+        window.showScreen('screen-home');
+    }
 }
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
+    if (id === 'screen-home') updateDash();
+    if (id === 'screen-vault') populateVault();
+    if (id === 'screen-logs') populateLogs();
     safeTypeset();
 };
 
@@ -45,7 +47,7 @@ window.submitLogin = () => {
     if (val) {
         callsign = val.toUpperCase();
         localStorage.setItem('ax_id', callsign);
-        document.getElementById('main-dock').classList.remove('hidden');
+        document.getElementById('screen-login').classList.add('hidden');
         window.showScreen('screen-home');
     }
 };
@@ -55,19 +57,16 @@ function updateDash() {
     document.getElementById('best-val').innerText = best;
     const progress = (xp % 1000) / 1000;
     document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
+    document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
+    document.getElementById('rank-tag').innerText = "Rank: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    window.showScreen('screen-difficulty');
-};
-
-window.setDiff = (s) => {
-    timeLimit = s; score = 0; lives = 3;
+    score = 0; integrity = 3;
     sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
     window.showScreen('screen-game');
     nextRound();
@@ -75,29 +74,30 @@ window.setDiff = (s) => {
 
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0) { showResults("Archive Depleted", "Retention failed."); return; }
-    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities verified."); return; }
+    if (integrity <= 0 || sessionQueue.length === 0) {
+        if (score > best) { best = score; localStorage.setItem('ax_best', best); }
+        window.showScreen('screen-home');
+        return;
+    }
 
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
-    document.getElementById('lives-box').innerText = "❤️".repeat(lives);
+    document.getElementById('lives-box').innerText = "Integrity: " + "I".repeat(integrity);
 
     const stack = document.getElementById('options-stack');
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'list-card-glass tactile';
-        b.innerHTML = `<div class="math-rail">\\( ${o} \\)</div>`;
+        b.className = 'btn-opt';
+        b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
                 score++; xp += 20; history.correct++; 
-                sessionQueue.shift();
-                nextRound(); 
+                sessionQueue.shift(); nextRound(); 
             } else handleFail();
-            localStorage.setItem('ax_xp', xp);
-            localStorage.setItem('ax_hist', JSON.stringify(history));
+            localStorage.setItem('ax_xp', xp); localStorage.setItem('ax_hist', JSON.stringify(history));
         };
         stack.appendChild(b);
     });
@@ -117,10 +117,9 @@ function startTimer() {
 
 function handleFail() {
     clearInterval(timerId);
-    lives--;
+    integrity--;
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    const failedQ = sessionQueue.shift();
-    sessionQueue.push(failedQ);
+    const failedQ = sessionQueue.shift(); sessionQueue.push(failedQ);
 
     document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
@@ -133,27 +132,12 @@ window.closeRoast = () => {
     nextRound();
 };
 
-function showResults(title, subtitle) {
-    if (score > best) { best = score; localStorage.setItem('ax_best', best); }
-    document.getElementById('results-title').innerText = title;
-    document.getElementById('res-score').innerText = score;
-    document.getElementById('res-xp').innerText = `+${score * 20}`;
-    document.getElementById('results-overlay').classList.remove('hidden');
-}
-
-window.closeResults = () => {
-    document.getElementById('results-overlay').classList.add('hidden');
-    window.showScreen('screen-home');
-};
-
 function populateVault() {
     const cont = document.getElementById('vault-list');
     cont.innerHTML = allQ.map(q => `
-        <div class="list-card-glass" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
-            <div class="math-rail">\\( ${q.q} \\)</div>
-            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">
-                <div class="math-rail">\\( ${q.a} \\)</div>
-            </div>
+        <div class="stat-card" style="margin-bottom:15px">
+            <div class="label">${q.chap}</div>
+            <div style="font-size:1.2rem; margin:10px 0">\\( ${q.q} = ${q.a} \\)</div>
         </div>
     `).join('');
     safeTypeset();
@@ -162,23 +146,21 @@ function populateVault() {
 function populateLogs() {
     const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-card" style="text-align:left; margin-bottom:10px;">
-            <div class="math-rail" style="font-size:0.9rem">\\( ${q} \\)</div>
-            <div class="label-accent" style="margin-top:10px">Identified Gaps: ${c}</div>
+        <div class="stat-card" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+            <div>\\( ${q} \\)</div>
+            <div class="label" style="color:var(--accent)">Missed ${c}x</div>
         </div>
-    `).join('') || "<p class='label' style='padding:40px; text-align:center;'>Archive Secure.</p>";
+    `).join('') || "<p class='label'>No records found.</p>";
     safeTypeset();
 }
 
 window.startRepair = () => {
     const bad = Object.keys(failLogs);
     filteredQ = allQ.filter(q => bad.includes(q.q));
-    window.showScreen('screen-difficulty');
-};
-
-window.toggleMute = () => {
-    isMuted = !isMuted;
-    document.getElementById('mute-btn').innerText = isMuted ? "🔈" : "🔇";
+    score = 0; integrity = 3;
+    sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
+    window.showScreen('screen-game');
+    nextRound();
 };
 
 init();
