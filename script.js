@@ -83,19 +83,19 @@ window.setDiff = (s) => {
 };
 
 function nextRound() {
-    // Check if player is dead
+    // 1. Check if player ran out of lives
     if (lives <= 0) {
-        finishSession("Archive Depleted. Try again.");
+        showResults("Archive Depleted", "Your retention was insufficient.");
         return;
     }
     
-    // Check if session is complete (all questions answered correctly)
+    // 2. Check if all questions in the chapter are finished
     if (sessionQueue.length === 0) {
-        finishSession("Mastery Achieved! All formulas verified.");
+        showResults("Mastery Achieved", "All identities have been verified.");
         return;
     }
 
-    currentQ = sessionQueue[0]; // Always take the first in queue
+    currentQ = sessionQueue[0]; 
     
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
@@ -110,9 +110,12 @@ function nextRound() {
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
-                score++; xp += 20; history.correct++; 
+                score++; 
+                const gain = 20;
+                xp += gain; 
+                history.correct++; 
                 playSfx(800, 'sine', 0.1); 
-                sessionQueue.shift(); // Remove correct answer from queue
+                sessionQueue.shift(); // Remove correct answer
                 nextRound(); 
             }
             else handleFail();
@@ -125,6 +128,22 @@ function nextRound() {
     startTimer();
 }
 
+function showResults(title, subtitle) {
+    clearInterval(timerId);
+    if (score > best) { best = score; localStorage.setItem('ax_best', best); }
+    
+    document.getElementById('results-title').innerText = title;
+    document.getElementById('results-subtitle').innerText = subtitle;
+    document.getElementById('res-score').innerText = score;
+    document.getElementById('res-xp').innerText = `+${score * 20}`;
+    
+    document.getElementById('results-overlay').classList.remove('hidden');
+}
+
+window.closeResults = () => {
+    document.getElementById('results-overlay').classList.add('hidden');
+    showScreen('screen-home');
+};
 function finishSession(msg) {
     if (score > best) { best = score; localStorage.setItem('ax_best', best); }
     alert(msg);
@@ -141,10 +160,12 @@ function startTimer() {
 }
 
 function handleFail() {
-    lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
+    lives--; 
+    clearInterval(timerId); 
+    playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
     
-    // Move failed question to the end of the queue to repeat later
+    // Move failed question to the end of the queue
     const failedQ = sessionQueue.shift();
     sessionQueue.push(failedQ);
 
@@ -153,11 +174,6 @@ function handleFail() {
     document.getElementById('roast-overlay').classList.remove('hidden');
     if (window.MathJax) window.MathJax.typeset();
 }
-
-window.closeRoast = () => {
-    document.getElementById('roast-overlay').classList.add('hidden');
-    nextRound();
-};
 
 function populateVault() {
     const cont = document.getElementById('vault-list');
@@ -190,3 +206,4 @@ window.startRepair = () => {
 };
 
 init();
+
