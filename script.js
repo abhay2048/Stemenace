@@ -23,7 +23,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Archive inaccessible."); }
+    } catch (e) { console.error("Archive failure."); }
     
     if (callsign) {
         document.getElementById('screen-login').classList.add('hidden');
@@ -33,20 +33,27 @@ async function init() {
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     
-    const target = document.getElementById(id);
-    if (target) target.classList.remove('hidden');
+    document.getElementById(id).classList.remove('hidden');
     
-    // Set active class on the correct nav item
-    const navItems = document.querySelectorAll('.nav-item');
-    if (id === 'screen-home') navItems[0].classList.add('active');
-    if (id === 'screen-vault') navItems[1].classList.add('active');
-    if (id === 'screen-logs') navItems[2].classList.add('active');
-
-    if (id === 'screen-home') updateDash();
-    if (id === 'screen-vault') populateVault();
-    if (id === 'screen-logs') populateLogs();
+    // UI Update logic for nav
+    if (id === 'screen-home') {
+        document.querySelectorAll('.nav-tab')[0].classList.add('active');
+        document.querySelectorAll('.nav-item')[0].classList.add('active');
+        updateDash();
+    }
+    if (id === 'screen-vault') {
+        document.querySelectorAll('.nav-tab')[1].classList.add('active');
+        document.querySelectorAll('.nav-item')[1].classList.add('active');
+        populateVault();
+    }
+    if (id === 'screen-logs') {
+        document.querySelectorAll('.nav-tab')[2].classList.add('active');
+        document.querySelectorAll('.nav-item')[2].classList.add('active');
+        populateLogs();
+    }
     safeTypeset();
 };
 
@@ -65,15 +72,11 @@ function updateDash() {
     document.getElementById('best-val').innerText = best;
     
     const level = Math.floor(xp / 1000) + 1;
-    const progress = (xp % 1000) / 1000;
-    
-    document.getElementById('level-val').innerText = level;
-    document.getElementById('level-val-m').innerText = level; // Mobile Ring
-    document.getElementById('xp-ring').style.strokeDashoffset = 283 - (progress * 283);
+    document.getElementById('level-val-m').innerText = level;
+    document.getElementById('level-val-d').innerText = level;
     
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('rank-tag').innerText = "Rank: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
@@ -96,7 +99,7 @@ function nextRound() {
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
-    document.getElementById('lives-box').innerText = "I".repeat(integrity);
+    document.getElementById('lives-box').innerText = "Integrity: " + "I".repeat(integrity);
 
     const stack = document.getElementById('options-stack');
     stack.innerHTML = "";
@@ -134,7 +137,7 @@ function handleFail() {
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
     const failedQ = sessionQueue.shift(); sessionQueue.push(failedQ);
 
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study required.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     safeTypeset();
@@ -148,9 +151,9 @@ window.closeRoast = () => {
 function populateVault() {
     const cont = document.getElementById('vault-list');
     cont.innerHTML = allQ.map(q => `
-        <div class="stat-card" style="margin-bottom:15px">
-            <div class="label">${q.chap}</div>
-            <div style="font-size:1.1rem; margin-top:10px">\\( ${q.q} = ${q.a} \\)</div>
+        <div class="stat-pill" style="margin-bottom:12px">
+            <small>${q.chap}</small>
+            <div style="font-size:1rem; margin-top:8px">\\( ${q.q} = ${q.a} \\)</div>
         </div>
     `).join('');
     safeTypeset();
@@ -159,9 +162,9 @@ function populateVault() {
 function populateLogs() {
     const cont = document.getElementById('logs-list');
     cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-card" style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+        <div class="stat-pill" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
             <div style="font-size:0.9rem">\\( ${q} \\)</div>
-            <div class="label" style="color:var(--accent)">Missed ${c}x</div>
+            <div class="label" style="color:var(--accent)">${c}x Missed</div>
         </div>
     `).join('') || "<p class='label'>No records found.</p>";
     safeTypeset();
