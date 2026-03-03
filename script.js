@@ -1,4 +1,5 @@
 let allQ = [], filteredQ = [], roasts = [], failLogs = {};
+let sessionQueue = []; // New: Tracks questions for the current round
 let currentQ = null, score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
 let callsign = localStorage.getItem('ax_id') || "";
@@ -75,17 +76,27 @@ window.selectChapter = (c) => {
 
 window.setDiff = (s) => {
     timeLimit = s; score = 0; lives = 3;
+    // Feature: Cycle through all questions. Shuffle the selected chapter.
+    sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
     showScreen('screen-game');
     nextRound();
 };
 
 function nextRound() {
+    // Check if player is dead
     if (lives <= 0) {
-        if (score > best) { best = score; localStorage.setItem('ax_best', best); }
-        showScreen('screen-home');
+        finishSession("Archive Depleted. Try again.");
         return;
     }
-    currentQ = filteredQ[Math.floor(Math.random() * filteredQ.length)];
+    
+    // Check if session is complete (all questions answered correctly)
+    if (sessionQueue.length === 0) {
+        finishSession("Mastery Achieved! All formulas verified.");
+        return;
+    }
+
+    currentQ = sessionQueue[0]; // Always take the first in queue
+    
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
     document.getElementById('lives-box').innerText = "❤️".repeat(lives);
@@ -98,7 +109,12 @@ function nextRound() {
         b.innerHTML = `<div class="math-rail">\\( ${o} \\)</div>`;
         b.onclick = () => {
             history.total++;
-            if (o === currentQ.a) { score++; xp += 20; history.correct++; playSfx(800, 'sine', 0.1); nextRound(); }
+            if (o === currentQ.a) { 
+                score++; xp += 20; history.correct++; 
+                playSfx(800, 'sine', 0.1); 
+                sessionQueue.shift(); // Remove correct answer from queue
+                nextRound(); 
+            }
             else handleFail();
             localStorage.setItem('ax_xp', xp);
             localStorage.setItem('ax_hist', JSON.stringify(history));
@@ -107,6 +123,12 @@ function nextRound() {
     });
     if (window.MathJax) window.MathJax.typeset();
     startTimer();
+}
+
+function finishSession(msg) {
+    if (score > best) { best = score; localStorage.setItem('ax_best', best); }
+    alert(msg);
+    showScreen('screen-home');
 }
 
 function startTimer() {
@@ -121,6 +143,11 @@ function startTimer() {
 function handleFail() {
     lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
+    
+    // Move failed question to the end of the queue to repeat later
+    const failedQ = sessionQueue.shift();
+    sessionQueue.push(failedQ);
+
     document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus required.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
@@ -152,7 +179,7 @@ function populateLogs() {
             <div class="math-rail" style="font-size:0.85rem">\\( ${q} \\)</div>
             <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
         </div>
-    `).join('') || "<p class='label'>No records found.</p>";
+    `).join('') || "<p class='label' style='padding:20px'>No records found.</p>";
     if (window.MathJax) window.MathJax.typeset();
 }
 
