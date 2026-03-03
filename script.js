@@ -19,6 +19,12 @@ function playSfx(f, t, d) {
     } catch(e){}
 }
 
+function safeTypeset() {
+    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().catch(e => console.log("MathJax pending"));
+    }
+}
+
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
@@ -32,19 +38,22 @@ async function init() {
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
     } catch (e) { console.error("Archive inaccessible."); }
     
-    if (!callsign) showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
+    if (!callsign) window.showScreen('screen-login');
+    else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
 }
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.remove('hidden');
+    
+    const target = document.getElementById(id);
+    if (target) target.classList.remove('hidden');
     
     if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
     if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
     if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
-    if (window.MathJax) window.MathJax.typeset();
+    
+    safeTypeset();
 };
 
 window.submitLogin = () => {
@@ -53,7 +62,7 @@ window.submitLogin = () => {
         callsign = val.toUpperCase();
         localStorage.setItem('ax_id', callsign);
         document.getElementById('main-dock').classList.remove('hidden');
-        showScreen('screen-home');
+        window.showScreen('screen-home');
     }
 };
 
@@ -71,25 +80,19 @@ function updateDash() {
 
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    showScreen('screen-difficulty');
+    window.showScreen('screen-difficulty');
 };
 
 window.setDiff = (s) => {
     timeLimit = s; score = 0; lives = 3;
     sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    showScreen('screen-game');
+    window.showScreen('screen-game');
     nextRound();
 };
 
 function nextRound() {
-    if (lives <= 0) {
-        showResults("Archive Depleted", "Your retention was insufficient.");
-        return;
-    }
-    if (sessionQueue.length === 0) {
-        showResults("Mastery Achieved", "All identities have been verified.");
-        return;
-    }
+    if (lives <= 0) { showResults("Archive Depleted", "Your retention was insufficient."); return; }
+    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities have been verified."); return; }
 
     currentQ = sessionQueue[0]; 
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -109,14 +112,13 @@ function nextRound() {
                 playSfx(800, 'sine', 0.1); 
                 sessionQueue.shift(); 
                 nextRound(); 
-            }
-            else handleFail();
+            } else handleFail();
             localStorage.setItem('ax_xp', xp);
             localStorage.setItem('ax_hist', JSON.stringify(history));
         };
         stack.appendChild(b);
     });
-    if (window.MathJax) window.MathJax.typeset();
+    safeTypeset();
     startTimer();
 }
 
@@ -130,19 +132,14 @@ function startTimer() {
 }
 
 function handleFail() {
-    lives--; 
-    clearInterval(timerId); 
-    playSfx(200, 'sawtooth', 0.2);
+    lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    
-    // Move current question to end of queue
     const failedQ = sessionQueue.shift();
     sessionQueue.push(failedQ);
-
     document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus required.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
-    if (window.MathJax) window.MathJax.typeset();
+    safeTypeset();
 }
 
 window.closeRoast = () => {
@@ -162,12 +159,7 @@ function showResults(title, subtitle) {
 
 window.closeResults = () => {
     document.getElementById('results-overlay').classList.add('hidden');
-    showScreen('screen-home');
-};
-
-window.toggleMute = () => {
-    isMuted = !isMuted;
-    document.getElementById('mute-btn').innerText = isMuted ? "Sound Off" : "Quiet Mode";
+    window.showScreen('screen-home');
 };
 
 function populateVault() {
@@ -180,7 +172,7 @@ function populateVault() {
             </div>
         </div>
     `).join('');
-    if (window.MathJax) window.MathJax.typeset();
+    safeTypeset();
 }
 
 function populateLogs() {
@@ -190,14 +182,19 @@ function populateLogs() {
             <div class="math-rail" style="font-size:0.85rem">\\( ${q} \\)</div>
             <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
         </div>
-    `).join('') || "<p class='label' style='padding:20px'>No records found.</p>";
-    if (window.MathJax) window.MathJax.typeset();
+    `).join('') || "<p class='label' style='padding:40px; text-align:center;'>No records found.</p>";
+    safeTypeset();
 }
 
 window.startRepair = () => {
     const bad = Object.keys(failLogs);
     filteredQ = allQ.filter(q => bad.includes(q.q));
-    showScreen('screen-difficulty');
+    window.showScreen('screen-difficulty');
+};
+
+window.toggleMute = () => {
+    isMuted = !isMuted;
+    document.getElementById('mute-btn').innerText = isMuted ? "Sound Off" : "Quiet Mode";
 };
 
 init();
