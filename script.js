@@ -1,6 +1,6 @@
 let allQ = [], filteredQ = [], roasts = [], failLogs = {};
-let sessionQueue = []; 
-let currentQ = null, score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
+let sessionQueue = [], currentQ = null;
+let score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
 let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
@@ -21,7 +21,7 @@ function playSfx(f, t, d) {
 
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().catch(e => console.log("MathJax pending"));
+        window.MathJax.typesetPromise().catch(e => console.log("Rendering..."));
     }
 }
 
@@ -36,7 +36,7 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
-    } catch (e) { console.error("Archive inaccessible."); }
+    } catch (e) { console.error("Database error."); }
     
     if (!callsign) window.showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
@@ -74,7 +74,6 @@ function updateDash() {
     document.getElementById('xp-ring').style.strokeDashoffset = 301.59 - (progress * 301.59);
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('rank-tag').innerText = "Mastery: " + (best > 50 ? "Sage" : best > 20 ? "Scholar" : "Novice");
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
@@ -91,8 +90,8 @@ window.setDiff = (s) => {
 };
 
 function nextRound() {
-    if (lives <= 0) { showResults("Archive Depleted", "Your retention was insufficient."); return; }
-    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities have been verified."); return; }
+    if (lives <= 0) { showResults("Archive Depleted", "Your retention failed."); return; }
+    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities verified."); return; }
 
     currentQ = sessionQueue[0]; 
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -109,12 +108,10 @@ function nextRound() {
             history.total++;
             if (o === currentQ.a) { 
                 score++; xp += 20; history.correct++; 
-                playSfx(800, 'sine', 0.1); 
-                sessionQueue.shift(); 
+                playSfx(800, 'sine', 0.1); sessionQueue.shift(); 
                 nextRound(); 
             } else handleFail();
-            localStorage.setItem('ax_xp', xp);
-            localStorage.setItem('ax_hist', JSON.stringify(history));
+            localStorage.setItem('ax_xp', xp); localStorage.setItem('ax_hist', JSON.stringify(history));
         };
         stack.appendChild(b);
     });
@@ -134,9 +131,8 @@ function startTimer() {
 function handleFail() {
     lives--; clearInterval(timerId); playSfx(200, 'sawtooth', 0.2);
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    const failedQ = sessionQueue.shift();
-    sessionQueue.push(failedQ);
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus required.";
+    const failedQ = sessionQueue.shift(); sessionQueue.push(failedQ);
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Focus.";
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     safeTypeset();
@@ -172,6 +168,7 @@ function populateVault() {
             </div>
         </div>
     `).join('');
+    cont.scrollTop = 0;
     safeTypeset();
 }
 
@@ -183,6 +180,7 @@ function populateLogs() {
             <span style="color:var(--accent); font-weight:800; margin-left:15px;">x${c}</span>
         </div>
     `).join('') || "<p class='label' style='padding:40px; text-align:center;'>No records found.</p>";
+    cont.scrollTop = 0;
     safeTypeset();
 }
 
