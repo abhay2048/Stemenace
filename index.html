@@ -147,7 +147,27 @@
             <button class="btn-main" style="width:100%" onclick="closeRoast()">Return to Study</button>
         </div>
     </div>
+<!-- RESULTS SCREEN -->
+<div id="results-overlay" class="overlay hidden">
+    <div class="recall-sheet">
+        <h2 id="results-title" class="serif-title" style="font-size: 2rem; color: var(--accent);">Mastery Achieved</h2>
+        <p id="results-subtitle" class="label" style="margin-bottom: 30px;">Session Summary</p>
+        
+        <div class="stat-row" style="margin-bottom: 30px;">
+            <div class="stat-box">
+                <label>Score</label>
+                <span id="res-score" class="serif-title">0</span>
+            </div>
+            <div class="stat-box">
+                <label>XP Gained</label>
+                <span id="res-xp" class="serif-title">+0</span>
+            </div>
+        </div>
 
+        <button class="btn-main" onclick="closeResults()">Return to Library</button>
+    </div>
+</div>
     <script src="script.js"></script>
 </body>
 </html>
+
