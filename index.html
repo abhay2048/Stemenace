@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXIOM | Scholarly Archive</title>
+    <title>AXIOM | Mathematical Archive</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -16,129 +17,103 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Tactical Floating Symbols -->
+    <!-- Scholars Background -->
     <div class="scholarly-bg">
-        <span class="float-math">∫</span><span class="float-math">∑</span><span class="float-math">π</span>
-        <span class="float-math">∂</span><span class="float-math">∮</span><span class="float-math">∞</span>
-        <span class="float-math">θ</span><span class="float-math">Δ</span><span class="float-math">√</span>
+        <span class="float-math">Ψ</span><span class="float-math">Ω</span><span class="float-math">λ</span>
+        <span class="float-math">∫</span><span class="float-math">∬</span><span class="float-math">∮</span>
     </div>
 
     <div class="app-container">
-        <!-- AUTH SCREEN -->
-        <div id="screen-login" class="screen">
-            <div class="auth-center-wrap">
-                <div class="login-seal-area">
-                    <div class="seal-outer">
-                        <div class="seal-inner">A</div>
+        <!-- SIDEBAR / NAV -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand"><h1>AXIOM</h1></div>
+            <div class="retention-status">
+                <label class="label">Retention Index</label>
+                <div class="ring-container">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="track" cx="50" cy="50" r="45"></circle>
+                        <circle id="xp-ring" class="fill" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <div class="ring-text"><span id="level-val">1</span></div>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-item active" onclick="showScreen('screen-home')">Library</button>
+                <button class="nav-item" onclick="showScreen('screen-vault')">The Archive</button>
+                <button class="nav-item" onclick="showScreen('screen-logs')">Knowledge Gaps</button>
+            </nav>
+        </aside>
+
+        <!-- MAIN AREA -->
+        <main class="main-content">
+            <!-- DASHBOARD -->
+            <div id="screen-home" class="screen">
+                <header class="view-header">
+                    <div class="meta">
+                        <h2 class="serif-title" id="display-name">Scholar</h2>
+                        <span class="rank-label" id="rank-tag">Rank: Novice</span>
                     </div>
-                    <div class="seal-glow"></div>
-                </div>
-                <h1 class="serif-title axiom-logo">AXIOM</h1>
-                <p class="label tracking-widest">Scholarly Archive Access</p>
-                <div class="auth-glass-card">
-                    <div class="input-container">
-                        <input type="text" id="callsign-input" placeholder="Scholar Identity" autocomplete="off">
-                        <div class="focus-border"></div>
+                </header>
+                <div class="scroll-area">
+                    <div class="stat-grid">
+                        <div class="stat-card"><label class="label">Accuracy</label><span id="accuracy-val">0%</span></div>
+                        <div class="stat-card"><label class="label">Mastery Streak</label><span id="best-val">0</span></div>
                     </div>
-                    <button class="btn-main tactile" onclick="submitLogin()">Access Library</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- HOME DASHBOARD -->
-        <div id="screen-home" class="screen hidden">
-            <header class="header-ui">
-                <div class="meta">
-                    <span id="rank-tag" class="label-accent">Novice Scholar</span>
-                    <h2 id="display-name" class="serif-title">Scholar</h2>
-                </div>
-                <button class="btn-icon-glass" onclick="toggleMute()">🔇</button>
-            </header>
-            <div class="content-scroll">
-                <div class="retention-ring-wrap">
-                    <div class="retention-ring">
-                        <svg viewBox="0 0 100 100">
-                            <circle class="track" cx="50" cy="50" r="46"></circle>
-                            <circle id="xp-ring" class="fill" cx="50" cy="50" r="46"></circle>
-                        </svg>
-                        <div class="ring-label"><span id="level-val">1</span><small>INDEX</small></div>
+                    <div class="category-grid">
+                        <button class="cat-card" onclick="selectChapter('trigonometry')"><h3>Trigonometry</h3><p>Circular & Periodic Functions</p></button>
+                        <button class="cat-card" onclick="selectChapter('calculus')"><h3>Calculus</h3><p>Differentiation & Integration</p></button>
                     </div>
+                    <button id="repair-btn" class="btn-repair" style="display:none;" onclick="startRepair()">Address Weaknesses</button>
                 </div>
-                <div class="stat-grid">
-                    <div class="stat-card">
-                        <label class="label">Best Streak</label>
-                        <span id="best-val" class="serif-title">0</span>
+            </div>
+
+            <!-- GAME ARENA -->
+            <div id="screen-game" class="screen hidden">
+                <div class="arena-hud">
+                    <div id="lives-box" class="hud-item">Integrity: III</div>
+                    <div class="timer-rail"><div id="timer-fill"></div></div>
+                    <div id="streak-box" class="hud-item">0</div>
+                </div>
+                <div class="arena-content">
+                    <div class="formula-card">
+                        <label class="label">Identify the resolution</label>
+                        <div id="formula-display" class="math-main"></div>
                     </div>
-                    <div class="stat-card">
-                        <label class="label">Accuracy</label>
-                        <span id="accuracy-val" class="serif-title">0%</span>
-                    </div>
-                </div>
-                <div class="action-stack">
-                    <button class="btn-main tactile" onclick="showScreen('screen-chapters')">Commence Session</button>
-                    <button id="repair-btn" class="btn-outline-glass tactile" style="display:none;" onclick="startRepair()">Repair Weaknesses</button>
+                    <div id="options-stack" class="options-grid"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- GAME ARENA -->
-        <div id="screen-game" class="screen hidden">
-            <div class="arena-hud">
-                <div id="lives-box" class="hud-stat">❤️❤️❤️</div>
-                <div class="timer-wrap"><div id="timer-fill"></div></div>
-                <div id="streak-box" class="hud-stat serif-title">0</div>
+            <!-- VAULT / LOGS (Shared List Style) -->
+            <div id="screen-vault" class="screen hidden">
+                <h2 class="serif-title">Mathematical Archive</h2>
+                <div class="scroll-area" id="vault-list"></div>
             </div>
-            <div class="arena-content">
-                <div class="formula-display-card">
-                    <div class="math-rail" id="formula-display"></div>
-                </div>
-                <div id="options-stack" class="options-grid"></div>
+            <div id="screen-logs" class="screen hidden">
+                <h2 class="serif-title">Inaccurate Recalls</h2>
+                <div class="scroll-area" id="logs-list"></div>
             </div>
-        </div>
-
-        <!-- NAVIGATION -->
-        <nav class="bottom-dock hidden" id="main-dock">
-            <div class="dock-item active" onclick="showScreen('screen-home')">Library</div>
-            <div class="dock-item" onclick="showScreen('screen-vault')">Archive</div>
-            <div class="dock-item" onclick="showScreen('screen-logs')">Gaps</div>
-        </nav>
-
-        <!-- SUB SCREENS -->
-        <div id="screen-chapters" class="screen hidden">
-            <header class="header-ui"><button class="btn-icon-glass" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
-            <div class="content-scroll" id="chapter-list">
-                <button class="list-card-glass tactile" onclick="selectChapter('trigonometry')">Trigonometry</button>
-                <button class="list-card-glass tactile" onclick="selectChapter('calculus')">Calculus</button>
-            </div>
-        </div>
-
-        <div id="screen-difficulty" class="screen hidden">
-            <header class="header-ui"><button class="btn-icon-glass" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
-            <div class="content-scroll">
-                <button class="list-card-glass tactile" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="list-card-glass tactile" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="list-card-glass critical tactile" onclick="setDiff(8)">Instant (8s)</button>
-            </div>
-        </div>
-
-        <div id="screen-vault" class="screen hidden"><header class="header-ui"><h2>Vault</h2></header><div class="content-scroll" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><header class="header-ui"><h2>Knowledge Gaps</h2></header><div class="content-scroll" id="logs-list"></div></div>
+        </main>
     </div>
 
-    <!-- OVERLAYS -->
+    <!-- CORRECTION OVERLAY (The Roast) -->
     <div id="roast-overlay" class="overlay hidden">
         <div class="recall-sheet">
-            <p id="roast-msg" class="italic-text"></p>
-            <div class="answer-reveal"><small class="label">Correct Identity</small><div class="math-rail" id="correct-display"></div></div>
-            <button class="btn-main tactile" onclick="closeRoast()">Return to Session</button>
+            <p id="roast-msg" class="roast-text"></p>
+            <div class="correction-box">
+                <label class="label">True Resolution</label>
+                <div id="correct-display"></div>
+            </div>
+            <button class="btn-primary" onclick="closeRoast()">Return to Study</button>
         </div>
     </div>
 
-    <div id="results-overlay" class="overlay hidden">
-        <div class="recall-sheet">
-            <h2 id="results-title" class="serif-title">Session Concluded</h2>
-            <div class="stat-grid" style="margin: 20px 0;"><div class="stat-card"><label>Score</label><span id="res-score">0</span></div><div class="stat-card"><label>XP</label><span id="res-xp">+0</span></div></div>
-            <button class="btn-main tactile" onclick="closeResults()">Back to Library</button>
+    <!-- LOGIN OVERLAY -->
+    <div id="screen-login" class="overlay">
+        <div class="login-card">
+            <h1 class="serif-title">AXIOM</h1>
+            <p class="label">Library Access Authorization</p>
+            <input type="text" id="callsign-input" placeholder="Enter Scholar Identity..." autocomplete="off">
+            <button class="btn-primary" onclick="submitLogin()">Authorize</button>
         </div>
     </div>
 
