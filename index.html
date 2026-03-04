@@ -15,107 +15,146 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Constrained Atmospheric Background -->
+    <div class="scholarly-bg">
+        <span class="float-math" style="top:10%; left:10%">∫</span>
+        <span class="float-math" style="top:20%; right:15%">∑</span>
+        <span class="float-math" style="bottom:15%; left:20%">π</span>
+        <span class="float-math" style="top:50%; right:10%">∂</span>
+        <span class="float-math" style="bottom:30%; right:20%">∞</span>
+    </div>
+
     <div class="app-container">
-        <!-- AUTH SCREEN -->
+        <!-- SCREEN: LOGIN -->
         <section id="screen-login" class="screen">
-            <div class="seal-container"><div class="seal">A</div></div>
-            <h1 class="serif-title axiom-logo">AXIOM</h1>
-            <p class="label-muted">Access Scholarly Archive</p>
-            <div class="auth-box">
-                <input type="text" id="callsign-input" placeholder="Identity..." autocomplete="off">
-                <button class="btn-main" onclick="submitLogin()">Authenticate</button>
+            <div class="login-header">
+                <div class="seal-logo">A</div>
+                <h1 class="serif-title axiom-title">AXIOM</h1>
+                <p class="label-muted tracking-wide">Scholarly Identity Required</p>
+            </div>
+            <div class="auth-card">
+                <input type="text" id="callsign-input" placeholder="Scholar Name..." autocomplete="off">
+                <button class="btn-primary" onclick="submitLogin()">Access Archive</button>
             </div>
         </section>
 
-        <!-- DASHBOARD -->
+        <!-- SCREEN: DASHBOARD -->
         <section id="screen-home" class="screen hidden">
-            <header class="header-ui">
-                <div class="meta">
+            <header class="dash-header">
+                <div class="scholar-meta">
                     <span id="rank-tag" class="label-muted">Novice Scholar</span>
                     <h2 id="display-name" class="serif-title">Scholar</h2>
                 </div>
-                <div class="retention-ring-wrap">
-                    <svg viewBox="0 0 36 36" class="ring"><path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/><path id="xp-ring" class="ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/></svg>
-                    <div class="ring-label"><span id="level-val">1</span><small>INDEX</small></div>
+                <div class="index-circle">
+                    <svg viewBox="0 0 36 36">
+                        <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <path id="xp-ring" class="ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    </svg>
+                    <div class="ring-content"><span id="level-val">1</span><small>INDEX</small></div>
                 </div>
             </header>
 
-            <div class="stat-grid">
-                <div class="stat-card"><label>Best Streak</label><span id="best-val">0</span></div>
-                <div class="stat-card"><label>Accuracy</label><span id="accuracy-val">0%</span></div>
+            <div class="stat-row">
+                <div class="stat-box"><label>BEST STREAK</label><span id="best-val">0</span></div>
+                <div class="stat-box"><label>ACCURACY</label><span id="accuracy-val">0%</span></div>
             </div>
 
-            <div class="action-stack">
-                <button class="menu-card" onclick="showScreen('screen-chapters')">
-                    <span class="serif-title">Commence Session</span>
-                    <small>Verify identities in the archive</small>
+            <div class="dash-actions">
+                <button class="action-card" onclick="showScreen('screen-chapters')">
+                    <span class="serif-title">Enter Archive</span>
+                    <small>Commence verification session</small>
                 </button>
-                <button id="repair-btn" class="menu-card repair" style="display:none;" onclick="startRepair()">
-                    <span class="serif-title">Repair Weaknesses</span>
-                    <small>Focus on identified knowledge gaps</small>
+                <button id="repair-btn" class="action-card weakness" style="display:none;" onclick="startRepair()">
+                    <span class="serif-title">Repair Gaps</span>
+                    <small>Target identified weaknesses</small>
                 </button>
             </div>
         </section>
 
-        <!-- ARENA -->
+        <!-- SCREEN: ARENA (PRACTICE) -->
         <section id="screen-game" class="screen hidden">
             <div class="arena-hud">
-                <div id="lives-box" class="hud-stat">❤️❤️❤️</div>
-                <div class="timer-container"><div id="timer-fill"></div></div>
-                <div id="streak-box" class="serif-title">0</div>
+                <div id="lives-box" class="hud-item">❤️❤️❤️</div>
+                <div class="timer-rail"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="hud-item serif-title">0</div>
             </div>
-            <div class="formula-display">
-                <div id="formula-display-math" class="serif-formula"></div>
+            
+            <div class="question-hero">
+                <div id="formula-display" class="math-display"></div>
             </div>
-            <div id="options-stack" class="options-grid"></div>
-        </section>
 
-        <!-- CHAPTERS & DIFFICULTY -->
-        <section id="screen-chapters" class="screen hidden">
-            <header class="header-ui"><button class="btn-icon" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
-            <div class="scroll-area" id="chapter-list"></div>
-        </section>
-
-        <section id="screen-difficulty" class="screen hidden">
-            <header class="header-ui"><button class="btn-icon" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
-            <div class="scroll-area">
-                <button class="menu-card" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="menu-card" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="menu-card critical" onclick="setDiff(8)">Instant (8s)</button>
+            <div id="options-stack" class="options-container">
+                <!-- 4 Buttons Injected Here -->
             </div>
         </section>
 
-        <!-- VAULT & LOGS -->
-        <section id="screen-vault" class="screen hidden"><header class="header-ui"><h2>Manuscripts</h2></header><div class="scroll-area" id="vault-list"></div></section>
-        <section id="screen-logs" class="screen hidden"><header class="header-ui"><h2>Gaps</h2></header><div class="scroll-area" id="logs-list"></div></section>
+        <!-- SCREEN: VAULT (ARCHIVE MODE) -->
+        <section id="screen-vault" class="screen hidden">
+            <header class="nav-header">
+                <button class="back-link" onclick="showScreen('screen-home')">←</button>
+                <h2 class="serif-title">Archive Mode</h2>
+            </header>
+            <div class="archive-recall-zone">
+                <div class="question-hero mini">
+                    <div id="archive-prompt" class="math-display"></div>
+                </div>
+                <div class="recall-input-wrap">
+                    <textarea id="manual-input" placeholder="Recall formula mentally or type here..."></textarea>
+                    <button class="btn-primary" onclick="revealArchiveAnswer()">Verify Identity</button>
+                </div>
+                <div id="archive-reveal" class="hidden">
+                    <div class="answer-card">
+                        <label class="label-muted">Correct Identity</label>
+                        <div id="archive-answer" class="math-display"></div>
+                    </div>
+                    <button class="btn-outline" onclick="nextArchiveItem()">Next Manuscript</button>
+                </div>
+            </div>
+        </section>
 
-        <!-- NAVIGATION -->
-        <nav class="bottom-nav hidden" id="main-dock">
-            <div class="nav-item active" onclick="showScreen('screen-home')">Home</div>
-            <div class="nav-item" onclick="showScreen('screen-vault')">Vault</div>
-            <div class="nav-item" onclick="showScreen('screen-logs')">Gaps</div>
+        <!-- NAV DOCK -->
+        <nav class="bottom-dock hidden" id="main-dock">
+            <div class="dock-tab active" onclick="showScreen('screen-home')">Library</div>
+            <div class="dock-tab" onclick="showScreen('screen-vault')">Archive</div>
+            <div class="dock-tab" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- OVERLAYS -->
-        <div id="roast-overlay" class="overlay hidden">
-            <div class="recall-sheet">
-                <p id="roast-msg" class="italic-text"></p>
-                <div class="answer-reveal">
-                    <label class="label-muted">Correct Identity</label>
-                    <div id="correct-display" class="serif-formula"></div>
-                </div>
-                <button class="btn-main" onclick="closeRoast()">Return</button>
+        <!-- SUB-SCREENS -->
+        <div id="screen-chapters" class="screen hidden">
+            <header class="nav-header"><button class="back-link" onclick="showScreen('screen-home')">←</button><h2>Chapters</h2></header>
+            <div class="scroll-v" id="chapter-list"></div>
+        </div>
+        <div id="screen-difficulty" class="screen hidden">
+            <header class="nav-header"><button class="back-link" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
+            <div class="scroll-v">
+                <button class="action-card" onclick="setDiff(30)">Contemplative (30s)</button>
+                <button class="action-card" onclick="setDiff(15)">Focused (15s)</button>
+                <button class="action-card critical" onclick="setDiff(8)">Instant (8s)</button>
             </div>
         </div>
+        <div id="screen-logs" class="screen hidden"><header class="nav-header"><h2>Knowledge Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
+    </div>
 
-        <div id="results-overlay" class="overlay hidden">
-            <div class="recall-sheet">
-                <h2 id="results-title" class="serif-title">Session Concluded</h2>
-                <div class="stat-grid" style="margin:20px 0;"><div class="stat-card"><label>Score</label><span id="res-score">0</span></div><div class="stat-card"><label>XP</label><span id="res-xp">+0</span></div></div>
-                <button class="btn-main" onclick="closeResults()">Back to Library</button>
-            </div>
+    <!-- OVERLAYS -->
+    <div id="roast-overlay" class="overlay hidden">
+        <div class="modal-sheet">
+            <p id="roast-msg" class="roast-text"></p>
+            <div class="reveal-box"><small class="label-muted">The Correct Identity</small><div id="correct-display" class="math-display"></div></div>
+            <button class="btn-primary" onclick="closeRoast()">Return to Archive</button>
         </div>
     </div>
+
+    <div id="results-overlay" class="overlay hidden">
+        <div class="modal-sheet">
+            <h2 class="serif-title">Session Summary</h2>
+            <div class="res-grid">
+                <div class="stat-box"><label>SCORE</label><span id="res-score">0</span></div>
+                <div class="stat-box"><label>XP</label><span id="res-xp">+0</span></div>
+            </div>
+            <button class="btn-primary" onclick="closeResults()">Back to Library</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
