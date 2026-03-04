@@ -26,7 +26,7 @@ async function init() {
         
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
-            <button class="menu-btn" onclick="selectChapter('${c}')">
+            <button class="menu-action" onclick="selectChapter('${c}')">
                 <span class="serif-title">${c.toUpperCase()}</span>
                 <small>Archive Manuscripts</small>
             </button>
@@ -39,12 +39,12 @@ async function init() {
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.nav-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
+    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
+    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
+    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
     safeTypeset();
 };
 
@@ -83,8 +83,8 @@ window.setDiff = (s) => {
 
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0) { showResults("Archive Depleted", "Retention failed."); return; }
-    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities verified."); return; }
+    if (lives <= 0) { showResults("Archive Depleted", "Retention failure."); return; }
+    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "Knowledge verified."); return; }
 
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -103,7 +103,7 @@ function nextRound() {
                 b.classList.add('correct');
                 score++; xp += 20; history.correct++; 
                 sessionQueue.shift();
-                setTimeout(nextRound, 500); 
+                setTimeout(nextRound, 400); 
             } else {
                 b.classList.add('wrong');
                 handleFail();
@@ -152,12 +152,21 @@ function showResults(title, sub) {
 window.closeResults = () => { document.getElementById('results-overlay').classList.add('hidden'); showScreen('screen-home'); };
 
 function populateVault() {
-    document.getElementById('vault-list').innerHTML = allQ.map(q => `<div class="menu-btn"><label class="label-muted">${q.chap}</label><div>\\(${q.q}\\)</div><div style="color:var(--accent); margin-top:5px;">\\(${q.a}\\)</div></div>`).join('');
+    document.getElementById('vault-list').innerHTML = allQ.map(q => `
+        <div class="menu-action">
+            <label class="label-muted">${q.chap}</label>
+            <div style="margin:10px 0">\\( ${q.q} \\)</div>
+            <div style="color:var(--accent)">\\( ${q.a} \\)</div>
+        </div>`).join('');
     safeTypeset();
 }
 
 function populateLogs() {
-    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `<div class="stat-card" style="text-align:left; margin-bottom:10px;"><div>\\(${q}\\)</div><div class="label-muted" style="margin-top:10px">Gaps: ${c}</div></div>`).join('') || "<p class='label-muted' style='text-align:center; padding:40px;'>No gaps found.</p>";
+    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
+        <div class="stat-card" style="text-align:left; margin-bottom:10px;">
+            <div>\\( ${q} \\)</div>
+            <div class="label-muted" style="margin-top:10px; color:var(--accent)">Gaps: ${c}</div>
+        </div>`).join('') || "<p class='label-muted' style='text-align:center; padding:40px;'>No gaps found.</p>";
     safeTypeset();
 }
 
