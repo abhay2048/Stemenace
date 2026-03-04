@@ -22,8 +22,7 @@ async function init() {
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
             <button class="btn-tactile-main" onclick="selectChapter('${c}')">${c.toUpperCase()}</button>
         `).join('');
-
-    } catch (e) { console.error("Initialization failed."); }
+    } catch (e) { console.error("Archive inaccessible."); }
     
     if (!callsign) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
@@ -67,7 +66,6 @@ function updateDash() {
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
-// ARENA LOGIC
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
     showScreen('screen-difficulty');
@@ -93,7 +91,7 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'opt-node';
+        b.className = 'opt-button';
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
@@ -135,13 +133,12 @@ function handleFail() {
 
 window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
 
-// ARCHIVE LIST FLASHCARDS
 function populateVault() {
     const list = document.getElementById('vault-list');
     list.innerHTML = allQ.map(q => `
-        <div class="manuscript-card" onclick="const a = this.querySelector('.manuscript-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'">
+        <div class="vault-card" onclick="const a = this.querySelector('.vault-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'">
             <div>\\( ${q.q} \\)</div>
-            <div class="manuscript-ans">\\( ${q.a} \\)</div>
+            <div class="vault-ans">\\( ${q.a} \\)</div>
         </div>
     `).join('');
     safeTypeset();
@@ -149,7 +146,7 @@ function populateVault() {
 
 function populateLogs() {
     document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="manuscript-card"><div>\\( ${q} \\)</div><div style="color:var(--accent);margin-top:10px">Gaps: ${c}</div></div>
+        <div class="vault-card"><div>\\( ${q} \\)</div><div style="color:var(--accent);margin-top:10px">Gaps Identified: ${c}</div></div>
     `).join('') || "<p style='text-align:center; padding:40px;'>No gaps identified.</p>";
     safeTypeset();
 }
