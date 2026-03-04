@@ -4,7 +4,7 @@ let score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
 let best = parseInt(localStorage.getItem('ax_best')) || 0;
 let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
-let timerId = null, timeLimit = 30, isMuted = false;
+let timerId = null, timeLimit = 30;
 
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
@@ -23,20 +23,30 @@ async function init() {
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
+        
+        // Load Chapters
+        const chapters = [...new Set(allQ.map(q => q.chap))];
+        document.getElementById('chapter-list').innerHTML = chapters.map(c => `
+            <button class="menu-card" onclick="selectChapter('${c}')">
+                <span class="serif-title">${c.charAt(0).toUpperCase() + c.slice(1)}</span>
+                <small>Archive Manuscripts</small>
+            </button>
+        `).join('');
+
     } catch (e) { console.error("Archive inaccessible."); }
     
-    if (!callsign) window.showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
+    if (!callsign) showScreen('screen-login');
+    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
+    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.nav-item')[0].classList.add('active'); }
+    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
+    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
     safeTypeset();
 };
 
@@ -46,16 +56,17 @@ window.submitLogin = () => {
         callsign = val.toUpperCase();
         localStorage.setItem('ax_id', callsign);
         document.getElementById('main-dock').classList.remove('hidden');
-        window.showScreen('screen-home');
+        showScreen('screen-home');
     }
 };
 
 function updateDash() {
     document.getElementById('display-name').innerText = callsign;
     document.getElementById('best-val').innerText = best;
-    const progress = (xp % 1000) / 1000;
-    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 289 - (progress * 289);
+    const level = Math.floor(xp / 1000) + 1;
+    const progress = (xp % 1000) / 10; // 0 to 100
+    document.getElementById('level-val').innerText = level;
+    document.getElementById('xp-ring').style.strokeDashoffset = 100 - progress;
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
@@ -63,23 +74,23 @@ function updateDash() {
 
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    window.showScreen('screen-difficulty');
+    showScreen('screen-difficulty');
 };
 
 window.setDiff = (s) => {
     timeLimit = s; score = 0; lives = 3;
     sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    window.showScreen('screen-game');
+    showScreen('screen-game');
     nextRound();
 };
 
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0) { showResults("Archive Depleted", "Retention failed."); return; }
-    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "All identities verified."); return; }
+    if (lives <= 0) { showResults("Session Terminated", "Recall failure detected."); return; }
+    if (sessionQueue.length === 0) { showResults("Mastery Complete", "All identities verified."); return; }
 
     currentQ = sessionQueue[0];
-    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    document.getElementById('formula-display-math').innerHTML = `\\[ ${currentQ.q} \\]`;
     document.getElementById('streak-box').innerText = score;
     document.getElementById('lives-box').innerText = "❤️".repeat(lives);
 
@@ -87,8 +98,8 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'list-card-glass tactile';
-        b.innerHTML = `<div class="math-rail">\\( ${o} \\)</div>`;
+        b.className = 'menu-card';
+        b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
@@ -122,7 +133,7 @@ function handleFail() {
     const failedQ = sessionQueue.shift();
     sessionQueue.push(failedQ);
 
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)];
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     safeTypeset();
@@ -133,7 +144,7 @@ window.closeRoast = () => {
     nextRound();
 };
 
-function showResults(title, subtitle) {
+function showResults(title, sub) {
     if (score > best) { best = score; localStorage.setItem('ax_best', best); }
     document.getElementById('results-title').innerText = title;
     document.getElementById('res-score').innerText = score;
@@ -143,42 +154,34 @@ function showResults(title, subtitle) {
 
 window.closeResults = () => {
     document.getElementById('results-overlay').classList.add('hidden');
-    window.showScreen('screen-home');
+    showScreen('screen-home');
 };
 
 function populateVault() {
-    const cont = document.getElementById('vault-list');
-    cont.innerHTML = allQ.map(q => `
-        <div class="list-card-glass" onclick="const a = this.querySelector('.ans'); a.style.display = a.style.display === 'block' ? 'none' : 'block';">
-            <div class="math-rail">\\( ${q.q} \\)</div>
-            <div class="ans" style="display:none; margin-top:15px; border-top:1px dashed var(--border); padding-top:15px; color:var(--accent)">
-                <div class="math-rail">\\( ${q.a} \\)</div>
-            </div>
+    document.getElementById('vault-list').innerHTML = allQ.map(q => `
+        <div class="menu-card">
+            <div class="label-muted">${q.chap}</div>
+            <div style="margin:10px 0">\\( ${q.q} \\)</div>
+            <div style="color:var(--accent)">\\( ${q.a} \\)</div>
         </div>
     `).join('');
     safeTypeset();
 }
 
 function populateLogs() {
-    const cont = document.getElementById('logs-list');
-    cont.innerHTML = Object.entries(failLogs).map(([q, c]) => `
+    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
         <div class="stat-card" style="text-align:left; margin-bottom:10px;">
-            <div class="math-rail" style="font-size:0.9rem">\\( ${q} \\)</div>
-            <div class="label-accent" style="margin-top:10px">Identified Gaps: ${c}</div>
+            <div style="font-size:0.9rem">\\( ${q} \\)</div>
+            <div class="label-muted" style="margin-top:10px; color:var(--accent)">Gaps Detected: ${c}</div>
         </div>
-    `).join('') || "<p class='label' style='padding:40px; text-align:center;'>Archive Secure.</p>";
+    `).join('') || "<p class='label-muted' style='text-align:center; padding:40px;'>No gaps identified.</p>";
     safeTypeset();
 }
 
 window.startRepair = () => {
     const bad = Object.keys(failLogs);
     filteredQ = allQ.filter(q => bad.includes(q.q));
-    window.showScreen('screen-difficulty');
-};
-
-window.toggleMute = () => {
-    isMuted = !isMuted;
-    document.getElementById('mute-btn').innerText = isMuted ? "🔈" : "🔇";
+    showScreen('screen-difficulty');
 };
 
 init();
