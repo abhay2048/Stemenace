@@ -6,12 +6,6 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
-function safeTypeset() {
-    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().catch(e => {});
-    }
-}
-
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
@@ -26,25 +20,29 @@ async function init() {
         
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
-            <button class="action-btn-matte" onclick="selectChapter('${c}')">
-                <span class="serif-title">${c.toUpperCase()}</span>
-                <small>Archive Manuscripts</small>
-            </button>
+            <button class="btn-primary-satisfying" onclick="selectChapter('${c}')">${c.toUpperCase()}</button>
         `).join('');
-    } catch (e) { console.error("Archive inaccessible."); }
+
+    } catch (e) { console.error("Initialization failed."); }
     
     if (!callsign) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
+function safeTypeset() {
+    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().catch(e => {});
+    }
+}
+
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { startArchive(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
+    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.nav-item')[0].classList.add('active'); }
+    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
+    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
     safeTypeset();
 };
 
@@ -69,7 +67,7 @@ function updateDash() {
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
-// PRACTICE ARENA
+// ARENA ENGINE
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
     showScreen('screen-difficulty');
@@ -84,8 +82,7 @@ window.setDiff = (s) => {
 
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0) { showResults("Archive Depleted", "Retention failure."); return; }
-    if (sessionQueue.length === 0) { showResults("Mastery Complete", "Knowledge verified."); return; }
+    if (lives <= 0 || sessionQueue.length === 0) { showScreen('screen-home'); return; }
 
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -96,19 +93,15 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'opt-node';
+        b.className = 'opt-btn';
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
-                b.classList.add('correct');
                 score++; xp += 20; history.correct++; 
                 sessionQueue.shift();
-                setTimeout(nextRound, 400); 
-            } else {
-                b.classList.add('wrong');
-                handleFail();
-            }
+                nextRound(); 
+            } else handleFail();
             localStorage.setItem('ax_xp', xp);
             localStorage.setItem('ax_hist', JSON.stringify(history));
         };
@@ -140,36 +133,31 @@ function handleFail() {
     safeTypeset();
 }
 
-// VAULT (ARCHIVE) LOGIC
-let archiveIdx = 0;
-function startArchive() {
-    archiveIdx = 0;
-    nextArchiveItem();
-}
-function nextArchiveItem() {
-    document.getElementById('archive-reveal-area').classList.add('hidden');
-    document.getElementById('recall-input-area').classList.remove('hidden');
-    document.getElementById('manual-answer').value = "";
-    currentQ = allQ[archiveIdx];
-    document.getElementById('archive-q-display').innerHTML = `\\[ ${currentQ.q} \\]`;
-    safeTypeset();
-}
-function revealArchiveAnswer() {
-    document.getElementById('archive-reveal-area').classList.remove('hidden');
-    document.getElementById('recall-input-area').classList.add('hidden');
-    document.getElementById('archive-a-display').innerHTML = `\\[ ${currentQ.a} \\]`;
-    archiveIdx = (archiveIdx + 1) % allQ.length;
+window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
+
+// VAULT (ARCHIVE) TOGGLE REVEAL
+function populateVault() {
+    const list = document.getElementById('vault-list');
+    list.innerHTML = allQ.map(q => `
+        <div class="vault-card" onclick="const a = this.querySelector('.vault-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'">
+            <div>\\( ${q.q} \\)</div>
+            <div class="vault-ans">\\( ${q.a} \\)</div>
+        </div>
+    `).join('');
     safeTypeset();
 }
 
-// HELPERS
-window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
-function showResults(title) {
-    if (score > best) { best = score; localStorage.setItem('ax_best', best); }
-    document.getElementById('res-score').innerText = score;
-    document.getElementById('res-xp').innerText = `+${score * 20}`;
-    document.getElementById('results-overlay').classList.remove('hidden');
+function populateLogs() {
+    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
+        <div class="vault-card"><div>\\( ${q} \\)</div><div style="color:var(--accent);margin-top:10px">Identified Gaps: ${c}</div></div>
+    `).join('') || "<p style='text-align:center; padding:40px;'>No weaknesses identified.</p>";
+    safeTypeset();
 }
-window.closeResults = () => { document.getElementById('results-overlay').classList.add('hidden'); showScreen('screen-home'); };
+
+window.startRepair = () => {
+    const bad = Object.keys(failLogs);
+    filteredQ = allQ.filter(q => bad.includes(q.q));
+    showScreen('screen-difficulty');
+};
 
 init();
