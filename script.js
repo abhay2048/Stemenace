@@ -6,6 +6,12 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
+function safeTypeset() {
+    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().catch(e => {});
+    }
+}
+
 async function init() {
     try {
         const [fRes, rRes] = await Promise.all([
@@ -18,35 +24,27 @@ async function init() {
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
         
-        // Populate Chapters
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
-            <button class="action-card" onclick="selectChapter('${c}')">
+            <button class="menu-btn" onclick="selectChapter('${c}')">
                 <span class="serif-title">${c.toUpperCase()}</span>
                 <small>Archive Manuscripts</small>
             </button>
         `).join('');
-
-    } catch (e) { console.error("Initialization failed."); }
+    } catch (e) { console.error("Archive inaccessible."); }
     
     if (!callsign) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
-function safeTypeset() {
-    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().catch(e => {});
-    }
-}
-
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-tab')[0].classList.add('active'); }
-    if (id === 'screen-vault') { startArchiveMode(); document.querySelectorAll('.dock-tab')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-tab')[2].classList.add('active'); }
+    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.nav-item')[0].classList.add('active'); }
+    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.nav-item')[1].classList.add('active'); }
+    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.nav-item')[2].classList.add('active'); }
     safeTypeset();
 };
 
@@ -65,13 +63,12 @@ function updateDash() {
     document.getElementById('best-val').innerText = best;
     const progress = (xp % 1000) / 10;
     document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDashoffset = 100 - progress;
+    document.getElementById('xp-ring').style.strokeDasharray = `${progress}, 100`;
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
     document.getElementById('accuracy-val').innerText = acc + "%";
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
-// PRACTICE LOGIC
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
     showScreen('screen-difficulty');
@@ -98,29 +95,26 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'option-btn';
+        b.className = 'opt-btn';
         b.innerHTML = `\\( ${o} \\)`;
-        b.onclick = () => checkAnswer(o, b);
+        b.onclick = () => {
+            history.total++;
+            if (o === currentQ.a) { 
+                b.classList.add('correct');
+                score++; xp += 20; history.correct++; 
+                sessionQueue.shift();
+                setTimeout(nextRound, 500); 
+            } else {
+                b.classList.add('wrong');
+                handleFail();
+            }
+            localStorage.setItem('ax_xp', xp);
+            localStorage.setItem('ax_hist', JSON.stringify(history));
+        };
         stack.appendChild(b);
     });
     safeTypeset();
     startTimer();
-}
-
-function checkAnswer(choice, btn) {
-    clearInterval(timerId);
-    history.total++;
-    if (choice === currentQ.a) {
-        btn.classList.add('correct');
-        score++; xp += 20; history.correct++;
-        sessionQueue.shift();
-        setTimeout(nextRound, 600);
-    } else {
-        btn.classList.add('incorrect');
-        handleFail();
-    }
-    localStorage.setItem('ax_xp', xp);
-    localStorage.setItem('ax_hist', JSON.stringify(history));
 }
 
 function startTimer() {
@@ -146,36 +140,31 @@ function handleFail() {
     safeTypeset();
 }
 
-// ARCHIVE MODE (MANUAL RECALL)
-let archiveIndex = 0;
-function startArchiveMode() {
-    archiveIndex = 0;
-    nextArchiveItem();
-}
-
-function nextArchiveItem() {
-    document.getElementById('archive-reveal').classList.add('hidden');
-    document.getElementById('manual-input').value = "";
-    currentQ = allQ[archiveIndex];
-    document.getElementById('archive-prompt').innerHTML = `\\[ ${currentQ.q} \\]`;
-    safeTypeset();
-}
-
-function revealArchiveAnswer() {
-    document.getElementById('archive-reveal').classList.remove('hidden');
-    document.getElementById('archive-answer').innerHTML = `\\[ ${currentQ.a} \\]`;
-    archiveIndex = (archiveIndex + 1) % allQ.length;
-    safeTypeset();
-}
-
-// UTILS
 window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
+
 function showResults(title, sub) {
     if (score > best) { best = score; localStorage.setItem('ax_best', best); }
     document.getElementById('res-score').innerText = score;
     document.getElementById('res-xp').innerText = `+${score * 20}`;
     document.getElementById('results-overlay').classList.remove('hidden');
 }
+
 window.closeResults = () => { document.getElementById('results-overlay').classList.add('hidden'); showScreen('screen-home'); };
+
+function populateVault() {
+    document.getElementById('vault-list').innerHTML = allQ.map(q => `<div class="menu-btn"><label class="label-muted">${q.chap}</label><div>\\(${q.q}\\)</div><div style="color:var(--accent); margin-top:5px;">\\(${q.a}\\)</div></div>`).join('');
+    safeTypeset();
+}
+
+function populateLogs() {
+    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `<div class="stat-card" style="text-align:left; margin-bottom:10px;"><div>\\(${q}\\)</div><div class="label-muted" style="margin-top:10px">Gaps: ${c}</div></div>`).join('') || "<p class='label-muted' style='text-align:center; padding:40px;'>No gaps found.</p>";
+    safeTypeset();
+}
+
+window.startRepair = () => {
+    const bad = Object.keys(failLogs);
+    filteredQ = allQ.filter(q => bad.includes(q.q));
+    showScreen('screen-difficulty');
+};
 
 init();
