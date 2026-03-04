@@ -26,7 +26,7 @@ async function init() {
         
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
-            <button class="menu-action" onclick="selectChapter('${c}')">
+            <button class="action-btn-matte" onclick="selectChapter('${c}')">
                 <span class="serif-title">${c.toUpperCase()}</span>
                 <small>Archive Manuscripts</small>
             </button>
@@ -43,7 +43,7 @@ window.showScreen = (id) => {
     document.getElementById(id).classList.remove('hidden');
     
     if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
+    if (id === 'screen-vault') { startArchive(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
     if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
     safeTypeset();
 };
@@ -69,6 +69,7 @@ function updateDash() {
     document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
+// PRACTICE ARENA
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
     showScreen('screen-difficulty');
@@ -84,7 +85,7 @@ window.setDiff = (s) => {
 function nextRound() {
     clearInterval(timerId);
     if (lives <= 0) { showResults("Archive Depleted", "Retention failure."); return; }
-    if (sessionQueue.length === 0) { showResults("Mastery Achieved", "Knowledge verified."); return; }
+    if (sessionQueue.length === 0) { showResults("Mastery Complete", "Knowledge verified."); return; }
 
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -95,7 +96,7 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'opt-btn';
+        b.className = 'opt-node';
         b.innerHTML = `\\( ${o} \\)`;
         b.onclick = () => {
             history.total++;
@@ -133,47 +134,42 @@ function handleFail() {
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
     const failedQ = sessionQueue.shift();
     sessionQueue.push(failedQ);
-
     document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)];
     document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
     document.getElementById('roast-overlay').classList.remove('hidden');
     safeTypeset();
 }
 
-window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
+// VAULT (ARCHIVE) LOGIC
+let archiveIdx = 0;
+function startArchive() {
+    archiveIdx = 0;
+    nextArchiveItem();
+}
+function nextArchiveItem() {
+    document.getElementById('archive-reveal-area').classList.add('hidden');
+    document.getElementById('recall-input-area').classList.remove('hidden');
+    document.getElementById('manual-answer').value = "";
+    currentQ = allQ[archiveIdx];
+    document.getElementById('archive-q-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    safeTypeset();
+}
+function revealArchiveAnswer() {
+    document.getElementById('archive-reveal-area').classList.remove('hidden');
+    document.getElementById('recall-input-area').classList.add('hidden');
+    document.getElementById('archive-a-display').innerHTML = `\\[ ${currentQ.a} \\]`;
+    archiveIdx = (archiveIdx + 1) % allQ.length;
+    safeTypeset();
+}
 
-function showResults(title, sub) {
+// HELPERS
+window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
+function showResults(title) {
     if (score > best) { best = score; localStorage.setItem('ax_best', best); }
     document.getElementById('res-score').innerText = score;
     document.getElementById('res-xp').innerText = `+${score * 20}`;
     document.getElementById('results-overlay').classList.remove('hidden');
 }
-
 window.closeResults = () => { document.getElementById('results-overlay').classList.add('hidden'); showScreen('screen-home'); };
-
-function populateVault() {
-    document.getElementById('vault-list').innerHTML = allQ.map(q => `
-        <div class="menu-action">
-            <label class="label-muted">${q.chap}</label>
-            <div style="margin:10px 0">\\( ${q.q} \\)</div>
-            <div style="color:var(--accent)">\\( ${q.a} \\)</div>
-        </div>`).join('');
-    safeTypeset();
-}
-
-function populateLogs() {
-    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-card" style="text-align:left; margin-bottom:10px;">
-            <div>\\( ${q} \\)</div>
-            <div class="label-muted" style="margin-top:10px; color:var(--accent)">Gaps: ${c}</div>
-        </div>`).join('') || "<p class='label-muted' style='text-align:center; padding:40px;'>No gaps found.</p>";
-    safeTypeset();
-}
-
-window.startRepair = () => {
-    const bad = Object.keys(failLogs);
-    filteredQ = allQ.filter(q => bad.includes(q.q));
-    showScreen('screen-difficulty');
-};
 
 init();
