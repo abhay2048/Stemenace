@@ -15,38 +15,36 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Constrained Atmospheric Layer -->
     <div class="scholarly-bg">
-        <span class="float-math" style="--d: 15s; --t: 10%; --l: 10%;">∫</span>
-        <span class="float-math" style="--d: 22s; --t: 20%; --r: 15%;">∑</span>
-        <span class="float-math" style="--d: 18s; --b: 15%; --l: 20%;">π</span>
-        <span class="float-math" style="--d: 25s; --b: 25%; --r: 10%;">∂</span>
-        <span class="float-math" style="--d: 20s; --t: 50%; --l: 45%;">∞</span>
+        <span class="float-math" style="--d:18s; --t:15%; --l:10%;">∫</span>
+        <span class="float-math" style="--d:25s; --t:25%; --r:15%;">∑</span>
+        <span class="float-math" style="--d:20s; --b:20%; --l:15%;">π</span>
+        <span class="float-math" style="--d:30s; --b:10%; --r:10%;">∂</span>
     </div>
 
     <div class="app-container">
-        <!-- LOGIN SCREEN -->
+        <!-- SCREEN: LOGIN -->
         <section id="screen-login" class="screen">
-            <div class="auth-center">
-                <div class="seal-logo">A</div>
-                <h1 class="axiom-title">AXIOM</h1>
+            <div class="auth-box">
+                <div class="seal-container">A</div>
+                <h1 class="axiom-logo">AXIOM</h1>
                 <p class="tagline">Mathematical Navigator</p>
                 <div class="login-card">
                     <input type="text" id="callsign-input" placeholder="Operator Identity" autocomplete="off">
-                    <button class="btn-initialize" onclick="submitLogin()">Initialize</button>
+                    <button class="btn-init" onclick="submitLogin()">Initialize</button>
                 </div>
             </div>
         </section>
 
-        <!-- DASHBOARD -->
+        <!-- SCREEN: DASHBOARD -->
         <section id="screen-home" class="screen hidden">
-            <header class="home-header">
-                <div class="user-info">
-                    <span id="rank-tag" class="label-muted">Mastery: Novice</span>
+            <header class="dash-header">
+                <div class="user-meta">
+                    <span id="rank-tag" class="label-accent">Novice Scholar</span>
                     <h2 id="display-name" class="serif-title">Scholar</h2>
                 </div>
-                <div class="retention-index-wrap">
-                    <svg viewBox="0 0 36 36" class="circular-chart">
+                <div class="index-wrap">
+                    <svg viewBox="0 0 36 36" class="chart">
                         <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         <path id="xp-ring" class="ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                     </svg>
@@ -55,39 +53,43 @@
             </header>
 
             <div class="stats-grid">
-                <div class="stat-item"><label>RECALL STREAK</label><span id="best-val">0</span></div>
-                <div class="stat-item"><label>ACCURACY</label><span id="accuracy-val">0%</span></div>
+                <div class="stat-card"><label>BEST STREAK</label><span id="best-val">0</span></div>
+                <div class="stat-card"><label>ACCURACY</label><span id="accuracy-val">0%</span></div>
             </div>
 
-            <div class="menu-stack">
+            <div class="home-menu">
                 <button class="btn-tactile-main" onclick="showScreen('screen-chapters')">Commence Study Session</button>
                 <button id="repair-btn" class="btn-tactile-secondary" style="display:none;" onclick="startRepair()">Address Weaknesses</button>
             </div>
         </section>
 
-        <!-- GAME ARENA -->
+        <!-- SCREEN: ARENA -->
         <section id="screen-game" class="screen hidden">
             <div class="arena-hud">
-                <div id="lives-box" class="hud-stat">❤️❤️❤️</div>
-                <div class="timer-container"><div id="timer-fill"></div></div>
-                <div id="streak-box" class="hud-stat serif-title">0</div>
+                <div id="lives-box">❤️❤️❤️</div>
+                <div class="timer-rail"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="serif-title">0</div>
             </div>
             
-            <div class="formula-container">
-                <div class="formula-card-matte">
-                    <div id="formula-display" class="math-main-render"></div>
+            <div class="hero-container">
+                <div class="hero-card">
+                    <div id="formula-display" class="math-render"></div>
                 </div>
             </div>
 
-            <div id="options-stack" class="options-vertical-grid">
-                <!-- 4 Stacked Buttons -->
-            </div>
+            <div id="options-stack" class="options-vertical-grid"></div>
         </section>
 
-        <!-- ARCHIVE (LIST FLASHCARDS) -->
+        <!-- SCREEN: ARCHIVE (LIST REVEAL) -->
         <section id="screen-vault" class="screen hidden">
             <header class="sub-header"><h2>Manuscript Vault</h2></header>
-            <div class="scroll-area" id="vault-list"></div>
+            <div class="scroll-v" id="vault-list"></div>
+        </section>
+
+        <!-- SCREEN: GAPS -->
+        <section id="screen-logs" class="screen hidden">
+            <header class="sub-header"><h2>Knowledge Gaps</h2></header>
+            <div class="scroll-v" id="logs-list"></div>
         </section>
 
         <!-- NAVIGATION -->
@@ -97,32 +99,18 @@
             <div class="nav-item" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- SUB SCREENS -->
-        <div id="screen-chapters" class="screen hidden">
-            <header class="sub-header"><button class="btn-icon" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
-            <div class="scroll-area" id="chapter-list"></div>
-        </div>
-        <div id="screen-difficulty" class="screen hidden">
-            <header class="sub-header"><button class="btn-icon" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
-            <div class="scroll-area">
-                <button class="btn-tactile-main" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="btn-tactile-main" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="btn-tactile-main critical" onclick="setDiff(8)">Instant (8s)</button>
+        <!-- OVERLAYS -->
+        <div id="roast-overlay" class="overlay hidden">
+            <div class="modal-sheet">
+                <p id="roast-msg" class="roast-italic"></p>
+                <div class="reveal-box"><label>Correct Identity</label><div id="correct-display" class="math-render"></div></div>
+                <button class="btn-tactile-main" onclick="closeRoast()">Continue Session</button>
             </div>
         </div>
-        <div id="screen-logs" class="screen hidden"><header class="sub-header"><h2>Knowledge Gaps</h2></header><div class="scroll-area" id="logs-list"></div></div>
-    </div>
 
-    <!-- FEEDBACK OVERLAY -->
-    <div id="roast-overlay" class="overlay hidden">
-        <div class="modal-sheet">
-            <p id="roast-msg" class="roast-italic"></p>
-            <div class="answer-reveal">
-                <label class="label-muted">Verified Identity</label>
-                <div id="correct-display" class="math-main-render"></div>
-            </div>
-            <button class="btn-tactile-main" onclick="closeRoast()">Return to Archive</button>
-        </div>
+        <!-- SUB SCREENS -->
+        <div id="screen-chapters" class="screen hidden"><header class="sub-header"><button class="btn-back" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header><div class="scroll-v" id="chapter-list"></div></div>
+        <div id="screen-difficulty" class="screen hidden"><header class="sub-header"><button class="btn-back" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header><div class="scroll-v"><button class="btn-tactile-main" onclick="setDiff(30)">Contemplative (30s)</button><button class="btn-tactile-main" onclick="setDiff(15)">Focused (15s)</button><button class="btn-tactile-main critical" onclick="setDiff(8)">Instant (8s)</button></div></div>
     </div>
 
     <script src="script.js"></script>
