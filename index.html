@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AXIOM | Mathematical Navigator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -15,89 +15,108 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Constrained Atmospheric Background -->
-    <div class="scholarly-bg" id="symbol-container"></div>
+    <!-- Constrained Atmospheric Layer (Symbols) -->
+    <div class="scholarly-bg" id="symbol-layer"></div>
 
     <div class="app-container">
-        <!-- SCREEN: LOGIN -->
+        <!-- AUTH SCREEN -->
         <section id="screen-login" class="screen">
-            <div class="auth-wrap">
-                <div class="seal-container">A</div>
+            <div class="auth-center">
+                <div class="seal-logo">A</div>
                 <h1 class="axiom-logo">AXIOM</h1>
                 <p class="tagline">Mathematical Navigator</p>
                 <div class="login-card">
                     <input type="text" id="callsign-input" placeholder="Operator Identity" autocomplete="off">
-                    <button class="btn-initialize" onclick="submitLogin()">Initialize</button>
+                    <button class="btn-primary-satisfying" onclick="submitLogin()">Initialize</button>
                 </div>
             </div>
         </section>
 
-        <!-- SCREEN: DASHBOARD -->
+        <!-- DASHBOARD -->
         <section id="screen-home" class="screen hidden">
-            <header class="home-header">
-                <div class="user-meta">
-                    <span id="rank-tag" class="label-muted">Mastery: Novice</span>
+            <header class="dash-header">
+                <div class="profile-info">
+                    <span id="rank-tag" class="label-accent">Novice Scholar</span>
                     <h2 id="display-name" class="serif-title">Scholar</h2>
                 </div>
-                <div class="index-wrap">
-                    <svg viewBox="0 0 36 36" class="chart">
+                <div class="retention-ring-wrap">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
                         <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         <path id="xp-ring" class="ring-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                     </svg>
-                    <div class="ring-label"><span id="level-val">1</span><small>Retention Index</small></div>
+                    <div class="ring-label"><span id="level-val">1</span><small>INDEX</small></div>
                 </div>
             </header>
 
             <div class="stats-row">
-                <div class="stat-box"><label>BEST STREAK</label><span id="best-val">0</span></div>
-                <div class="stat-box"><label>ACCURACY</label><span id="accuracy-val">0%</span></div>
+                <div class="stat-card"><label>BEST STREAK</label><span id="best-val">0</span></div>
+                <div class="stat-card"><label>ACCURACY</label><span id="accuracy-val">0%</span></div>
             </div>
 
-            <div class="dash-actions">
-                <button class="btn-tactile-main" onclick="showScreen('screen-chapters')">Commence Study Session</button>
-                <button id="repair-btn" class="btn-weakness" style="display:none;" onclick="startRepair()">Address Weaknesses</button>
+            <div class="home-menu">
+                <button class="menu-action-btn" onclick="showScreen('screen-chapters')">
+                    <span class="serif-title">Commence Session</span>
+                    <small>Verify archive manuscripts</small>
+                </button>
+                <button id="repair-btn" class="menu-action-btn repair-mode" style="display:none;" onclick="startRepair()">
+                    <span class="serif-title">Address Weaknesses</span>
+                    <small>Focus on identified gaps</small>
+                </button>
             </div>
         </section>
 
-        <!-- SCREEN: ARENA -->
+        <!-- PRACTICE ARENA -->
         <section id="screen-game" class="screen hidden">
             <div class="arena-hud">
-                <div id="lives-box" class="hud-item">❤️❤️❤️</div>
+                <div id="lives-box" class="hud-label">❤️❤️❤️</div>
                 <div class="timer-rail"><div id="timer-fill"></div></div>
-                <div id="streak-box" class="hud-item serif-title">0</div>
+                <div id="streak-box" class="hud-label serif-title">0</div>
             </div>
             
-            <div class="hero-container">
-                <div class="formula-card">
-                    <div id="formula-display" class="math-main"></div>
+            <div class="hero-card-container">
+                <div class="formula-card-matte">
+                    <div id="formula-display" class="math-viewport"></div>
                 </div>
             </div>
 
-            <div id="options-stack" class="options-vertical"></div>
+            <div id="options-stack" class="options-vertical-grid">
+                <!-- Buttons Injected -->
+            </div>
         </section>
 
-        <!-- NAVIGATION -->
-        <nav id="main-dock" class="bottom-nav hidden">
-            <div class="nav-item active" onclick="showScreen('screen-home')">Library</div>
-            <div class="nav-item" onclick="showScreen('screen-vault')">Archive</div>
-            <div class="nav-item" onclick="showScreen('screen-logs')">Gaps</div>
+        <!-- BOTTOM NAVIGATION -->
+        <nav id="main-dock" class="bottom-dock hidden">
+            <div class="dock-item active" onclick="showScreen('screen-home')">Library</div>
+            <div class="dock-item" onclick="showScreen('screen-vault')">Archive</div>
+            <div class="dock-item" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- SUB-SCREENS -->
-        <div id="screen-vault" class="screen hidden"><header class="sub-header"><h2>Manuscript Vault</h2></header><div class="scroll-v" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><header class="sub-header"><h2>Knowledge Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
-        <div id="screen-chapters" class="screen hidden"><header class="sub-header"><button class="btn-icon" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header><div class="scroll-v" id="chapter-list"></div></div>
-        <div id="screen-difficulty" class="screen hidden"><header class="sub-header"><button class="btn-icon" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header><div class="scroll-v"><button class="btn-tactile-main" onclick="setDiff(30)">Contemplative (30s)</button><button class="btn-tactile-main" onclick="setDiff(15)">Focused (15s)</button><button class="btn-tactile-main critical" onclick="setDiff(8)">Instant (8s)</button></div></div>
-
-        <!-- RECALL MODAL -->
-        <div id="roast-overlay" class="overlay hidden">
-            <div class="modal-sheet">
-                <p id="roast-msg" class="roast-text"></p>
-                <div class="reveal-box"><label>Correct Identity</label><div id="correct-display" class="math-main"></div></div>
-                <button class="btn-tactile-main" onclick="closeRoast()">Continue Session</button>
+        <!-- SUB SCREENS -->
+        <div id="screen-chapters" class="screen hidden">
+            <header class="sub-header"><button class="btn-back" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header>
+            <div class="scroll-v" id="chapter-list"></div>
+        </div>
+        <div id="screen-difficulty" class="screen hidden">
+            <header class="sub-header"><button class="btn-back" onclick="showScreen('screen-chapters')">←</button><h2>Pace</h2></header>
+            <div class="scroll-v">
+                <button class="menu-action-btn" onclick="setDiff(30)">Contemplative (30s)</button>
+                <button class="menu-action-btn" onclick="setDiff(15)">Focused (15s)</button>
+                <button class="menu-action-btn critical" onclick="setDiff(8)">Instant (8s)</button>
             </div>
         </div>
+        <div id="screen-vault" class="screen hidden"><header class="sub-header"><h2>Vault</h2></header><div class="scroll-v" id="vault-list"></div></div>
+        <div id="screen-logs" class="screen hidden"><header class="sub-header"><h2>Knowledge Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
     </div>
+
+    <!-- FEEDBACK OVERLAY -->
+    <div id="roast-overlay" class="overlay hidden">
+        <div class="modal-sheet">
+            <p id="roast-msg" class="roast-text"></p>
+            <div class="reveal-box"><label class="label-muted">Verified Identity</label><div id="correct-display" class="math-viewport"></div></div>
+            <button class="btn-primary-satisfying" onclick="closeRoast()">Return to Session</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
-</html>s
+</html>
