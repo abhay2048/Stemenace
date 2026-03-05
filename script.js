@@ -6,12 +6,13 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
-// Symbol Generator
+// Fixed Symbol Generator
 function genSymbols() {
     const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ"];
     const container = document.getElementById('symbol-layer');
+    if(!container) return; // Prevent Null Error
     container.innerHTML = "";
-    for(let i=0; i<25; i++) {
+    for(let i=0; i<30; i++) {
         const span = document.createElement('span');
         span.className = 'float-symbol';
         span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
@@ -23,7 +24,7 @@ function genSymbols() {
 }
 
 async function init() {
-    genSymbols();
+    genSymbols(); // Run after element is defined
     try {
         const [fRes, rRes] = await Promise.all([
             fetch('mathformula.txt').then(r => r.text()),
@@ -37,15 +38,15 @@ async function init() {
         
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
-            <button class="menu-action-btn" onclick="selectChapter('${c}')">
+            <button class="menu-action-card" onclick="selectChapter('${c}')">
                 <span class="serif-title">${c.toUpperCase()}</span>
                 <small>Archive Manuscripts</small>
             </button>
         `).join('');
-    } catch (e) { console.error("Data error."); }
+    } catch (e) { console.error("Archive load failed."); }
     
-    if (!callsign) showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
+    if (!callsign) window.showScreen('screen-login');
+    else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
 }
 
 function safeTypeset() {
@@ -56,12 +57,21 @@ function safeTypeset() {
 
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.dock-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
     document.getElementById(id).classList.remove('hidden');
     
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.dock-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.dock-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.dock-item')[2].classList.add('active'); }
+    if (id === 'screen-home') { 
+        updateDash(); 
+        document.querySelectorAll('.nav-item')[0].classList.add('active'); 
+    }
+    if (id === 'screen-vault') { 
+        populateVault(); 
+        document.querySelectorAll('.nav-item')[1].classList.add('active'); 
+    }
+    if (id === 'screen-logs') { 
+        populateLogs(); 
+        document.querySelectorAll('.nav-item')[2].classList.add('active'); 
+    }
     safeTypeset();
 };
 
@@ -71,7 +81,7 @@ window.submitLogin = () => {
         callsign = val.toUpperCase();
         localStorage.setItem('ax_id', callsign);
         document.getElementById('main-dock').classList.remove('hidden');
-        showScreen('screen-home');
+        window.showScreen('screen-home'); // Use window context
     }
 };
 
@@ -88,19 +98,19 @@ function updateDash() {
 
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    showScreen('screen-difficulty');
+    window.showScreen('screen-difficulty');
 };
 
 window.setDiff = (s) => {
     timeLimit = s; score = 0; lives = 3;
     sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    showScreen('screen-game');
+    window.showScreen('screen-game');
     nextRound();
 };
 
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0 || sessionQueue.length === 0) { showScreen('screen-home'); return; }
+    if (lives <= 0 || sessionQueue.length === 0) { window.showScreen('screen-home'); return; }
 
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
@@ -155,25 +165,22 @@ window.closeRoast = () => { document.getElementById('roast-overlay').classList.a
 
 function populateVault() {
     document.getElementById('vault-list').innerHTML = allQ.map(q => `
-        <div class="menu-action-btn" onclick="const a = this.querySelector('.man-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'">
-            <label class=\"label-muted\">${q.chap}</label>
-            <div style=\"padding:10px 0\">\\(${q.q}\\)</div>
-            <div class=\"man-ans\" style=\"display:none; color:var(--accent); border-top:1px dashed var(--border); margin-top:10px; padding-top:10px\">\\(${q.a}\\)</div>
+        <div class="vault-item" onclick="const a = this.querySelector('.vault-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'">
+            <div>\\(${q.q}\\)</div>
+            <div class=\"vault-ans\">\\(${q.a}\\)</div>
         </div>`).join('');
 }
 
 function populateLogs() {
     document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class="stat-card" style="text-align:left; margin-bottom:12px">
-            <div style=\"font-size:0.9rem\">\\(${q}\\)</div>
-            <div class=\"label-accent\" style=\"margin-top:10px\">Gaps identified: ${c}</div>
-        </div>`).join('') || "<p class='label-muted' style='text-align:center; padding:40px;'>No gaps detected.</p>";
+        <div class=\"stat-box\"><div>\\(${q}\\)</div><div class=\"label-muted\" style=\"margin-top:10px\">Gaps: ${c}</div></div>
+    `).join('') || \"<p style='text-align:center; padding:40px;'>No gaps identified.</p>\";
 }
 
 window.startRepair = () => {
     const bad = Object.keys(failLogs);
     filteredQ = allQ.filter(q => bad.includes(q.q));
-    showScreen('screen-difficulty');
+    window.showScreen('screen-difficulty');
 };
 
 init();
