@@ -1,223 +1,84 @@
 :root {
-    /* Color Palette - Desaturated & Academic */
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --card: #334155;
+    --bg: #0b0d14;
+    --surface: #12151f;
+    --card: #1c2235;
     --accent: #a594f9;
     --accent-dark: #7b66e3;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
+    --init-green: #96af94;
+    --text: #e5e7eb;
+    --text-muted: #94a3b8;
     --border: rgba(255, 255, 255, 0.08);
-    --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    --transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --serif: 'Source Serif 4', serif;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
 
-body {
-    background-color: var(--bg);
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    overflow: hidden;
-    height: 100dvh; /* Dynamic viewport height for mobile */
-}
+/* Constrained Background Symbols */
+.scholarly-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.1; overflow: hidden; }
+.float-symbol { position: absolute; font-family: var(--serif); font-size: 2rem; color: var(--accent); animation: drift 15s infinite ease-in-out; }
+@keyframes drift { 0%, 100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(15px, 25px) rotate(15deg); } }
 
-/* 1. ATMOSPHERIC FLOATING SYMBOLS */
-.scholarly-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
+.app-container { max-width: 430px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 25px; background: var(--bg); z-index: 5; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.symbol {
-    position: absolute;
-    top: var(--top);
-    left: var(--left);
-    font-family: 'Source Serif 4', serif;
-    font-size: 1.5rem;
-    color: var(--accent);
-    opacity: 0.12;
-    filter: blur(0.5px);
-    animation: drift 12s infinite ease-in-out alternate;
-    animation-delay: var(--delay);
-}
+/* Login Screen */
+.auth-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.seal-container { width: 90px; height: 90px; border: 2px solid var(--accent); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700; color: var(--accent); margin-bottom: 30px; }
+.axiom-logo { font-size: 2.5rem; letter-spacing: 0.15em; margin: 0; }
+.tagline { color: var(--text-muted); margin: 10px 0 50px; font-size: 0.9rem; }
+.login-card { background: var(--surface); padding: 30px; border-radius: 24px; width: 100%; border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+.login-card input { width: 100%; background: #000; border: none; padding: 18px; color: white; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+.btn-initialize { width: 100%; background: var(--init-green); color: black; border: none; padding: 18px; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #6e826c; transition: 0.1s; }
+.btn-initialize:active { transform: translateY(3px); box-shadow: 0 1px 0 #6e826c; }
 
-@keyframes drift {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(25px, 20px) rotate(15deg); }
-}
+/* Dash & Index */
+.home-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.index-wrap { position: relative; width: 75px; height: 75px; }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 2.5; }
+.ring-fill { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; transition: 1s ease; }
+.ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1; }
+.ring-label span { font-size: 1.6rem; font-weight: 700; }
+.ring-label small { font-size: 0.45rem; color: var(--text-muted); width: 45px; }
 
-/* 2. THE APP CONTAINER (PREVENT OVERFLOW) */
-.app-container {
-    max-width: 440px;
-    margin: 0 auto;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 10;
-}
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 12px; text-align: center; }
+.stat-box label { display: block; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 5px; }
+.stat-box span { font-size: 1.5rem; font-family: var(--serif); }
 
-/* 3. HERO FORMULA CARD (DEPTH IMPROVEMENT) */
-.question-hero {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    min-height: 0; /* Important for flex-shrink */
-}
+/* Tactile Gameplay */
+.btn-tactile-main { background: var(--accent); color: black; border: none; padding: 22px; width: 100%; border-radius: 16px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.1s; margin-bottom: 12px; box-shadow: 0 5px 0 var(--accent-dark); }
+.btn-tactile-main:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--accent-dark); }
+.btn-weakness { background: white; color: black; border: none; padding: 10px 20px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
 
-.hero-card {
-    width: 100%;
-    max-height: 100%;
-    background: linear-gradient(145deg, #1e293b, #111827);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 30px;
-    position: relative;
-    box-shadow: var(--shadow-soft), inset 0 1px 1px rgba(255,255,255,0.05);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+/* Flexible Hero (No Clipping) */
+.arena-hud { display: flex; align-items: center; justify-content: space-between; height: 40px; margin-bottom: 15px; }
+.timer-rail { flex: 1; height: 3px; background: #1e2433; margin: 0 15px; border-radius: 2px; overflow: hidden; }
+#timer-fill { height: 100%; background: var(--accent); width: 100%; }
 
-.hero-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    box-shadow: inset 0 -5px 15px rgba(0,0,0,0.4);
-    pointer-events: none;
-}
+.hero-container { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.formula-card { width: 100%; height: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 25px; box-shadow: inset 0 0 20px rgba(0,0,0,0.3); overflow: hidden; }
+.math-main { font-family: var(--serif); font-size: 1.7rem; text-align: center; color: white; width: 100%; line-height: 1.4; }
 
-.math-display {
-    font-family: 'Source Serif 4', serif;
-    font-size: 1.8rem;
-    line-height: 1.4;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
+.options-vertical { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
+.opt-btn { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 12px; text-align: center; color: white; cursor: pointer; transition: 0.15s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+.opt-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); background: var(--accent); color: black; }
 
-/* 4. TACTILE SATISFYING BUTTONS */
-.options-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 0 20px 100px 20px; /* Space for bottom dock */
-}
+/* Archive List */
+.vault-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 14px; margin-bottom: 12px; cursor: pointer; }
+.vault-ans { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); color: var(--accent); display: none; }
 
-.opt-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 18px;
-    border-radius: 14px;
-    color: var(--text-primary);
-    font-size: 1.05rem;
-    cursor: pointer;
-    text-align: center;
-    position: relative;
-    transition: var(--transition);
-    /* 3D Depth Shadow */
-    box-shadow: 0 4px 0 #0f172a, var(--shadow-soft);
-}
+/* Bottom Nav */
+.bottom-nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #0f121d; display: flex; border-top: 1px solid var(--border); z-index: 100; padding-bottom: 15px; }
+.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+.nav-item.active { color: var(--accent); }
 
-.opt-btn:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #0f172a;
-    background: #2d3a4f;
-}
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: flex; align-items: flex-end; }
+.modal-sheet { background: var(--surface); width: 100%; padding: 40px 25px; border-radius: 30px 30px 0 0; border-top: 2px solid var(--accent); text-align: center; }
+.roast-text { font-style: italic; color: var(--accent); font-size: 1.1rem; margin-bottom: 20px; }
 
-/* Smooth color transitions for feedback */
-.opt-btn.correct { border-color: #34d399; color: #34d399; background: rgba(52, 211, 153, 0.05); }
-.opt-btn.wrong { border-color: #f87171; color: #f87171; background: rgba(248, 113, 113, 0.05); }
-
-/* 5. ARENA HUD (TIMER & LIVES) */
-.arena-hud {
-    padding: 20px 25px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.timer-rail {
-    flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    margin: 0 20px;
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-}
-
-#timer-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent-dark), var(--accent));
-    width: 100%;
-    box-shadow: 0 0 10px var(--accent);
-}
-
-/* 6. BOTTOM DOCK (GLASS EFFECT) */
-.bottom-dock {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 80px;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid var(--border);
-    padding-bottom: env(safe-area-inset-bottom);
-}
-
-.nav-item {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.nav-item.active {
-    color: var(--accent);
-    text-shadow: 0 0 8px rgba(165, 148, 249, 0.4);
-}
-
-/* 7. SCROLL AREA FOR ARCHIVE */
-.scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    padding-bottom: 100px;
-    scrollbar-width: none;
-}
-
-.scroll-area::-webkit-scrollbar { display: none; }
-
-.vault-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 20px;
-    border-radius: 16px;
-    margin-bottom: 12px;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition);
-}
-
-.vault-item:active { transform: scale(0.98); }
-
-/* MOBILE RESPONSIVE TWEAKS */
-@media (max-width: 400px) {
-    .math-display { font-size: 1.5rem; }
-    .hero-card { padding: 20px; }
-    .opt-btn { padding: 15px; font-size: 1rem; }
-}
+.scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+.hidden { display: none !important; }
+.label-muted { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); }
+.btn-icon { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
