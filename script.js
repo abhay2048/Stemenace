@@ -6,11 +6,11 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
-// Fixed Symbol Generator
+// Symbol Generator
 function genSymbols() {
     const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ"];
     const container = document.getElementById('symbol-layer');
-    if(!container) return; // Prevent Null Error
+    if(!container) return;
     container.innerHTML = "";
     for(let i=0; i<30; i++) {
         const span = document.createElement('span');
@@ -24,7 +24,7 @@ function genSymbols() {
 }
 
 async function init() {
-    genSymbols(); // Run after element is defined
+    genSymbols();
     try {
         const [fRes, rRes] = await Promise.all([
             fetch('mathformula.txt').then(r => r.text()),
@@ -39,14 +39,14 @@ async function init() {
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
             <button class="menu-action-card" onclick="selectChapter('${c}')">
-                <span class="serif-title">${c.toUpperCase()}</span>
+                <span>${c.toUpperCase()}</span>
                 <small>Archive Manuscripts</small>
             </button>
         `).join('');
     } catch (e) { console.error("Archive load failed."); }
     
-    if (!callsign) window.showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); window.showScreen('screen-home'); }
+    if (!callsign) showScreen('screen-login');
+    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
 function safeTypeset() {
@@ -58,19 +58,24 @@ function safeTypeset() {
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.remove('hidden');
+    
+    const target = document.getElementById(id);
+    if(target) target.classList.remove('hidden');
     
     if (id === 'screen-home') { 
         updateDash(); 
-        document.querySelectorAll('.nav-item')[0].classList.add('active'); 
+        const navs = document.querySelectorAll('.nav-item');
+        if(navs[0]) navs[0].classList.add('active'); 
     }
     if (id === 'screen-vault') { 
         populateVault(); 
-        document.querySelectorAll('.nav-item')[1].classList.add('active'); 
+        const navs = document.querySelectorAll('.nav-item');
+        if(navs[1]) navs[1].classList.add('active'); 
     }
     if (id === 'screen-logs') { 
         populateLogs(); 
-        document.querySelectorAll('.nav-item')[2].classList.add('active'); 
+        const navs = document.querySelectorAll('.nav-item');
+        if(navs[2]) navs[2].classList.add('active'); 
     }
     safeTypeset();
 };
@@ -80,20 +85,32 @@ window.submitLogin = () => {
     if (val) {
         callsign = val.toUpperCase();
         localStorage.setItem('ax_id', callsign);
-        document.getElementById('main-dock').classList.remove('hidden');
-        window.showScreen('screen-home'); // Use window context
+        const dock = document.getElementById('main-dock');
+        if(dock) dock.classList.remove('hidden');
+        window.showScreen('screen-home');
     }
 };
 
 function updateDash() {
-    document.getElementById('display-name').innerText = callsign;
-    document.getElementById('best-val').innerText = best;
+    const nameEl = document.getElementById('display-name');
+    if(nameEl) nameEl.innerText = callsign;
+    
+    const bestEl = document.getElementById('best-val');
+    if(bestEl) bestEl.innerText = best;
+    
     const progress = (xp % 1000) / 10;
-    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDasharray = `${progress}, 100`;
+    const levelVal = document.getElementById('level-val');
+    if(levelVal) levelVal.innerText = Math.floor(xp / 1000) + 1;
+    
+    const ring = document.getElementById('xp-ring');
+    if(ring) ring.style.strokeDasharray = progress + ", 100";
+    
+    const accEl = document.getElementById('accuracy-val');
     const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
-    document.getElementById('accuracy-val').innerText = acc + "%";
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+    if(accEl) accEl.innerText = acc + "%";
+    
+    const repairBtn = document.getElementById('repair-btn');
+    if(repairBtn) repairBtn.style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
 window.selectChapter = (c) => {
@@ -113,7 +130,7 @@ function nextRound() {
     if (lives <= 0 || sessionQueue.length === 0) { window.showScreen('screen-home'); return; }
 
     currentQ = sessionQueue[0];
-    document.getElementById('formula-display').innerHTML = `\\[ ${currentQ.q} \\]`;
+    document.getElementById('formula-display').innerHTML = "\\[" + currentQ.q + "\\]";
     document.getElementById('streak-box').innerText = score;
     document.getElementById('lives-box').innerText = "❤️".repeat(lives);
 
@@ -122,7 +139,7 @@ function nextRound() {
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
         b.className = 'opt-node';
-        b.innerHTML = `\\( ${o} \\)`;
+        b.innerHTML = "\\(" + o + "\\)";
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
@@ -144,7 +161,7 @@ function startTimer() {
     const bar = document.getElementById('timer-fill');
     timerId = setInterval(() => {
         cur -= 0.1;
-        bar.style.width = (cur / timeLimit) * 100 + "%";
+        if(bar) bar.style.width = (cur / timeLimit) * 100 + "%";
         if (cur <= 0) handleFail();
     }, 100);
 }
@@ -155,26 +172,43 @@ function handleFail() {
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
     const failedQ = sessionQueue.shift();
     sessionQueue.push(failedQ);
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)];
-    document.getElementById('correct-display').innerHTML = `\\[ ${currentQ.a} \\]`;
-    document.getElementById('roast-overlay').classList.remove('hidden');
+    
+    const roastMsg = document.getElementById('roast-msg');
+    if(roastMsg) roastMsg.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
+    
+    const correctDisp = document.getElementById('correct-display');
+    if(correctDisp) correctDisp.innerHTML = "\\[" + currentQ.a + "\\]";
+    
+    const overlay = document.getElementById('roast-overlay');
+    if(overlay) overlay.classList.remove('hidden');
     safeTypeset();
 }
 
-window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
+window.closeRoast = () => { 
+    const overlay = document.getElementById('roast-overlay');
+    if(overlay) overlay.classList.add('hidden'); 
+    nextRound(); 
+};
 
 function populateVault() {
-    document.getElementById('vault-list').innerHTML = allQ.map(q => `
-        <div class="vault-item" onclick="const a = this.querySelector('.vault-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'">
-            <div>\\(${q.q}\\)</div>
-            <div class=\"vault-ans\">\\(${q.a}\\)</div>
-        </div>`).join('');
+    const list = document.getElementById('vault-list');
+    if(!list) return;
+    list.innerHTML = allQ.map(q => {
+        return '<div class="vault-item" onclick="const a = this.querySelector(\'.vault-ans\'); a.style.display = (a.style.display === \'block\') ? \'none\' : \'block\'">' +
+               '<div>\\(' + q.q + '\\)</div>' +
+               '<div class="vault-ans">\\(' + q.a + '\\)</div>' +
+               '</div>';
+    }).join('');
 }
 
 function populateLogs() {
-    document.getElementById('logs-list').innerHTML = Object.entries(failLogs).map(([q, c]) => `
-        <div class=\"stat-box\"><div>\\(${q}\\)</div><div class=\"label-muted\" style=\"margin-top:10px\">Gaps: ${c}</div></div>
-    `).join('') || \"<p style='text-align:center; padding:40px;'>No gaps identified.</p>\";
+    const list = document.getElementById('logs-list');
+    if(!list) return;
+    const items = Object.entries(failLogs).map(([q, c]) => {
+        return '<div class="vault-item"><div>\\(' + q + '\\)</div>' +
+               '<div style="color:var(--accent);margin-top:10px">Gaps: ' + c + '</div></div>';
+    });
+    list.innerHTML = items.length ? items.join('') : "<p style='text-align:center; padding:40px;'>No gaps identified.</p>";
 }
 
 window.startRepair = () => {
