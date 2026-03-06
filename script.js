@@ -6,22 +6,10 @@ let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
-// Symbol Generator
-function genSymbols() {
-    const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ"];
-    const container = document.getElementById('symbol-layer');
-    if(!container) return;
-    container.innerHTML = "";
-    for(let i=0; i<30; i++) {
-        const span = document.createElement('span');
-        span.className = 'float-symbol';
-        span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
-        span.style.left = Math.random() * 95 + "%";
-        span.style.top = Math.random() * 95 + "%";
-        span.style.animationDelay = Math.random() * 5 + "s";
-        container.appendChild(span);
-    }
-}
+// PvP Variables
+let p1Score = 0, p2Score = 0, pvpQueue = [];
+
+// --- CORE INITIALIZATION ---
 
 async function init() {
     genSymbols();
@@ -30,6 +18,7 @@ async function init() {
             fetch('mathformula.txt').then(r => r.text()),
             fetch('roast.txt').then(r => r.text())
         ]);
+        
         allQ = fRes.split('\n').filter(l => l.includes('::')).map(l => {
             const p = l.split('::').map(s => s.trim());
             return { chap: p[0], q: p[1], a: p[2], opts: [p[2], p[3], p[4], p[5]] };
@@ -46,69 +35,69 @@ async function init() {
     } catch (e) { console.error("Archive load failed."); }
     
     if (!callsign) showScreen('screen-login');
-    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
+    else { 
+        document.getElementById('main-dock').classList.remove('hidden'); 
+        showScreen('screen-home'); 
+    }
 }
 
-// --- UPDATED JAVASCRIPT ---
+// --- MATH SCALING & RENDERING ---
 
 function autoScaleMath(elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
 
-    // 1. Reset to base size so we can measure the "natural" width
+    // Reset to base size to measure true natural width
     el.style.fontSize = '1.6rem';
     
-    // 2. Wait for a short moment after MathJax promise for final layout
     setTimeout(() => {
         const parent = el.parentElement;
         if (!parent) return;
 
-        // Use a 40px buffer for card padding
-        const maxWidth = parent.clientWidth - 40;
-        
-        // Find the actual rendered MathJax container
+        const maxWidth = parent.clientWidth - 40; // Card width minus padding
         const mjx = el.querySelector('mjx-container');
-        if(!mjx) return;
         
-        // Measure the real visual width of the math
-        const renderedWidth = mjx.getBoundingClientRect().width;
-        
-        // 3. If it's wider than the screen, calculate the exact scale needed
-        if (renderedWidth > maxWidth) {
-            const ratio = maxWidth / renderedWidth;
-            // Set new size, but don't go smaller than 0.7rem for readability
-            const newSize = Math.max(1.6 * ratio, 0.7); 
-            el.style.fontSize = newSize + 'rem';
+        if (mjx) {
+            const renderedWidth = mjx.getBoundingClientRect().width;
+            if (renderedWidth > maxWidth) {
+                const ratio = maxWidth / renderedWidth;
+                // Scale down based on ratio, but stay readable (min 0.75rem)
+                const newSize = Math.max(1.6 * ratio, 0.75); 
+                el.style.fontSize = newSize + 'rem';
+            }
         }
-    }, 150); // 150ms delay is the "sweet spot" for MathJax 3.0
+    }, 150); // Delay allows MathJax font internal layout to settle
 }
 
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
         window.MathJax.typesetPromise().then(() => {
-            // Scale the main question
+            // Scale Main Game Formula
             autoScaleMath('formula-display');
-            
-            // Scale the answer in the roast overlay
+            // Scale PvP Formulas
+            autoScaleMath('p1-formula');
+            autoScaleMath('p2-formula');
+            // Scale Reveal Formula
             autoScaleMath('correct-display');
             
-            // Handle Option Buttons (Shrink them if the answer text is too long)
-            document.querySelectorAll('.opt-node').forEach(node => {
+            // Auto-scale option buttons if text is too wide
+            document.querySelectorAll('.opt-node, .opt-pvp').forEach(node => {
                 const inner = node.querySelector('mjx-container');
                 if (inner) {
                     const maxWidth = node.clientWidth - 20;
                     const curWidth = inner.getBoundingClientRect().width;
                     if (curWidth > maxWidth) {
                         const ratio = maxWidth / curWidth;
-                        node.style.fontSize = Math.max(ratio, 0.7) + 'rem';
-                    } else {
-                        node.style.fontSize = '1rem'; // Reset if it fits
+                        node.style.fontSize = Math.max(ratio * 0.9, 0.7) + 'rem';
                     }
                 }
             });
-        });
+        }).catch(e => {});
     }
 }
+
+// --- NAVIGATION ---
+
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
@@ -116,6 +105,14 @@ window.showScreen = (id) => {
     const target = document.getElementById(id);
     if(target) target.classList.remove('hidden');
     
+    // Manage Bottom Dock Visibility
+    const dock = document.getElementById('main-dock');
+    if (id === 'screen-game' || id === 'screen-pvp' || id === 'screen-login') {
+        dock.classList.add('hidden');
+    } else {
+        dock.classList.remove('hidden');
+    }
+
     if (id === 'screen-home') { 
         updateDash(); 
         const navs = document.querySelectorAll('.nav-item');
@@ -134,43 +131,7 @@ window.showScreen = (id) => {
     safeTypeset();
 };
 
-window.submitLogin = () => {
-    const val = document.getElementById('callsign-input').value.trim();
-    if (val) {
-        callsign = val.toUpperCase();
-        localStorage.setItem('ax_id', callsign);
-        const dock = document.getElementById('main-dock');
-        if(dock) dock.classList.remove('hidden');
-        window.showScreen('screen-home');
-    }
-};
-
-function updateDash() {
-    const nameEl = document.getElementById('display-name');
-    if(nameEl) nameEl.innerText = callsign;
-    
-    const bestEl = document.getElementById('best-val');
-    if(bestEl) bestEl.innerText = best;
-    
-    const progress = (xp % 1000) / 10;
-    const levelVal = document.getElementById('level-val');
-    if(levelVal) levelVal.innerText = Math.floor(xp / 1000) + 1;
-    
-    const ring = document.getElementById('xp-ring');
-    if(ring) ring.style.strokeDasharray = progress + ", 100";
-    
-    const accEl = document.getElementById('accuracy-val');
-    const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
-    if(accEl) accEl.innerText = acc + "%";
-    
-    const repairBtn = document.getElementById('repair-btn');
-    if(repairBtn) repairBtn.style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
-}
-
-window.selectChapter = (c) => {
-    filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    window.showScreen('screen-difficulty');
-};
+// --- SINGLE PLAYER LOGIC ---
 
 window.setDiff = (s) => {
     timeLimit = s; score = 0; lives = 3;
@@ -181,10 +142,14 @@ window.setDiff = (s) => {
 
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0 || sessionQueue.length === 0) { window.showScreen('screen-home'); return; }
-    
+    if (lives <= 0 || sessionQueue.length === 0) { 
+        if(score > best) { best = score; localStorage.setItem('ax_best', best); }
+        window.showScreen('screen-home'); 
+        return; 
+    }
 
     currentQ = sessionQueue[0];
+    // Use inline tags \( \) for better scaling control
     document.getElementById('formula-display').innerHTML = "\\(" + currentQ.q + "\\)";
     document.getElementById('streak-box').innerText = score;
     document.getElementById('lives-box').innerText = "❤️".repeat(lives);
@@ -211,6 +176,71 @@ function nextRound() {
     startTimer();
 }
 
+function handleFail() {
+    clearInterval(timerId);
+    lives--;
+    failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
+    const failedQ = sessionQueue.shift();
+    sessionQueue.push(failedQ); // Repeat later
+    
+    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Incorrect logic.";
+    document.getElementById('correct-display').innerHTML = "\\(" + currentQ.a + "\\)";
+    
+    document.getElementById('roast-overlay').classList.remove('hidden');
+    safeTypeset();
+}
+
+// --- PVP LOGIC ---
+
+window.startPvP = () => {
+    p1Score = 0; p2Score = 0;
+    document.getElementById('p1-score').innerText = "0";
+    document.getElementById('p2-score').innerText = "0";
+    pvpQueue = [...allQ].sort(() => Math.random() - 0.5);
+    window.showScreen('screen-pvp');
+    nextPvPRound();
+};
+
+function nextPvPRound() {
+    if (pvpQueue.length === 0) { 
+        alert(`Battle End! P1: ${p1Score} | P2: ${p2Score}`);
+        window.showScreen('screen-home');
+        return; 
+    }
+
+    const q = pvpQueue.shift();
+    document.getElementById('p1-formula').innerHTML = "\\(" + q.q + "\\)";
+    document.getElementById('p2-formula').innerHTML = "\\(" + q.q + "\\)";
+
+    renderPvPOptions('p1-options', q, 1);
+    renderPvPOptions('p2-options', q, 2);
+    safeTypeset();
+}
+
+function renderPvPOptions(containerId, q, playerNum) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    [...q.opts].sort(() => Math.random() - 0.5).forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-pvp';
+        btn.innerHTML = "\\(" + o + "\\)";
+        btn.onclick = () => {
+            if (o === q.a) {
+                if (playerNum === 1) p1Score++; else p2Score++;
+                document.getElementById(`p${playerNum}-score`).innerText = playerNum === 1 ? p1Score : p2Score;
+                btn.style.borderColor = "var(--accent)";
+                setTimeout(nextPvPRound, 300);
+            } else {
+                btn.style.opacity = "0.3";
+                btn.disabled = true;
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+
+// --- UTILS & HELPERS ---
+
 function startTimer() {
     let cur = timeLimit;
     const bar = document.getElementById('timer-fill');
@@ -221,48 +251,52 @@ function startTimer() {
     }, 100);
 }
 
-function handleFail() {
-    clearInterval(timerId);
-    lives--;
-    failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    const failedQ = sessionQueue.shift();
-    sessionQueue.push(failedQ);
-    
-    const roastMsg = document.getElementById('roast-msg');
-    if(roastMsg) roastMsg.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
-    
-    const correctDisp = document.getElementById('correct-display');
-    if(correctDisp) correctDisp.innerHTML = "\\(" + currentQ.a + "\\)";
-    
-    const overlay = document.getElementById('roast-overlay');
-    if(overlay) overlay.classList.remove('hidden');
-    safeTypeset();
+window.closeRoast = () => { 
+    document.getElementById('roast-overlay').classList.add('hidden'); 
+    nextRound(); 
+};
+
+window.submitLogin = () => {
+    const val = document.getElementById('callsign-input').value.trim();
+    if (val) {
+        callsign = val.toUpperCase();
+        localStorage.setItem('ax_id', callsign);
+        window.showScreen('screen-home');
+    }
+};
+
+function updateDash() {
+    document.getElementById('display-name').innerText = callsign;
+    document.getElementById('best-val').innerText = best;
+    const progress = (xp % 1000) / 10;
+    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
+    document.getElementById('xp-ring').style.strokeDasharray = progress + ", 100";
+    const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
+    document.getElementById('accuracy-val').innerText = acc + "%";
+    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
 }
 
-window.closeRoast = () => { 
-    const overlay = document.getElementById('roast-overlay');
-    if(overlay) overlay.classList.add('hidden'); 
-    nextRound(); 
+window.selectChapter = (c) => {
+    filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
+    window.showScreen('screen-difficulty');
 };
 
 function populateVault() {
     const list = document.getElementById('vault-list');
-    if(!list) return;
-    list.innerHTML = allQ.map(q => {
-        return '<div class="vault-item" onclick="const a = this.querySelector(\'.vault-ans\'); a.style.display = (a.style.display === \'block\') ? \'none\' : \'block\'">' +
-               '<div>\\(' + q.q + '\\)</div>' +
-               '<div class="vault-ans">\\(' + q.a + '\\)</div>' +
-               '</div>';
-    }).join('');
+    list.innerHTML = allQ.map(q => `
+        <div class="vault-item" onclick="this.querySelector('.vault-ans').style.display = 'block'">
+            <div>\\(${q.q}\\)</div>
+            <div class="vault-ans">\\(${q.a}\\)</div>
+        </div>
+    `).join('');
 }
 
 function populateLogs() {
     const list = document.getElementById('logs-list');
-    if(!list) return;
-    const items = Object.entries(failLogs).map(([q, c]) => {
-        return '<div class="vault-item"><div>\\(' + q + '\\)</div>' +
-               '<div style="color:var(--accent);margin-top:10px">Gaps: ' + c + '</div></div>';
-    });
+    const items = Object.entries(failLogs).map(([q, c]) => `
+        <div class="vault-item"><div>\\(${q}\\)</div>
+        <div style="color:var(--accent);margin-top:10px">Identified Gaps: ${c}</div></div>
+    `);
     list.innerHTML = items.length ? items.join('') : "<p style='text-align:center; padding:40px;'>No gaps identified.</p>";
 }
 
@@ -272,9 +306,20 @@ window.startRepair = () => {
     window.showScreen('screen-difficulty');
 };
 
+function genSymbols() {
+    const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ"];
+    const container = document.getElementById('symbol-layer');
+    if(!container) return;
+    container.innerHTML = "";
+    for(let i=0; i<30; i++) {
+        const span = document.createElement('span');
+        span.className = 'float-symbol';
+        span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+        span.style.left = Math.random() * 95 + "%";
+        span.style.top = Math.random() * 95 + "%";
+        span.style.animationDelay = Math.random() * 5 + "s";
+        container.appendChild(span);
+    }
+}
+
 init();
-
-
-
-
-
