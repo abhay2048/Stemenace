@@ -57,6 +57,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 
 .formula-viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+/* --- UPDATED CSS --- */
+
 .hero-card {
     width: 100%;
     min-height: 180px;
@@ -66,27 +68,29 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 15px; /* Reduced padding to give more room */
+    padding: 10px; /* Tighter padding for more math space */
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    overflow: hidden; /* Prevent scrollbars */
+    overflow: hidden; /* No scrollbars */
+    position: relative;
 }
 
 .math-main {
     font-family: var(--serif);
-    font-size: 1.6rem; /* Start large */
+    font-size: 1.6rem; /* Base size */
     text-align: center;
     color: white;
-    width: 100%;
-    white-space: nowrap; /* Force math to stay on one line for measuring */
-    transition: font-size 0.2s ease; /* Smooth transition when shrinking */
+    width: auto; /* Changed from 100% to auto for measurement */
+    max-width: 100%;
+    display: inline-block;
+    transition: font-size 0.1s ease;
 }
 
-/* Ensure MathJax doesn't add its own big margins */
+/* Force MathJax to behave like an inline element for scaling */
 mjx-container {
     margin: 0 !important;
-    display: inline-block !important; /* Helps with width measuring */
+    display: inline-block !important;
+    vertical-align: middle;
 }
-
 
 .options-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
 .opt-node { 
@@ -127,5 +131,6 @@ mjx-container {
 .hidden { display: none !important; }
 .scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
 .btn-back { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
+
 
 
