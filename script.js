@@ -128,6 +128,7 @@ window.setDiff = (s) => {
 function nextRound() {
     clearInterval(timerId);
     if (lives <= 0 || sessionQueue.length === 0) { window.showScreen('screen-home'); return; }
+    
 
     currentQ = sessionQueue[0];
     document.getElementById('formula-display').innerHTML = "\\[" + currentQ.q + "\\]";
@@ -177,7 +178,7 @@ function handleFail() {
     if(roastMsg) roastMsg.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
     
     const correctDisp = document.getElementById('correct-display');
-    if(correctDisp) correctDisp.innerHTML = "\\[" + currentQ.a + "\\]";
+    if(correctDisp) correctDisp.innerHTML = "\\(" + currentQ.a + "\\)";
     
     const overlay = document.getElementById('roast-overlay');
     if(overlay) overlay.classList.remove('hidden');
@@ -218,3 +219,4 @@ window.startRepair = () => {
 };
 
 init();
+
