@@ -51,7 +51,45 @@ async function init() {
 
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().catch(e => {});
+        window.MathJax.typesetPromise().then(() => {
+            // Scale the main formula
+            autoScaleMath('formula-display');
+            // Scale the correct answer in the roast overlay
+            autoScaleMath('correct-display');
+            
+            // Also scale options if they are too long
+            document.querySelectorAll('.opt-node').forEach((node, index) => {
+                const parentW = node.clientWidth - 20;
+                let childW = node.scrollWidth;
+                let fs = 1.0;
+                while (childW > parentW && fs > 0.6) {
+                    fs -= 0.05;
+                    node.style.fontSize = fs + "rem";
+                    childW = node.scrollWidth;
+                }
+            });
+        }).catch(e => console.error(e));
+    }
+}function safeTypeset() {
+    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().then(() => {
+            // Scale the main formula
+            autoScaleMath('formula-display');
+            // Scale the correct answer in the roast overlay
+            autoScaleMath('correct-display');
+            
+            // Also scale options if they are too long
+            document.querySelectorAll('.opt-node').forEach((node, index) => {
+                const parentW = node.clientWidth - 20;
+                let childW = node.scrollWidth;
+                let fs = 1.0;
+                while (childW > parentW && fs > 0.6) {
+                    fs -= 0.05;
+                    node.style.fontSize = fs + "rem";
+                    childW = node.scrollWidth;
+                }
+            });
+        }).catch(e => console.error(e));
     }
 }
 
@@ -219,4 +257,5 @@ window.startRepair = () => {
 };
 
 init();
+
 
