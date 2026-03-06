@@ -57,33 +57,34 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 
 .formula-viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-.hero-card { 
-    width: 100%; 
-    min-height: 180px; /* Gives a consistent height */
-    background: var(--card); 
-    border: 1px solid var(--border); 
-    border-radius: 20px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    padding: 20px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-    overflow-x: auto; /* Allows horizontal swipe for very long formulas */
-    overflow-y: hidden;
-}
-
-.math-main { 
-    font-family: var(--serif); 
-    font-size: clamp(1.1rem, 4.5vw, 1.6rem); /* Slightly smaller on mobile to prevent clipping */
-    text-align: center; 
-    color: white; 
+.hero-card {
     width: 100%;
+    min-height: 180px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px; /* Reduced padding to give more room */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden; /* Prevent scrollbars */
 }
 
-/* Fix for MathJax adding extra space around "Display" formulas */
-mjx-container[display="true"] {
+.math-main {
+    font-family: var(--serif);
+    font-size: 1.6rem; /* Start large */
+    text-align: center;
+    color: white;
+    width: 100%;
+    white-space: nowrap; /* Force math to stay on one line for measuring */
+    transition: font-size 0.2s ease; /* Smooth transition when shrinking */
+}
+
+/* Ensure MathJax doesn't add its own big margins */
+mjx-container {
     margin: 0 !important;
-    padding: 10px 0;
+    display: inline-block !important; /* Helps with width measuring */
 }
 
 
@@ -126,4 +127,5 @@ mjx-container[display="true"] {
 .hidden { display: none !important; }
 .scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
 .btn-back { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
+
 
