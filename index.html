@@ -80,6 +80,34 @@
                 </button>
             </div>
         </section>
+        <!-- PVP ARENA -->
+<section id="screen-pvp" class="screen hidden pvp-arena">
+    <!-- Player 1 (Top - Flipped) -->
+    <div class="pvp-zone p1-zone">
+        <div class="pvp-hud">
+            <div id="p1-score" class="pvp-score">0</div>
+            <div class="pvp-label">PLAYER 1</div>
+        </div>
+        <div class="formula-viewport">
+            <div class="hero-card pvp-card"><div id="p1-formula" class="math-main"></div></div>
+        </div>
+        <div id="p1-options" class="pvp-options"></div>
+    </div>
+
+    <div class="pvp-divider">VS</div>
+
+    <!-- Player 2 (Bottom) -->
+    <div class="pvp-zone p2-zone">
+        <div id="p2-options" class="pvp-options"></div>
+        <div class="formula-viewport">
+            <div class="hero-card pvp-card"><div id="p2-formula" class="math-main"></div></div>
+        </div>
+        <div class="pvp-hud">
+            <div class="pvp-label">PLAYER 2</div>
+            <div id="p2-score" class="pvp-score">0</div>
+        </div>
+    </div>
+</section>
 
         <!-- PRACTICE ARENA -->
         <section id="screen-game" class="screen hidden">
@@ -96,6 +124,7 @@
             </div>
 
             <div id="options-stack" class="options-container"></div>
+        
         </section>
 
         <!-- NAVIGATION -->
@@ -123,6 +152,8 @@
 
     <script src="script.js"></script>
 </body>
+    
 </html>
+
 
 
