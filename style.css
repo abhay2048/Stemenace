@@ -55,12 +55,61 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .timer-rail { flex: 1; height: 3px; background: var(--border); margin: 0 15px; border-radius: 2px; overflow: hidden; }
 #timer-fill { height: 100%; background: var(--accent); width: 100%; }
 
+
 .formula-viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-.hero-card { width: 100%; height: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
-.math-main { font-family: var(--serif); font-size: clamp(1rem, 5vw, 1.7rem); text-align: center; color: white; width: 100%; }
+.hero-card { 
+    width: 100%; 
+    min-height: 180px; /* Gives a consistent height */
+    background: var(--card); 
+    border: 1px solid var(--border); 
+    border-radius: 20px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+    overflow-x: auto; /* Allows horizontal swipe for very long formulas */
+    overflow-y: hidden;
+}
+
+.math-main { 
+    font-family: var(--serif); 
+    font-size: clamp(1.1rem, 4.5vw, 1.6rem); /* Slightly smaller on mobile to prevent clipping */
+    text-align: center; 
+    color: white; 
+    width: 100%;
+}
+
+/* Fix for MathJax adding extra space around "Display" formulas */
+mjx-container[display="true"] {
+    margin: 0 !important;
+    padding: 10px 0;
+}
+
 
 .options-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
-.opt-node { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 12px; text-align: center; font-size: 1rem; color: var(--text); cursor: pointer; transition: 0.2s; }
+.opt-node { 
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    padding: 15px; 
+    border-radius: 12px; 
+    text-align: center; 
+    font-size: 1rem; 
+    color: var(--text); 
+    cursor: pointer; 
+    transition: 0.2s;
+    overflow-x: auto; /* Prevents long options from breaking the layout */
+}
+
+/* Custom Scrollbar for formulas so they look clean */
+.hero-card::-webkit-scrollbar, .opt-node::-webkit-scrollbar {
+    height: 3px;
+}
+.hero-card::-webkit-scrollbar-thumb, .opt-node::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
 .opt-node:active { background: var(--accent); color: black; }
 
 .vault-item { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 14px; margin-bottom: 12px; cursor: pointer; }
@@ -77,3 +126,4 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .hidden { display: none !important; }
 .scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
 .btn-back { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
+
