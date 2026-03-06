@@ -49,47 +49,62 @@ async function init() {
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
+function autoScaleMath(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    // 1. Reset to base size so we can measure the "natural" width
+    el.style.fontSize = '1.6rem';
+    
+    // 2. Wait for a short moment after MathJax promise for final layout
+    setTimeout(() => {
+        const parent = el.parentElement;
+        if (!parent) return;
+
+        // Use a 40px buffer for card padding
+        const maxWidth = parent.clientWidth - 40;
+        
+        // Find the actual rendered MathJax container
+        const mjx = el.querySelector('mjx-container');
+        if(!mjx) return;
+        
+        // Measure the real visual width of the math
+        const renderedWidth = mjx.getBoundingClientRect().width;
+        
+        // 3. If it's wider than the screen, calculate the exact scale needed
+        if (renderedWidth > maxWidth) {
+            const ratio = maxWidth / renderedWidth;
+            // Set new size, but don't go smaller than 0.7rem for readability
+            const newSize = Math.max(1.6 * ratio, 0.7); 
+            el.style.fontSize = newSize + 'rem';
+        }
+    }, 150); // 150ms delay is the "sweet spot" for MathJax 3.0
+}
+
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
         window.MathJax.typesetPromise().then(() => {
-            // Scale the main formula
+            // Scale the main question
             autoScaleMath('formula-display');
-            // Scale the correct answer in the roast overlay
+            
+            // Scale the answer in the roast overlay
             autoScaleMath('correct-display');
             
-            // Also scale options if they are too long
-            document.querySelectorAll('.opt-node').forEach((node, index) => {
-                const parentW = node.clientWidth - 20;
-                let childW = node.scrollWidth;
-                let fs = 1.0;
-                while (childW > parentW && fs > 0.6) {
-                    fs -= 0.05;
-                    node.style.fontSize = fs + "rem";
-                    childW = node.scrollWidth;
+            // Handle Option Buttons (Shrink them if the answer text is too long)
+            document.querySelectorAll('.opt-node').forEach(node => {
+                const inner = node.querySelector('mjx-container');
+                if (inner) {
+                    const maxWidth = node.clientWidth - 20;
+                    const curWidth = inner.getBoundingClientRect().width;
+                    if (curWidth > maxWidth) {
+                        const ratio = maxWidth / curWidth;
+                        node.style.fontSize = Math.max(ratio, 0.7) + 'rem';
+                    } else {
+                        node.style.fontSize = '1rem'; // Reset if it fits
+                    }
                 }
             });
-        }).catch(e => console.error(e));
-    }
-}function safeTypeset() {
-    if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().then(() => {
-            // Scale the main formula
-            autoScaleMath('formula-display');
-            // Scale the correct answer in the roast overlay
-            autoScaleMath('correct-display');
-            
-            // Also scale options if they are too long
-            document.querySelectorAll('.opt-node').forEach((node, index) => {
-                const parentW = node.clientWidth - 20;
-                let childW = node.scrollWidth;
-                let fs = 1.0;
-                while (childW > parentW && fs > 0.6) {
-                    fs -= 0.05;
-                    node.style.fontSize = fs + "rem";
-                    childW = node.scrollWidth;
-                }
-            });
-        }).catch(e => console.error(e));
+        });
     }
 }
 
@@ -257,6 +272,7 @@ window.startRepair = () => {
 };
 
 init();
+
 
 
 
