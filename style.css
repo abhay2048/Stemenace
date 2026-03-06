@@ -91,7 +91,6 @@ mjx-container {
     display: inline-block !important;
     vertical-align: middle;
 }
-
 .options-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
 .opt-node { 
     background: var(--surface); 
@@ -131,6 +130,7 @@ mjx-container {
 .hidden { display: none !important; }
 .scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
 .btn-back { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
+
 
 
 
