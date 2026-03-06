@@ -169,7 +169,7 @@ function nextRound() {
     
 
     currentQ = sessionQueue[0];
-    document.getElementById('formula-display').innerHTML = "\\[" + currentQ.q + "\\]";
+    document.getElementById('formula-display').innerHTML = "\\(" + currentQ.q + "\\)";
     document.getElementById('streak-box').innerText = score;
     document.getElementById('lives-box').innerText = "❤️".repeat(lives);
 
@@ -257,5 +257,6 @@ window.startRepair = () => {
 };
 
 init();
+
 
 
