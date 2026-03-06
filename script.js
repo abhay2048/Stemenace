@@ -49,6 +49,8 @@ async function init() {
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
+// --- UPDATED JAVASCRIPT ---
+
 function autoScaleMath(elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
@@ -107,7 +109,6 @@ function safeTypeset() {
         });
     }
 }
-
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
@@ -272,6 +273,7 @@ window.startRepair = () => {
 };
 
 init();
+
 
 
 
