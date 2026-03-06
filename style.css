@@ -12,150 +12,51 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
 
-/* Constrained Floating Symbols */
 .scholarly-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.12; overflow: hidden; }
 .float-symbol { position: absolute; font-family: var(--serif); font-size: 2rem; color: var(--accent); animation: drift 15s infinite ease-in-out alternate; }
 @keyframes drift { from { transform: translate(0,0) rotate(0deg); } to { transform: translate(20px, 30px) rotate(15deg); } }
 
 .app-container { max-width: 430px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 30px 25px; background: var(--bg); z-index: 5; animation: fadeIn 0.4s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 30px 25px; background: var(--bg); z-index: 5; }
 
-/* Login Screen */
-.auth-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.seal-logo { width: 85px; height: 85px; border: 1.5px solid var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent); margin-bottom: 30px; font-family: var(--serif); }
-.axiom-logo { font-size: 2.5rem; letter-spacing: 0.2em; margin: 0; }
-.tagline { color: var(--text-muted); margin: 10px 0 50px; font-size: 0.9rem; }
-.login-card { background: var(--surface); padding: 30px; border-radius: 20px; width: 100%; border: 1px solid var(--border); }
-.login-card input { width: 100%; background: #000; border: none; padding: 18px; color: white; border-radius: 12px; margin-bottom: 20px; text-align: center; }
-.btn-primary { background: var(--accent); color: black; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 700; cursor: pointer; }
-
-/* Dashboard */
+/* Dashboard UI */
 .home-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 .index-circle-wrap { position: relative; width: 65px; height: 65px; }
 .ring-bg { fill: none; stroke: var(--border); stroke-width: 2.5; }
 .ring-fill { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; transition: 1.2s ease; }
 .index-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
 .index-label span { font-family: var(--serif); font-size: 1.3rem; }
-.index-label small { font-size: 0.5rem; color: var(--text-muted); letter-spacing: 0.5px; }
+.index-label small { font-size: 0.5rem; color: var(--text-muted); }
 
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
-.stat-box { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 12px; text-align: center; }
-.stat-box label { display: block; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 5px; }
-.stat-box span { font-family: var(--serif); font-size: 1.5rem; }
+.menu-action-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; width: 100%; text-align: left; border-radius: 14px; margin-bottom: 12px; cursor: pointer; color: white; }
+.pvp-btn { background: linear-gradient(45deg, #a594f9, #7c3aed); border: none; }
+.repair-card { background: white; color: black; }
 
-.menu-action-card { background: var(--surface); border: 1px solid var(--border); padding: 22px; width: 100%; text-align: left; border-radius: 14px; margin-bottom: 12px; transition: 0.2s; cursor: pointer; }
-.menu-action-card:active { transform: scale(0.98); border-color: var(--accent); }
-.menu-action-card span { display: block; font-size: 1.1rem; margin-bottom: 4px; }
-.menu-action-card small { color: var(--text-muted); font-size: 0.8rem; }
-.menu-action-card.repair-btn { background: #fff; color: #000; }
+/* Formulas & Scaling */
+.formula-viewport { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+.hero-card { width: 100%; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; position: relative; }
+.math-main { font-family: var(--serif); font-size: 1.6rem; text-align: center; color: white; display: inline-block; width: auto; max-width: 100%; transition: font-size 0.1s ease; }
+mjx-container { margin: 0 !important; display: inline-block !important; vertical-align: middle; }
 
-/* Gameplay Fixed */
-.arena-hud { display: flex; align-items: center; justify-content: space-between; height: 40px; margin-bottom: 15px; }
-.timer-rail { flex: 1; height: 3px; background: var(--border); margin: 0 15px; border-radius: 2px; overflow: hidden; }
-#timer-fill { height: 100%; background: var(--accent); width: 100%; }
+/* PvP Arena */
+.pvp-arena { padding: 0 !important; display: flex; flex-direction: column; background: #000; z-index: 200; }
+.pvp-zone { flex: 1; display: flex; flex-direction: column; padding: 15px; position: relative; transition: 0.3s; }
+.p1-zone { transform: rotate(180deg); border-bottom: 1px solid var(--border); }
+.pvp-divider { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); color: #000; padding: 4px 12px; font-weight: 800; border-radius: 20px; z-index: 20; font-size: 0.7rem; }
+.pvp-exit-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: white; z-index: 100; font-size: 1.2rem; cursor: pointer; }
 
+/* PvP Stun State */
+.stunned { filter: grayscale(1) brightness(0.3); pointer-events: none; }
+.stunned .pvp-card { border-color: #ef4444 !important; }
 
-.formula-viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-/* --- UPDATED CSS --- */
-
-.hero-card {
-    width: 100%;
-    min-height: 180px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px; /* Tighter padding for more math space */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    overflow: hidden; /* No scrollbars */
-    position: relative;
-}
-
-.math-main {
-    font-family: var(--serif);
-    font-size: 1.6rem; /* Base size */
-    text-align: center;
-    color: white;
-    width: auto; /* Changed from 100% to auto for measurement */
-    max-width: 100%;
-    display: inline-block;
-    transition: font-size 0.1s ease;
-}
-
-/* Force MathJax to behave like an inline element for scaling */
-mjx-container {
-    margin: 0 !important;
-    display: inline-block !important;
-    vertical-align: middle;
-}
-.options-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
-.opt-node { 
-    background: var(--surface); 
-    border: 1px solid var(--border); 
-    padding: 15px; 
-    border-radius: 12px; 
-    text-align: center; 
-    font-size: 1rem; 
-    color: var(--text); 
-    cursor: pointer; 
-    transition: 0.2s;
-    overflow-x: auto; /* Prevents long options from breaking the layout */
-}
-
-/* Custom Scrollbar for formulas so they look clean */
-.hero-card::-webkit-scrollbar, .opt-node::-webkit-scrollbar {
-    height: 3px;
-}
-.hero-card::-webkit-scrollbar-thumb, .opt-node::-webkit-scrollbar-thumb {
-    background: var(--accent);
-    border-radius: 10px;
-}
-
-.opt-node:active { background: var(--accent); color: black; }
-
-.vault-item { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 14px; margin-bottom: 12px; cursor: pointer; }
-.vault-ans { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); color: var(--accent); display: none; }
-
-.bottom-dock { position: absolute; bottom: 0; width: 100%; height: 75px; background: var(--surface); display: flex; border-top: 1px solid var(--border); z-index: 100; padding-bottom: 15px; }
-.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; font-weight: 600; }
-.nav-item.active { color: var(--accent); }
-
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: flex; align-items: flex-end; }
-.modal-sheet { background: var(--surface); width: 100%; padding: 45px 25px; border-radius: 30px 30px 0 0; border-top: 1px solid var(--accent); text-align: center; }
-.roast-text { font-style: italic; color: var(--accent); font-size: 1.1rem; margin-bottom: 20px; }
-
-.hidden { display: none !important; }
-.scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
-.btn-back { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
-
-/* --- PVP STYLES --- */
-.pvp-arena { padding: 0 !important; display: flex; flex-direction: column; overflow: hidden; background: #000; }
-.pvp-zone { flex: 1; display: flex; flex-direction: column; padding: 15px; position: relative; }
-
-/* Flip Player 1 so they face Player 2 */
-.p1-zone { transform: rotate(180deg); border-bottom: 1px solid var(--accent); }
-
-.pvp-hud { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; }
-.pvp-score { font-family: var(--serif); font-size: 2rem; color: var(--accent); }
-.pvp-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--text-muted); }
-
-.pvp-card { min-height: 120px !important; margin: 10px 0; }
 .pvp-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.opt-pvp, .opt-node { background: var(--surface); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: white; text-align: center; font-size: 0.9rem; }
 
-.pvp-divider { 
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: var(--accent); color: #000; padding: 4px 12px; font-weight: 800;
-    border-radius: 20px; z-index: 20; font-size: 0.8rem;
-}
+/* UI Extras */
+.hidden { display: none !important; }
+.bottom-dock { position: absolute; bottom: 0; width: 100%; height: 70px; background: var(--surface); display: flex; border-top: 1px solid var(--border); z-index: 100; }
+.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
+.nav-item.active { color: var(--accent); font-weight: bold; }
 
-.opt-pvp { background: var(--surface); border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 0.8rem; color: #fff; }
-
-.pvp-btn { background: linear-gradient(45deg, #a594f9, #7c3aed) !important; color: white !important; }
-
-
-
-
-
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: flex-end; }
+.modal-sheet { background: var(--surface); width: 100%; padding: 40px 25px; border-radius: 30px 30px 0 0; text-align: center; }
