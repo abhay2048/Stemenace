@@ -3,108 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AXIOM | Scholar</title>
-    <!-- Minimalist Professional Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <title>AXIOM | The Scholar's Path</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script>
-        window.MathJax = { 
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, 
-            startup: { ready: () => { MathJax.startup.defaultReady(); window.mjReady = true; } } 
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            startup: { ready: () => { MathJax.startup.defaultReady(); window.mjReady = true; } }
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="nebula-bg"></div>
-    <div id="symbol-layer"></div>
+    <!-- Animated background layer -->
+    <div class="nebula"></div>
+    <div id="symbol-layer" class="scholarly-bg"></div>
 
     <div class="app-container">
         <!-- ENTRANCE -->
         <section id="screen-login" class="screen">
-            <div class="full-center">
-                <h1 class="main-logo">AXIOM</h1>
-                <p class="sub-tag">THE SCHOLAR'S PATH</p>
-                <div class="login-box">
-                    <input type="text" id="scholar-input" placeholder="Identity" autocomplete="off">
-                    <button class="btn-3d" onclick="submitLogin()">ENTER ARCHIVE</button>
+            <div class="glass-content">
+                <div class="crest-glow">A</div>
+                <h1 class="serif-title main-title">AXIOM</h1>
+                <p class="tagline">The Path of Mathematical Mastery</p>
+                <div class="input-group">
+                    <input type="text" id="scholar-input" placeholder="Name of Scholar" autocomplete="off">
+                    <button class="btn-primary" onclick="submitLogin()">Begin Journey</button>
                 </div>
             </div>
         </section>
 
-        <!-- DASHBOARD -->
+        <!-- LIBRARY DASHBOARD -->
         <section id="screen-home" class="screen hidden">
-            <header class="home-head">
-                <h2 id="display-name" class="serif">Scholar</h2>
-                <div class="pill-stat" id="accuracy-val">0%</div>
+            <header class="home-nav">
+                <div class="profile">
+                    <span class="greeting">Welcome,</span>
+                    <h2 id="display-name" class="serif-title">Scholar</h2>
+                </div>
+                <div class="mini-stat">
+                    <label>Accuracy</label>
+                    <span id="accuracy-val">0%</span>
+                </div>
             </header>
-            
-            <div class="hero-stat">
-                <label>REVISED MANUSCRIPTS</label>
-                <span id="total-val">0</span>
-            </div>
 
-            <div class="action-stack">
-                <button class="btn-3d" onclick="showScreen('screen-chapters')">COMMENCE REVISION</button>
-                <button id="repair-btn" class="glass-card repair-btn" onclick="startRepair()" style="display:none;">ADDRESS WEAKNESSES</button>
+            <div class="dashboard-scroll">
+                <div class="total-count-card">
+                    <label>Equations Revised</label>
+                    <h3 id="total-val">0</h3>
+                </div>
+
+                <div class="menu-grid">
+                    <button class="action-card main" onclick="showScreen('screen-chapters')">
+                        <span class="serif-title">Manuscript Review</span>
+                        <small>Explore archives</small>
+                    </button>
+                    <button id="repair-btn" class="action-card warning" style="display:none;" onclick="startRepair()">
+                        <span class="serif-title">Address Gaps</span>
+                        <small>Refine weak areas</small>
+                    </button>
+                </div>
             </div>
         </section>
 
-        <!-- REVISION ROOM -->
+        <!-- STUDY ROOM (GAME) -->
         <section id="screen-game" class="screen hidden">
-            <div class="game-meta">
-                <div id="lives-val" class="lives">❤️❤️❤️</div>
-                <div id="streak-val" class="serif accent-text">0</div>
+            <div class="game-hud">
+                <div id="lives-box" class="lives">❤️❤️❤️</div>
+                <div class="timer-container"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="streak-badge">0</div>
             </div>
-            <div class="timer-rail"><div id="timer-fill"></div></div>
-            <div class="focus-window">
+            
+            <div class="focus-area">
                 <div class="glass-card manuscript">
-                    <div id="formula-display"></div>
+                    <div id="formula-display" class="math-main"></div>
                 </div>
             </div>
+
             <div id="options-stack" class="options-grid"></div>
         </section>
 
-        <!-- LESSON SUMMARY -->
+        <!-- SUMMARY SCREEN -->
         <section id="screen-summary" class="screen hidden">
-            <div class="full-center">
-                <h2 class="serif large-title">Concluded</h2>
-                <div class="glass-card summary-box">
-                    <div class="row"><span>Identified</span><span id="sum-score">0</span></div>
-                    <div class="row"><span>Focus Remaining</span><span id="sum-lives">0</span></div>
+            <div class="summary-wrap">
+                <h2 class="serif-title">Lesson Concluded</h2>
+                <div class="summary-card glass-card">
+                    <div class="sum-row"><span>Correct</span><span id="sum-correct">0</span></div>
+                    <div class="sum-row"><span>Status</span><span id="sum-grade">-</span></div>
                 </div>
-                <button class="btn-3d" onclick="showScreen('screen-home')">RETURN</button>
+                <button class="btn-primary" onclick="showScreen('screen-home')">Finish</button>
             </div>
         </section>
 
         <!-- NAVIGATION -->
-        <nav id="main-dock" class="nav-dock hidden">
-            <div class="nav-item" id="nav-home" onclick="showScreen('screen-home')">Library</div>
-            <div class="nav-item" id="nav-vault" onclick="showScreen('screen-vault')">Vault</div>
-            <div class="nav-item" id="nav-logs" onclick="showScreen('screen-logs')">Gaps</div>
+        <nav id="main-dock" class="bottom-bar hidden">
+            <div class="bar-item active" onclick="showScreen('screen-home')">Home</div>
+            <div class="bar-item" onclick="showScreen('screen-vault')">Vault</div>
+            <div class="bar-item" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- OVERLAYS & SUBS -->
-        <div id="screen-chapters" class="screen hidden"><div class="sub-head"><button onclick="showScreen('screen-home')" class="back-btn">←</button><h2>Archives</h2></div><div class="scroll-area" id="chapter-list"></div></div>
-        
-        <div id="screen-difficulty" class="screen hidden">
-            <div class="sub-head"><button onclick="showScreen('screen-chapters')" class="back-btn">←</button><h2>Select Pace</h2></div>
-            <div class="scroll-area">
-                <button class="glass-card diff-btn" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="glass-card diff-btn" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="btn-3d diff-btn" onclick="setDiff(8)">Rapid (8s)</button>
-            </div>
-        </div>
+        <!-- SUB SCREENS (Archives/Gaps/Vault) -->
+        <div id="screen-chapters" class="screen hidden"><header class="sub-head"><button class="back" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header><div class="scroll-v" id="chapter-list"></div></div>
+        <div id="screen-difficulty" class="screen hidden"><header class="sub-head"><button class="back" onclick="showScreen('screen-chapters')">←</button><h2>Select Pace</h2></header><div class="scroll-v difficulty-list"></div></div>
+        <div id="screen-vault" class="screen hidden"><header class="sub-head"><h2>The Vault</h2></header><div class="scroll-v" id="vault-list"></div></div>
+        <div id="screen-logs" class="screen hidden"><header class="sub-head"><h2>Identified Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
+    </div>
 
-        <div id="screen-vault" class="screen hidden"><div class="sub-head"><h2>Vault</h2></div><div class="scroll-area" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><div class="sub-head"><h2>Knowledge Gaps</h2></div><div class="scroll-area" id="logs-list"></div></div>
-
-        <div id="roast-overlay" class="overlay hidden">
-            <div class="glass-card modal">
-                <p id="roast-msg" class="roast-text"></p>
-                <div id="correct-display" class="reveal-math"></div>
-                <button class="btn-3d" onclick="closeRoast()">CONTINUE</button>
+    <!-- FEEDBACK OVERLAY -->
+    <div id="roast-overlay" class="overlay hidden">
+        <div class="feedback-sheet">
+            <p id="roast-msg"></p>
+            <div class="correct-box">
+                <small>The correct form was:</small>
+                <div id="correct-display"></div>
             </div>
+            <button class="btn-primary" onclick="closeRoast()">Resume Study</button>
         </div>
     </div>
 
