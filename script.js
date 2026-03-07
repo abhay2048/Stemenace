@@ -1,13 +1,25 @@
 let allQ = [], filteredQ = [], roasts = [], failLogs = {};
 let sessionQueue = [], currentQ = null;
-let score = 0, lives = 3, xp = parseInt(localStorage.getItem('ax_xp')) || 0;
-let best = parseInt(localStorage.getItem('ax_best')) || 0;
+let score = 0, lives = 3;
 let callsign = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
-// PvP state
-let p1Score = 0, p2Score = 0, pvpQueue = [], p1Stun = false, p2Stun = false;
+function genSymbols() {
+    const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ"];
+    const container = document.getElementById('symbol-layer');
+    if(!container) return;
+    container.innerHTML = "";
+    for(let i=0; i<30; i++) {
+        const span = document.createElement('span');
+        span.className = 'float-symbol';
+        span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+        span.style.left = Math.random() * 95 + "%";
+        span.style.top = Math.random() * 95 + "%";
+        span.style.animationDelay = Math.random() * 5 + "s";
+        container.appendChild(span);
+    }
+}
 
 async function init() {
     genSymbols();
@@ -29,69 +41,53 @@ async function init() {
                 <small>Archive Manuscripts</small>
             </button>
         `).join('');
-    } catch (e) { console.error("Load failed."); }
+    } catch (e) { console.error("Archive load failed."); }
     
-    if (!callsign) window.showScreen('screen-login');
-    else window.showScreen('screen-home');
-}
-
-// --- RENDERING & SCALING ---
-function autoScaleMath(elementId) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-    
-    const isPvP = elementId.includes('p1') || elementId.includes('p2');
-    el.style.fontSize = isPvP ? '1.2rem' : '1.6rem';
-    
-    setTimeout(() => {
-        const mjx = el.querySelector('mjx-container');
-        if (mjx) {
-            const parentWidth = el.parentElement.clientWidth - 20;
-            const renderedWidth = mjx.getBoundingClientRect().width;
-            if (renderedWidth > parentWidth) {
-                const base = isPvP ? 1.2 : 1.6;
-                el.style.fontSize = Math.max(base * (parentWidth / renderedWidth), 0.6) + 'rem';
-            }
-        }
-    }, 200);
+    if (!callsign) showScreen('screen-login');
+    else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
 }
 
 function safeTypeset() {
     if (window.mjReady && window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise().then(() => {
-            ['formula-display', 'p1-formula', 'p2-formula', 'correct-display'].forEach(autoScaleMath);
-            document.querySelectorAll('.opt-node, .opt-pvp').forEach(node => {
-                const inner = node.querySelector('mjx-container');
-                if (inner) {
-                    const maxW = node.clientWidth - 10;
-                    const curW = inner.getBoundingClientRect().width;
-                    if (curW > maxW) node.style.fontSize = Math.max(maxW/curW, 0.65) + 'rem';
-                }
-            });
-        });
+        window.MathJax.typesetPromise().catch(e => {});
     }
 }
 
-// --- GLOBAL ATTACHED FUNCTIONS (To fix ReferenceErrors) ---
-
 window.showScreen = (id) => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    const dock = document.getElementById('main-dock');
-    if (['screen-game', 'screen-pvp', 'screen-login'].includes(id)) dock.classList.add('hidden');
-    else { dock.classList.remove('hidden'); updateDash(); }
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+    
+    const target = document.getElementById(id);
+    if(target) target.classList.remove('hidden');
+    
+    if (id === 'screen-home') updateDash();
     if (id === 'screen-vault') populateVault();
     if (id === 'screen-logs') populateLogs();
     safeTypeset();
 };
 
 window.submitLogin = () => {
-    const v = document.getElementById('callsign-input').value.trim();
-    if(v) { callsign = v.toUpperCase(); localStorage.setItem('ax_id', callsign); window.showScreen('screen-home'); }
+    const val = document.getElementById('callsign-input').value.trim();
+    if (val) {
+        callsign = val.toUpperCase();
+        localStorage.setItem('ax_id', callsign);
+        document.getElementById('main-dock').classList.remove('hidden');
+        window.showScreen('screen-home');
+    }
 };
 
+function updateDash() {
+    document.getElementById('display-name').innerText = callsign;
+    document.getElementById('total-val').innerText = history.total;
+    const acc = history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0;
+    document.getElementById('accuracy-val').innerText = acc + "%";
+    
+    const repairBtn = document.getElementById('repair-btn');
+    if(repairBtn) repairBtn.style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+}
+
 window.selectChapter = (c) => {
-    filteredQ = allQ.filter(q => q.chap === c);
+    filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
     window.showScreen('screen-difficulty');
 };
 
@@ -102,146 +98,106 @@ window.setDiff = (s) => {
     nextRound();
 };
 
-window.closeRoast = () => {
-    document.getElementById('roast-overlay').classList.add('hidden');
-    nextRound();
-};
-
-window.startRepair = () => {
-    const failedList = Object.keys(failLogs);
-    filteredQ = allQ.filter(q => failedList.includes(q.q));
-    if (filteredQ.length) window.showScreen('screen-difficulty');
-};
-
-window.startPvP = () => {
-    p1Score = 0; p2Score = 0; p1Stun = false; p2Stun = false;
-    document.getElementById('p1-score').innerText = "0"; document.getElementById('p2-score').innerText = "0";
-    document.getElementById('p1-zone').classList.remove('stunned'); document.getElementById('p2-zone').classList.remove('stunned');
-    pvpQueue = [...allQ].sort(() => Math.random() - 0.5);
-    window.showScreen('screen-pvp');
-    nextPvPRound();
-};
-
-// --- SESSION LOGIC ---
-
 function nextRound() {
     clearInterval(timerId);
-    if (lives <= 0 || sessionQueue.length === 0) { 
-        if(score > best) { best = score; localStorage.setItem('ax_best', best); }
-        window.showScreen('screen-home'); return; 
+    
+    // ISSUE 4: Handle end of session (Victory or Death)
+    if (lives <= 0 || sessionQueue.length === 0) {
+        document.getElementById('sum-correct').innerText = score;
+        document.getElementById('sum-lives').innerText = lives;
+        window.showScreen('screen-summary');
+        return;
     }
 
     currentQ = sessionQueue[0];
-    document.getElementById('formula-display').innerHTML = "\\(" + currentQ.q + "\\)";
-    document.getElementById('lives-box').innerText = "❤️".repeat(lives);
+    document.getElementById('formula-display').innerHTML = "\\[" + currentQ.q + "\\]";
     document.getElementById('streak-box').innerText = score;
+    document.getElementById('lives-box').innerText = "❤️".repeat(lives);
 
     const stack = document.getElementById('options-stack');
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'opt-node'; b.innerHTML = "\\(" + o + "\\)";
+        b.className = 'opt-node';
+        b.innerHTML = "\\(" + o + "\\)";
         b.onclick = () => {
             history.total++;
-            if (o === currentQ.a) { score++; xp += 20; history.correct++; sessionQueue.shift(); nextRound(); }
-            else { handleFail(); }
-            localStorage.setItem('ax_xp', xp); localStorage.setItem('ax_hist', JSON.stringify(history));
+            if (o === currentQ.a) { 
+                score++; history.correct++; 
+                sessionQueue.shift();
+                nextRound(); 
+            } else handleFail();
+            localStorage.setItem('ax_hist', JSON.stringify(history));
         };
         stack.appendChild(b);
     });
-    safeTypeset(); startTimer();
+    safeTypeset();
+    startTimer();
+}
+
+function startTimer() {
+    let cur = timeLimit;
+    const bar = document.getElementById('timer-fill');
+    timerId = setInterval(() => {
+        cur -= 0.1;
+        if(bar) bar.style.width = (cur / timeLimit) * 100 + "%";
+        if (cur <= 0) handleFail();
+    }, 100);
 }
 
 function handleFail() {
-    clearInterval(timerId); lives--;
+    clearInterval(timerId);
+    lives--;
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
-    sessionQueue.push(sessionQueue.shift());
-    document.getElementById('roast-msg').innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Incorrect logic.";
-    document.getElementById('correct-display').innerHTML = "\\(" + currentQ.a + "\\)";
-    document.getElementById('roast-overlay').classList.remove('hidden');
+    
+    // ISSUE 2: Spaced Repetition
+    // Remove from front and insert it 3 items back (or at end if queue is short)
+    const failedQ = sessionQueue.shift();
+    const newIdx = Math.min(2, sessionQueue.length);
+    sessionQueue.splice(newIdx, 0, failedQ);
+    
+    const roastMsg = document.getElementById('roast-msg');
+    if(roastMsg) roastMsg.innerText = roasts[Math.floor(Math.random() * roasts.length)] || "Study harder.";
+    
+    const correctDisp = document.getElementById('correct-display');
+    if(correctDisp) correctDisp.innerHTML = "\\[" + currentQ.a + "\\]";
+    
+    const overlay = document.getElementById('roast-overlay');
+    if(overlay) overlay.classList.remove('hidden');
     safeTypeset();
 }
 
-// --- PVP LOGIC ---
-
-function nextPvPRound() {
-    if (document.getElementById('screen-pvp').classList.contains('hidden')) return;
-    if (pvpQueue.length === 0) { alert("Duel Finished!"); window.showScreen('screen-home'); return; }
-    const q = pvpQueue.shift();
-    document.getElementById('p1-formula').innerHTML = "\\(" + q.q + "\\)";
-    document.getElementById('p2-formula').innerHTML = "\\(" + q.q + "\\)";
-    renderPvP(q, 1); renderPvP(q, 2);
-    safeTypeset();
-}
-
-function renderPvP(q, pNum) {
-    const cont = document.getElementById(`p${pNum}-options`);
-    cont.innerHTML = "";
-    [...q.opts].sort(() => Math.random() - 0.5).forEach(o => {
-        const b = document.createElement('button');
-        b.className = 'opt-pvp'; b.innerHTML = "\\(" + o + "\\)";
-        b.onclick = () => {
-            if ((pNum === 1 && p1Stun) || (pNum === 2 && p2Stun)) return;
-            if (o === q.a) {
-                if (pNum === 1) p1Score++; else p2Score++;
-                document.getElementById(`p${pNum}-score`).innerText = (pNum === 1 ? p1Score : p2Score);
-                setTimeout(nextPvPRound, 300);
-            } else { stun(pNum); }
-        };
-        cont.appendChild(b);
-    });
-}
-
-function stun(pNum) {
-    if (pNum === 1) p1Stun = true; else p2Stun = true;
-    document.getElementById(`p${pNum}-zone`).classList.add('stunned');
-    setTimeout(() => {
-        if (pNum === 1) p1Stun = false; else p2Stun = false;
-        document.getElementById(`p${pNum}-zone`).classList.remove('stunned');
-    }, 1000);
-}
-
-// --- UTILS ---
-
-function startTimer() {
-    let cur = timeLimit; const bar = document.getElementById('timer-fill');
-    timerId = setInterval(() => { cur -= 0.1; if(bar) bar.style.width = (cur/timeLimit)*100+"%"; if(cur<=0) handleFail(); }, 100);
-}
-
-function updateDash() {
-    document.getElementById('display-name').innerText = callsign;
-    document.getElementById('best-val').innerText = best;
-    document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
-    document.getElementById('xp-ring').style.strokeDasharray = (xp % 1000) / 10 + ", 100";
-    document.getElementById('accuracy-val').innerText = (history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0) + "%";
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length ? 'block' : 'none';
-}
+window.closeRoast = () => { 
+    const overlay = document.getElementById('roast-overlay');
+    if(overlay) overlay.classList.add('hidden'); 
+    nextRound(); 
+};
 
 function populateVault() {
-    document.getElementById('vault-list').innerHTML = allQ.map(q => `
-        <div class="vault-item" onclick="this.querySelector('.vault-ans').style.display='block'">
-            <div>\\(${q.q}\\)</div><div class="vault-ans">\\(${q.a}\\)</div>
-        </div>
-    `).join('');
-    safeTypeset();
+    const list = document.getElementById('vault-list');
+    if(!list) return;
+    list.innerHTML = allQ.map(q => {
+        return '<div class="vault-item" onclick="const a = this.querySelector(\'.vault-ans\'); a.style.display = (a.style.display === \'block\') ? \'none\' : \'block\'">' +
+               '<div>\\(' + q.q + '\\)</div>' +
+               '<div class="vault-ans">\\(' + q.a + '\\)</div>' +
+               '</div>';
+    }).join('');
 }
 
 function populateLogs() {
-    const logs = Object.entries(failLogs).map(([q, c]) => `
-        <div class="vault-item"><div>\\(${q}\\)</div><div style="color:var(--accent);margin-top:10px">Gaps: ${c}</div></div>
-    `);
-    document.getElementById('logs-list').innerHTML = logs.length ? logs.join('') : "<p style='text-align:center; padding: 40px;'>No gaps.</p>";
-    safeTypeset();
+    const list = document.getElementById('logs-list');
+    if(!list) return;
+    const items = Object.entries(failLogs).map(([q, c]) => {
+        return '<div class="vault-item"><div>\\(' + q + '\\)</div>' +
+               '<div style="color:var(--accent);margin-top:10px">Gaps: ' + c + '</div></div>';
+    });
+    list.innerHTML = items.length ? items.join('') : "<p style='text-align:center; padding:40px;'>No gaps identified.</p>";
 }
 
-function genSymbols() {
-    const syms = ["∫", "∑", "π", "∂", "∞", "√"];
-    const cont = document.getElementById('symbol-layer');
-    if(!cont) return; cont.innerHTML = "";
-    for(let i=0; i<30; i++) {
-        const s = document.createElement('span'); s.className = 'float-symbol'; s.innerText = syms[Math.floor(Math.random()*6)];
-        s.style.left = Math.random()*95+"%"; s.style.top = Math.random()*95+"%"; cont.appendChild(s);
-    }
-}
+window.startRepair = () => {
+    const bad = Object.keys(failLogs);
+    filteredQ = allQ.filter(q => bad.includes(q.q));
+    window.showScreen('screen-difficulty');
+};
 
 init();
