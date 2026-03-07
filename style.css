@@ -12,51 +12,56 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
 
-/* Floating Symbols Background */
 .scholarly-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.12; overflow: hidden; }
 .float-symbol { position: absolute; font-family: var(--serif); font-size: 2rem; color: var(--accent); animation: drift 15s infinite ease-in-out alternate; }
 @keyframes drift { from { transform: translate(0,0) rotate(0deg); } to { transform: translate(20px, 30px) rotate(15deg); } }
 
 .app-container { max-width: 430px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 25px; background: var(--bg); z-index: 5; }
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 30px 25px; background: var(--bg); z-index: 5; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Single Player Formula UI */
-.formula-viewport { flex: 1; display: flex; align-items: center; justify-content: center; }
-.hero-card { width: 100%; min-height: 150px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; }
-.math-main { font-family: var(--serif); font-size: 1.6rem; text-align: center; color: white; display: inline-block; width: auto; max-width: 100%; transition: font-size 0.2s ease; }
-mjx-container { margin: 0 !important; display: inline-block !important; }
+/* AUTH */
+.auth-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.seal-logo { width: 85px; height: 85px; border: 1.5px solid var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent); margin-bottom: 30px; font-family: var(--serif); }
+.axiom-logo { font-size: 2.5rem; letter-spacing: 0.2em; margin: 0; }
+.tagline { color: var(--text-muted); margin: 10px 0 50px; font-size: 0.9rem; }
+.login-card { background: var(--surface); padding: 30px; border-radius: 20px; width: 100%; border: 1px solid var(--border); }
+.login-card input { width: 100%; background: #000; border: none; padding: 18px; color: white; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+.btn-primary { background: var(--accent); color: black; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 700; cursor: pointer; }
 
-/* Duel Mode Layout (Fixed Visibility) */
-.pvp-arena { padding: 0 !important; background: #000; z-index: 200; display: flex; flex-direction: column; }
-.pvp-zone { flex: 1; display: flex; flex-direction: column; padding: 12px; position: relative; overflow: hidden; }
-.p1-zone { transform: rotate(180deg); border-bottom: 1px solid var(--border); }
-.pvp-formula-area { flex: 1.2; display: flex; align-items: center; justify-content: center; }
-.pvp-card { min-height: 100px !important; width: 100%; padding: 10px !important; border-radius: 12px; }
-.pvp-options-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 5px; }
+/* Dashboard Simplified */
+.home-header { margin-bottom: 30px; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 12px; text-align: center; }
+.stat-box label { display: block; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 5px; }
+.stat-box span { font-family: var(--serif); font-size: 1.5rem; }
 
-.pvp-center-bar { height: 40px; position: relative; display: flex; align-items: center; justify-content: center; z-index: 300; border-top: 1px solid var(--border); }
-.pvp-vs-tag { background: var(--accent); color: #000; padding: 4px 16px; font-weight: 800; border-radius: 20px; font-size: 0.7rem; }
-.pvp-exit-btn { position: absolute; left: 15px; width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.menu-action-card { background: var(--surface); border: 1px solid var(--border); padding: 22px; width: 100%; text-align: left; border-radius: 14px; margin-bottom: 12px; transition: 0.2s; cursor: pointer; }
+.menu-action-card:active { transform: scale(0.98); border-color: var(--accent); }
+.menu-action-card span { display: block; font-size: 1.1rem; margin-bottom: 4px; }
+.menu-action-card small { color: var(--text-muted); font-size: 0.8rem; }
+.repair-btn { background: #fff !important; color: #000 !important; }
 
-/* Stun State */
-.stunned { filter: grayscale(1) brightness(0.3); pointer-events: none; }
-.stunned .pvp-card { border-color: #ef4444 !important; }
+/* ARENA */
+.arena-hud { display: flex; align-items: center; justify-content: space-between; height: 40px; margin-bottom: 15px; }
+.timer-rail { flex: 1; height: 3px; background: var(--border); margin: 0 15px; border-radius: 2px; overflow: hidden; }
+#timer-fill { height: 100%; background: var(--accent); width: 100%; }
+.formula-viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.hero-card { width: 100%; height: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 25px; }
+.math-main { font-family: var(--serif); font-size: clamp(1rem, 5vw, 1.7rem); text-align: center; color: white; width: 100%; }
+.options-container { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
+.opt-node { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 12px; text-align: center; font-size: 1rem; color: var(--text); cursor: pointer; transition: 0.2s; }
 
-/* Standard UI Elements */
-.menu-action-card { background: var(--surface); border: 1px solid var(--border); padding: 18px; width: 100%; border-radius: 14px; margin-bottom: 10px; color: white; text-align: left; cursor: pointer; }
-.pvp-btn { background: linear-gradient(45deg, #a594f9, #7c3aed); border: none; }
-.repair-card { background: white; color: black; }
-.opt-pvp, .opt-node { background: var(--surface); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: white; text-align: center; font-size: 0.85rem; cursor: pointer; overflow: hidden; }
+.bottom-dock { position: absolute; bottom: 0; width: 100%; height: 75px; background: var(--surface); display: flex; border-top: 1px solid var(--border); z-index: 100; padding-bottom: 15px; }
+.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; font-weight: 600; }
+.nav-item.active { color: var(--accent); }
 
-/* Navigation & Header */
-.bottom-dock { position: absolute; bottom: 0; width: 100%; height: 65px; background: var(--surface); display: flex; border-top: 1px solid var(--border); z-index: 100; }
-.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
-.nav-item.active { color: var(--accent); font-weight: bold; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: flex; align-items: flex-end; }
+.modal-sheet { background: var(--surface); width: 100%; padding: 45px 25px; border-radius: 30px 30px 0 0; border-top: 1px solid var(--accent); text-align: center; }
+.roast-text { font-style: italic; color: var(--accent); font-size: 1.1rem; margin-bottom: 20px; }
+
 .hidden { display: none !important; }
-.scroll-v { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-
-.vault-item { background: var(--surface); padding: 18px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
-.vault-ans { margin-top: 12px; color: var(--accent); display: none; }
-
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: flex-end; }
-.modal-sheet { background: var(--surface); width: 100%; padding: 40px 25px; border-radius: 30px 30px 0 0; text-align: center; }
+.scroll-v { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+.btn-back { background: transparent; border: 1px solid var(--border); color: var(--accent); padding: 8px 12px; border-radius: 8px; margin-right: 15px; cursor: pointer; }
+.vault-item { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 14px; margin-bottom: 12px; cursor: pointer; }
+.vault-ans { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); color: var(--accent); display: none; }
