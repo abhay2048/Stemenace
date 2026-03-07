@@ -5,18 +5,31 @@ let scholarName = localStorage.getItem('ax_id') || "";
 let history = JSON.parse(localStorage.getItem('ax_hist')) || { total: 0, correct: 0 };
 let timerId = null, timeLimit = 30;
 
-// Mesmerizing Background Animation
+// High-Density Negative Space Symbols
 function genSymbols() {
-    const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ"];
+    const symbols = ["∫", "∑", "π", "∂", "∞", "θ", "Δ", "√", "Ω", "μ", "φ", "λ"];
     const container = document.getElementById('symbol-layer');
     if(!container) return;
-    for(let i=0; i<15; i++) {
+    container.innerHTML = "";
+    
+    // Generate 50 symbols mostly in "negative space" (edges)
+    for(let i=0; i<50; i++) {
         const span = document.createElement('span');
         span.className = 'float-symbol';
         span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
-        span.style.left = Math.random() * 95 + "%";
-        span.style.animationDuration = (Math.random() * 10 + 10) + "s";
-        span.style.animationDelay = (Math.random() * 5) + "s";
+        
+        // Logic to keep symbols mostly away from the center for mobile
+        let x = Math.random() * 100;
+        let y = Math.random() * 100;
+        
+        // If too central, push to edges
+        if (x > 30 && x < 70) x = (Math.random() > 0.5) ? x + 35 : x - 35;
+        
+        span.style.left = x + "%";
+        span.style.top = y + "%";
+        span.style.fontSize = (Math.random() * 1 + 1) + "rem";
+        span.style.animation = `float ${Math.random() * 20 + 20}s infinite ease-in-out`;
+        span.style.animationDelay = `${Math.random() * -20}s`;
         container.appendChild(span);
     }
 }
@@ -34,21 +47,15 @@ async function init() {
         });
         roasts = rRes.split('\n').filter(l => l.trim() !== "");
         
+        // Populate Chapter List
         const chapters = [...new Set(allQ.map(q => q.chap))];
         document.getElementById('chapter-list').innerHTML = chapters.map(c => `
-            <button class="action-card" onclick="selectChapter('${c}')">
-                <span class="serif-title">${c.toUpperCase()}</span>
-                <small>Review manuscript</small>
-            </button>
+            <div class="glass-panel" style="margin-bottom:12px; padding:20px;" onclick="selectChapter('${c}')">
+                <div style="font-family:var(--serif); font-size:1.2rem;">${c.toUpperCase()}</div>
+                <div style="font-size:0.7rem; color:var(--text-dim); margin-top:4px;">REVISE MANUSCRIPTS</div>
+            </div>
         `).join('');
-
-        // Difficulty selection
-        document.querySelector('.difficulty-list').innerHTML = `
-            <button class="action-card" onclick="setDiff(30)"><span>Contemplative</span><small>30 Seconds</small></button>
-            <button class="action-card" onclick="setDiff(15)"><span>Focused</span><small>15 Seconds</small></button>
-            <button class="action-card" onclick="setDiff(8)"><span>Rapid</span><small>8 Seconds</small></button>
-        `;
-    } catch (e) { console.error("Archive load failed."); }
+    } catch (e) { console.error("Library failed to load."); }
     
     if (!scholarName) showScreen('screen-login');
     else { document.getElementById('main-dock').classList.remove('hidden'); showScreen('screen-home'); }
@@ -61,15 +68,25 @@ function safeTypeset() {
 }
 
 window.showScreen = (id) => {
+    // Smooth transition: Slide out current
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.bar-item').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+    
     const target = document.getElementById(id);
     if(target) target.classList.remove('hidden');
     
-    // UI Active Tab Highlighting
-    if (id === 'screen-home') { updateDash(); document.querySelectorAll('.bar-item')[0].classList.add('active'); }
-    if (id === 'screen-vault') { populateVault(); document.querySelectorAll('.bar-item')[1].classList.add('active'); }
-    if (id === 'screen-logs') { populateLogs(); document.querySelectorAll('.bar-item')[2].classList.add('active'); }
+    if (id === 'screen-home') { 
+        updateDash(); 
+        document.getElementById('nav-home').classList.add('active'); 
+    }
+    if (id === 'screen-vault') { 
+        populateVault(); 
+        document.getElementById('nav-vault').classList.add('active'); 
+    }
+    if (id === 'screen-logs') { 
+        populateLogs(); 
+        document.getElementById('nav-logs').classList.add('active'); 
+    }
     safeTypeset();
 };
 
@@ -79,7 +96,7 @@ window.submitLogin = () => {
         scholarName = val.toUpperCase();
         localStorage.setItem('ax_id', scholarName);
         document.getElementById('main-dock').classList.remove('hidden');
-        window.showScreen('screen-home');
+        showScreen('screen-home');
     }
 };
 
@@ -93,13 +110,13 @@ function updateDash() {
 
 window.selectChapter = (c) => {
     filteredQ = allQ.filter(q => q.chap.toLowerCase() === c.toLowerCase());
-    window.showScreen('screen-difficulty');
+    showScreen('screen-difficulty');
 };
 
 window.setDiff = (s) => {
     timeLimit = s; score = 0; lives = 3;
     sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
-    window.showScreen('screen-game');
+    showScreen('screen-game');
     nextRound();
 };
 
@@ -118,16 +135,14 @@ function nextRound() {
     stack.innerHTML = "";
     [...currentQ.opts].sort(() => Math.random() - 0.5).forEach(o => {
         const b = document.createElement('button');
-        b.className = 'opt-node';
+        b.className = 'opt-btn';
         b.innerHTML = "\\(" + o + "\\)";
         b.onclick = () => {
             history.total++;
             if (o === currentQ.a) { 
-                b.style.borderColor = "var(--accent)";
-                b.style.boxShadow = "0 0 15px var(--accent)";
                 score++; history.correct++; 
                 sessionQueue.shift();
-                setTimeout(nextRound, 300); 
+                nextRound(); 
             } else handleFail();
             localStorage.setItem('ax_hist', JSON.stringify(history));
         };
@@ -135,15 +150,6 @@ function nextRound() {
     });
     safeTypeset();
     startTimer();
-}
-
-function showSummary() {
-    document.getElementById('sum-correct').innerText = score;
-    let grade = "Novice Scholar";
-    if (score > 10) grade = "Proficient Scholar";
-    if (score > 25) grade = "Grand Master Scholar";
-    document.getElementById('sum-grade').innerText = grade;
-    window.showScreen('screen-summary');
 }
 
 function startTimer() {
@@ -161,7 +167,7 @@ function handleFail() {
     lives--;
     failLogs[currentQ.q] = (failLogs[currentQ.q] || 0) + 1;
     
-    // Spaced Repetition (Issue 2)
+    // ISSUE 2: Spaced Repetition (Insert 2 items back)
     const failedQ = sessionQueue.shift();
     sessionQueue.splice(Math.min(2, sessionQueue.length), 0, failedQ);
     
@@ -171,26 +177,32 @@ function handleFail() {
     safeTypeset();
 }
 
-window.closeRoast = () => { 
-    document.getElementById('roast-overlay').classList.add('hidden'); 
-    nextRound(); 
+function showSummary() {
+    document.getElementById('sum-correct').innerText = score;
+    document.getElementById('sum-lives').innerText = lives;
+    window.showScreen('screen-summary');
+}
+
+window.closeRoast = () => {
+    document.getElementById('roast-overlay').classList.add('hidden');
+    nextRound();
 };
 
 function populateVault() {
     const list = document.getElementById('vault-list');
-    list.innerHTML = allQ.map(q => `<div class="glass-card" style="margin-bottom:15px;" onclick="const a = this.querySelector('.vault-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'"><div>\\(${q.q}\\)</div><div class="vault-ans" style="display:none; color:var(--accent); margin-top:15px;">\\(${q.a}\\)</div></div>`).join('');
+    list.innerHTML = allQ.map(q => `<div class="glass-panel" style="margin-bottom:12px; padding:20px;" onclick="const a = this.querySelector('.v-ans'); a.style.display = (a.style.display === 'block') ? 'none' : 'block'"><div>\\(${q.q}\\)</div><div class="v-ans" style="display:none; color:var(--accent); margin-top:15px; border-top:1px solid var(--border); padding-top:15px;">\\(${q.a}\\)</div></div>`).join('');
 }
 
 function populateLogs() {
     const list = document.getElementById('logs-list');
-    const items = Object.entries(failLogs).map(([q, c]) => `<div class="glass-card" style="margin-bottom:15px;"><div>\\(${q}\\)</div><div style="color:var(--accent);margin-top:10px">Identified Gaps: ${c}</div></div>`);
-    list.innerHTML = items.length ? items.join('') : "<p style='text-align:center; padding:40px; color:var(--text-dim)'>Clear Archives.</p>";
+    const items = Object.entries(failLogs).map(([q, c]) => `<div class="glass-panel" style="margin-bottom:12px; padding:20px;"><div>\\(${q}\\)</div><div style="color:var(--accent); margin-top:10px; font-size:0.8rem">Gaps Identified: ${c}</div></div>`);
+    list.innerHTML = items.length ? items.join('') : "<p style='text-align:center; opacity:0.5; margin-top:50px;'>No gaps in your knowledge.</p>";
 }
 
 window.startRepair = () => {
     const bad = Object.keys(failLogs);
     filteredQ = allQ.filter(q => bad.includes(q.q));
-    window.showScreen('screen-difficulty');
+    showScreen('screen-difficulty');
 };
 
 init();
