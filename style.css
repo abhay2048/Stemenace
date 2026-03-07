@@ -13,50 +13,46 @@
 body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
 
 .scholarly-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.12; overflow: hidden; }
-.float-symbol { position: absolute; font-family: var(--serif); font-size: 2rem; color: var(--accent); animation: drift 15s infinite ease-in-out alternate; }
-@keyframes drift { from { transform: translate(0,0) rotate(0deg); } to { transform: translate(20px, 30px) rotate(15deg); } }
+.float-symbol { position: absolute; font-family: var(--serif); font-size: 2rem; color: var(--accent); }
 
 .app-container { max-width: 430px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 30px 25px; background: var(--bg); z-index: 5; }
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 25px; background: var(--bg); z-index: 5; }
+
+/* Formulas & Scaling */
+.formula-viewport { flex: 1; display: flex; align-items: center; justify-content: center; }
+.hero-card { width: 100%; min-height: 140px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; }
+.math-main { font-family: var(--serif); font-size: 1.6rem; text-align: center; color: white; display: inline-block; width: auto; max-width: 100%; }
+mjx-container { margin: 0 !important; display: inline-block !important; }
+
+/* Fixed PvP Layout (No overlap) */
+.pvp-arena { padding: 0 !important; background: #000; z-index: 200; display: flex; flex-direction: column; }
+.pvp-zone { flex: 1; display: flex; flex-direction: column; padding: 10px 15px; position: relative; overflow: hidden; }
+.p1-zone { transform: rotate(180deg); border-bottom: 1px solid var(--border); }
+
+/* Priorities within PvP */
+.pvp-formula-box { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 100px; }
+.pvp-options-grid { height: 140px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px 0; }
+.pvp-hud-small { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+
+.pvp-divider { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); color: #000; padding: 3px 12px; font-weight: 800; border-radius: 20px; z-index: 300; font-size: 0.7rem; }
+.pvp-exit-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: white; z-index: 400; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+
+/* Stun State */
+.stunned { filter: grayscale(1) brightness(0.2); pointer-events: none; }
+
+.opt-pvp, .opt-node { background: var(--surface); border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: white; text-align: center; font-size: 0.8rem; overflow: hidden; }
 
 /* Dashboard UI */
-.home-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.index-circle-wrap { position: relative; width: 65px; height: 65px; }
-.ring-bg { fill: none; stroke: var(--border); stroke-width: 2.5; }
-.ring-fill { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; transition: 1.2s ease; }
-.index-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
-.index-label span { font-family: var(--serif); font-size: 1.3rem; }
-.index-label small { font-size: 0.5rem; color: var(--text-muted); }
-
-.menu-action-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; width: 100%; text-align: left; border-radius: 14px; margin-bottom: 12px; cursor: pointer; color: white; }
+.menu-action-card { background: var(--surface); border: 1px solid var(--border); padding: 18px; width: 100%; border-radius: 14px; margin-bottom: 10px; color: white; text-align: left; }
 .pvp-btn { background: linear-gradient(45deg, #a594f9, #7c3aed); border: none; }
 .repair-card { background: white; color: black; }
 
-/* Formulas & Scaling */
-.formula-viewport { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px 0; }
-.hero-card { width: 100%; min-height: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 15px; overflow: hidden; position: relative; }
-.math-main { font-family: var(--serif); font-size: 1.6rem; text-align: center; color: white; display: inline-block; width: auto; max-width: 100%; transition: font-size 0.1s ease; }
-mjx-container { margin: 0 !important; display: inline-block !important; vertical-align: middle; }
-
-/* PvP Arena */
-.pvp-arena { padding: 0 !important; display: flex; flex-direction: column; background: #000; z-index: 200; }
-.pvp-zone { flex: 1; display: flex; flex-direction: column; padding: 15px; position: relative; transition: 0.3s; }
-.p1-zone { transform: rotate(180deg); border-bottom: 1px solid var(--border); }
-.pvp-divider { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); color: #000; padding: 4px 12px; font-weight: 800; border-radius: 20px; z-index: 20; font-size: 0.7rem; }
-.pvp-exit-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: white; z-index: 100; font-size: 1.2rem; cursor: pointer; }
-
-/* PvP Stun State */
-.stunned { filter: grayscale(1) brightness(0.3); pointer-events: none; }
-.stunned .pvp-card { border-color: #ef4444 !important; }
-
-.pvp-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.opt-pvp, .opt-node { background: var(--surface); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: white; text-align: center; font-size: 0.9rem; }
-
-/* UI Extras */
-.hidden { display: none !important; }
-.bottom-dock { position: absolute; bottom: 0; width: 100%; height: 70px; background: var(--surface); display: flex; border-top: 1px solid var(--border); z-index: 100; }
-.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
+.bottom-dock { position: absolute; bottom: 0; width: 100%; height: 65px; background: var(--surface); display: flex; border-top: 1px solid var(--border); z-index: 100; }
+.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--text-muted); }
 .nav-item.active { color: var(--accent); font-weight: bold; }
 
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: flex-end; }
-.modal-sheet { background: var(--surface); width: 100%; padding: 40px 25px; border-radius: 30px 30px 0 0; text-align: center; }
+.hidden { display: none !important; }
+.scroll-v { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+.sub-header { display: flex; align-items: center; margin-bottom: 20px; }
+.vault-item { background: var(--surface); padding: 15px; border-radius: 12px; margin-bottom: 8px; }
+.vault-ans { margin-top: 10px; color: var(--accent); display: none; }
