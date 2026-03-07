@@ -11,64 +11,61 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="nebula-bg"></div>
     <div id="symbol-layer"></div>
 
     <div class="app-container">
         <!-- LOGIN -->
         <section id="screen-login" class="screen">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                <h1 style="font-family:var(--serif); font-size:3.5rem; letter-spacing:8px; margin-bottom:10px;">AXIOM</h1>
-                <p style="text-transform:uppercase; letter-spacing:4px; font-size:0.7rem; color:var(--text-dim); margin-bottom:40px;">Mathematical Path</p>
-                <input type="text" id="scholar-input" placeholder="Scholar Name" style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--border); color:#fff; text-align:center; padding:15px; font-size:1.2rem; margin-bottom:30px; font-family:var(--serif);">
-                <button class="btn-3d" style="width:200px;" onclick="submitLogin()">ENTER</button>
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">
+                <h1 style="font-family:var(--serif); font-size:3rem; letter-spacing:10px;">AXIOM</h1>
+                <p style="font-size:0.7rem; color:#666; letter-spacing:4px; margin: 10px 0 60px;">THE SCHOLAR'S PATH</p>
+                <input type="text" id="scholar-input" placeholder="Name of Scholar" style="background:transparent; border:none; border-bottom:1px solid #333; color:#fff; text-align:center; padding:15px; font-size:1.2rem; margin-bottom:40px;">
+                <button class="btn-3d" onclick="submitLogin()">ENTER ARCHIVE</button>
             </div>
         </section>
 
         <!-- HOME -->
         <section id="screen-home" class="screen hidden">
-            <header class="header-minimal">
-                <h2 id="display-name">Scholar</h2>
-                <div class="stat-pill" id="accuracy-val">0% ACCURACY</div>
-            </header>
-
-            <div class="count-display">
-                <label>Total Equations Mastered</label>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="display-name" class="serif-title">Scholar</h2>
+                <div style="background:var(--accent); color:#000; padding:4px 12px; border-radius:100px; font-size:0.7rem; font-weight:700;" id="accuracy-val">0%</div>
+            </div>
+            
+            <div class="stat-hero">
+                <label>EQUATIONS REVISED</label>
                 <span id="total-val">0</span>
             </div>
 
-            <div class="scroll-area">
-                <button class="btn-3d" style="width:100%; margin-bottom:15px;" onclick="showScreen('screen-chapters')">COMMENCE REVISION</button>
-                <button id="repair-btn" class="glass-panel" style="width:100%; padding:20px; color:var(--accent); display:none;" onclick="startRepair()">ADDRESS WEAKNESSES</button>
+            <div style="flex:1;">
+                <button class="btn-3d" style="margin-bottom:20px;" onclick="showScreen('screen-chapters')">BEGIN REVISION</button>
+                <button id="repair-btn" class="glass-card" style="width:100%; color:var(--accent); font-weight:700; border-color:var(--accent); display:none;" onclick="startRepair()">ADDRESS WEAKNESSES</button>
             </div>
         </section>
 
         <!-- GAME -->
         <section id="screen-game" class="screen hidden">
-            <div class="header-minimal">
-                <div id="lives-box">❤️❤️❤️</div>
-                <div id="streak-box" class="serif-title" style="font-size:1.5rem; color:var(--accent);">0</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div id="lives-val" style="font-size:1.2rem;"></div>
+                <div id="streak-val" style="font-family:var(--serif); font-size:1.5rem; color:var(--accent);">0</div>
             </div>
-            <div style="width:100%; height:2px; background:var(--border); margin-bottom:30px; border-radius:10px; overflow:hidden;">
-                <div id="timer-fill" style="height:100%; background:var(--accent); width:100%;"></div>
-            </div>
-            <div class="focus-stage">
-                <div class="glass-panel manuscript-card">
-                    <div id="formula-display" class="math-text"></div>
+            <div class="timer-track"><div id="timer-fill"></div></div>
+            <div class="manuscript-focus">
+                <div class="glass-card">
+                    <div id="formula-display" style="font-size:1.5rem;"></div>
                 </div>
             </div>
-            <div id="options-stack" class="options-grid"></div>
+            <div id="options-stack" style="padding-bottom:100px;"></div>
         </section>
 
         <!-- SUMMARY -->
         <section id="screen-summary" class="screen hidden">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                <h2 style="font-family:var(--serif); font-size:2.5rem; margin-bottom:40px;">Lesson Concluded</h2>
-                <div class="glass-panel" style="width:100%; padding:30px; margin-bottom:40px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Identified</span><span id="sum-correct">0</span></div>
-                    <div style="display:flex; justify-content:space-between;"><span>Focus Remaining</span><span id="sum-lives">0</span></div>
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">
+                <h2 class="serif-title" style="font-size:2rem; margin-bottom:40px;">Session Concluded</h2>
+                <div class="glass-card" style="margin-bottom:40px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Identified</span><span id="sum-score">0</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Focus Left</span><span id="sum-lives">0</span></div>
                 </div>
-                <button class="btn-3d" style="width:200px;" onclick="showScreen('screen-home')">RETURN</button>
+                <button class="btn-3d" onclick="showScreen('screen-home')">RETURN</button>
             </div>
         </section>
 
@@ -76,29 +73,27 @@
         <nav id="main-dock" class="nav-dock hidden">
             <div class="nav-item" id="nav-home" onclick="showScreen('screen-home')">Library</div>
             <div class="nav-item" id="nav-vault" onclick="showScreen('screen-vault')">Vault</div>
-            <div class="nav-item" id="nav-logs" onclick="showScreen('screen-logs')">Gaps</div>
+            <div class="nav-item" id="nav-gaps" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- SUB SCREENS -->
-        <div id="screen-chapters" class="screen hidden"><div class="header-minimal"><button onclick="showScreen('screen-home')" style="background:none; border:none; color:var(--accent); font-size:1.2rem;">←</button><h2>Archives</h2></div><div class="scroll-area" id="chapter-list"></div></div>
+        <!-- SUBS -->
+        <div id="screen-chapters" class="screen hidden"><h2 class="serif-title" style="margin-bottom:30px;">Archives</h2><div id="chapter-list" style="overflow-y:auto; padding-bottom:100px;"></div></div>
         <div id="screen-difficulty" class="screen hidden">
-            <div class="header-minimal"><button onclick="showScreen('screen-chapters')" style="background:none; border:none; color:var(--accent); font-size:1.2rem;">←</button><h2>Select Pace</h2></div>
-            <div class="scroll-area">
-                <button class="glass-panel" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="glass-panel" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="btn-3d" style="width:100%; padding:25px; margin-bottom:15px;" onclick="setDiff(8)">Rapid (8s)</button>
-            </div>
+            <h2 class="serif-title" style="margin-bottom:30px;">Select Pace</h2>
+            <button class="glass-card" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(30)">Contemplative (30s)</button>
+            <button class="glass-card" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(15)">Focused (15s)</button>
+            <button class="btn-3d" onclick="setDiff(8)">Rapid (8s)</button>
         </div>
-        <div id="screen-vault" class="screen hidden"><div class="header-minimal"><h2>Vault</h2></div><div class="scroll-area" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><div class="header-minimal"><h2>Gaps</h2></div><div class="scroll-area" id="logs-list"></div></div>
+        <div id="screen-vault" class="screen hidden"><h2 class="serif-title" style="margin-bottom:30px;">Vault</h2><div id="vault-list" style="overflow-y:auto; padding-bottom:100px;"></div></div>
+        <div id="screen-logs" class="screen hidden"><h2 class="serif-title" style="margin-bottom:30px;">Gaps</h2><div id="logs-list" style="overflow-y:auto; padding-bottom:100px;"></div></div>
     </div>
 
-    <!-- OVERLAY -->
-    <div id="roast-overlay" class="overlay hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:flex; align-items:center; justify-content:center; padding:30px;">
-        <div class="glass-panel" style="width:100%; padding:40px; text-align:center;">
+    <!-- FEEDBACK -->
+    <div id="roast-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:flex; align-items:center; justify-content:center; padding:30px;">
+        <div class="glass-card" style="width:100%; text-align:center;">
             <p id="roast-msg" style="font-style:italic; color:var(--accent); margin-bottom:20px;"></p>
-            <div id="correct-display" class="math-text" style="margin-bottom:30px;"></div>
-            <button class="btn-3d" style="width:100%;" onclick="closeRoast()">CONTINUE</button>
+            <div id="correct-display" style="margin-bottom:40px;"></div>
+            <button class="btn-3d" onclick="closeRoast()">CONTINUE</button>
         </div>
     </div>
 
