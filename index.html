@@ -4,96 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AXIOM | Scholar</title>
+    <!-- Minimalist Professional Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
     <script>
-        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, startup: { ready: () => { MathJax.startup.defaultReady(); window.mjReady = true; } } };
+        window.MathJax = { 
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, 
+            startup: { ready: () => { MathJax.startup.defaultReady(); window.mjReady = true; } } 
+        };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="nebula-bg"></div>
     <div id="symbol-layer"></div>
 
     <div class="app-container">
-        <!-- LOGIN -->
+        <!-- ENTRANCE -->
         <section id="screen-login" class="screen">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">
-                <h1 style="font-family:var(--serif); font-size:3rem; letter-spacing:10px;">AXIOM</h1>
-                <p style="font-size:0.7rem; color:#666; letter-spacing:4px; margin: 10px 0 60px;">THE SCHOLAR'S PATH</p>
-                <input type="text" id="scholar-input" placeholder="Name of Scholar" style="background:transparent; border:none; border-bottom:1px solid #333; color:#fff; text-align:center; padding:15px; font-size:1.2rem; margin-bottom:40px;">
-                <button class="btn-3d" onclick="submitLogin()">ENTER ARCHIVE</button>
+            <div class="full-center">
+                <h1 class="main-logo">AXIOM</h1>
+                <p class="sub-tag">THE SCHOLAR'S PATH</p>
+                <div class="login-box">
+                    <input type="text" id="scholar-input" placeholder="Identity" autocomplete="off">
+                    <button class="btn-3d" onclick="submitLogin()">ENTER ARCHIVE</button>
+                </div>
             </div>
         </section>
 
-        <!-- HOME -->
+        <!-- DASHBOARD -->
         <section id="screen-home" class="screen hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 id="display-name" class="serif-title">Scholar</h2>
-                <div style="background:var(--accent); color:#000; padding:4px 12px; border-radius:100px; font-size:0.7rem; font-weight:700;" id="accuracy-val">0%</div>
-            </div>
+            <header class="home-head">
+                <h2 id="display-name" class="serif">Scholar</h2>
+                <div class="pill-stat" id="accuracy-val">0%</div>
+            </header>
             
-            <div class="stat-hero">
-                <label>EQUATIONS REVISED</label>
+            <div class="hero-stat">
+                <label>REVISED MANUSCRIPTS</label>
                 <span id="total-val">0</span>
             </div>
 
-            <div style="flex:1;">
-                <button class="btn-3d" style="margin-bottom:20px;" onclick="showScreen('screen-chapters')">BEGIN REVISION</button>
-                <button id="repair-btn" class="glass-card" style="width:100%; color:var(--accent); font-weight:700; border-color:var(--accent); display:none;" onclick="startRepair()">ADDRESS WEAKNESSES</button>
+            <div class="action-stack">
+                <button class="btn-3d" onclick="showScreen('screen-chapters')">COMMENCE REVISION</button>
+                <button id="repair-btn" class="glass-card repair-btn" onclick="startRepair()" style="display:none;">ADDRESS WEAKNESSES</button>
             </div>
         </section>
 
-        <!-- GAME -->
+        <!-- REVISION ROOM -->
         <section id="screen-game" class="screen hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div id="lives-val" style="font-size:1.2rem;"></div>
-                <div id="streak-val" style="font-family:var(--serif); font-size:1.5rem; color:var(--accent);">0</div>
+            <div class="game-meta">
+                <div id="lives-val" class="lives">❤️❤️❤️</div>
+                <div id="streak-val" class="serif accent-text">0</div>
             </div>
-            <div class="timer-track"><div id="timer-fill"></div></div>
-            <div class="manuscript-focus">
-                <div class="glass-card">
-                    <div id="formula-display" style="font-size:1.5rem;"></div>
+            <div class="timer-rail"><div id="timer-fill"></div></div>
+            <div class="focus-window">
+                <div class="glass-card manuscript">
+                    <div id="formula-display"></div>
                 </div>
             </div>
-            <div id="options-stack" style="padding-bottom:100px;"></div>
+            <div id="options-stack" class="options-grid"></div>
         </section>
 
-        <!-- SUMMARY -->
+        <!-- LESSON SUMMARY -->
         <section id="screen-summary" class="screen hidden">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">
-                <h2 class="serif-title" style="font-size:2rem; margin-bottom:40px;">Session Concluded</h2>
-                <div class="glass-card" style="margin-bottom:40px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Identified</span><span id="sum-score">0</span></div>
-                    <div style="display:flex; justify-content:space-between;"><span>Focus Left</span><span id="sum-lives">0</span></div>
+            <div class="full-center">
+                <h2 class="serif large-title">Concluded</h2>
+                <div class="glass-card summary-box">
+                    <div class="row"><span>Identified</span><span id="sum-score">0</span></div>
+                    <div class="row"><span>Focus Remaining</span><span id="sum-lives">0</span></div>
                 </div>
                 <button class="btn-3d" onclick="showScreen('screen-home')">RETURN</button>
             </div>
         </section>
 
-        <!-- NAV DOCK -->
+        <!-- NAVIGATION -->
         <nav id="main-dock" class="nav-dock hidden">
             <div class="nav-item" id="nav-home" onclick="showScreen('screen-home')">Library</div>
             <div class="nav-item" id="nav-vault" onclick="showScreen('screen-vault')">Vault</div>
-            <div class="nav-item" id="nav-gaps" onclick="showScreen('screen-logs')">Gaps</div>
+            <div class="nav-item" id="nav-logs" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- SUBS -->
-        <div id="screen-chapters" class="screen hidden"><h2 class="serif-title" style="margin-bottom:30px;">Archives</h2><div id="chapter-list" style="overflow-y:auto; padding-bottom:100px;"></div></div>
+        <!-- OVERLAYS & SUBS -->
+        <div id="screen-chapters" class="screen hidden"><div class="sub-head"><button onclick="showScreen('screen-home')" class="back-btn">←</button><h2>Archives</h2></div><div class="scroll-area" id="chapter-list"></div></div>
+        
         <div id="screen-difficulty" class="screen hidden">
-            <h2 class="serif-title" style="margin-bottom:30px;">Select Pace</h2>
-            <button class="glass-card" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(30)">Contemplative (30s)</button>
-            <button class="glass-card" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(15)">Focused (15s)</button>
-            <button class="btn-3d" onclick="setDiff(8)">Rapid (8s)</button>
+            <div class="sub-head"><button onclick="showScreen('screen-chapters')" class="back-btn">←</button><h2>Select Pace</h2></div>
+            <div class="scroll-area">
+                <button class="glass-card diff-btn" onclick="setDiff(30)">Contemplative (30s)</button>
+                <button class="glass-card diff-btn" onclick="setDiff(15)">Focused (15s)</button>
+                <button class="btn-3d diff-btn" onclick="setDiff(8)">Rapid (8s)</button>
+            </div>
         </div>
-        <div id="screen-vault" class="screen hidden"><h2 class="serif-title" style="margin-bottom:30px;">Vault</h2><div id="vault-list" style="overflow-y:auto; padding-bottom:100px;"></div></div>
-        <div id="screen-logs" class="screen hidden"><h2 class="serif-title" style="margin-bottom:30px;">Gaps</h2><div id="logs-list" style="overflow-y:auto; padding-bottom:100px;"></div></div>
-    </div>
 
-    <!-- FEEDBACK -->
-    <div id="roast-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:flex; align-items:center; justify-content:center; padding:30px;">
-        <div class="glass-card" style="width:100%; text-align:center;">
-            <p id="roast-msg" style="font-style:italic; color:var(--accent); margin-bottom:20px;"></p>
-            <div id="correct-display" style="margin-bottom:40px;"></div>
-            <button class="btn-3d" onclick="closeRoast()">CONTINUE</button>
+        <div id="screen-vault" class="screen hidden"><div class="sub-head"><h2>Vault</h2></div><div class="scroll-area" id="vault-list"></div></div>
+        <div id="screen-logs" class="screen hidden"><div class="sub-head"><h2>Knowledge Gaps</h2></div><div class="scroll-area" id="logs-list"></div></div>
+
+        <div id="roast-overlay" class="overlay hidden">
+            <div class="glass-card modal">
+                <p id="roast-msg" class="roast-text"></p>
+                <div id="correct-display" class="reveal-math"></div>
+                <button class="btn-3d" onclick="closeRoast()">CONTINUE</button>
+            </div>
         </div>
     </div>
 
