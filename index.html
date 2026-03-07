@@ -3,102 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AXIOM | Scholar</title>
+    <title>AXIOM | The Scholar's Path</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script>
-        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, startup: { ready: () => { MathJax.startup.defaultReady(); window.mjReady = true; } } };
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            startup: { ready: () => { MathJax.startup.defaultReady(); window.mjReady = true; } }
+        };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="nebula-bg"></div>
-    <div id="symbol-layer"></div>
+    <!-- Animated background layer -->
+    <div class="nebula"></div>
+    <div id="symbol-layer" class="scholarly-bg"></div>
 
     <div class="app-container">
-        <!-- LOGIN -->
+        <!-- ENTRANCE -->
         <section id="screen-login" class="screen">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                <h1 style="font-family:var(--serif); font-size:3.5rem; letter-spacing:8px; margin-bottom:10px;">AXIOM</h1>
-                <p style="text-transform:uppercase; letter-spacing:4px; font-size:0.7rem; color:var(--text-dim); margin-bottom:40px;">Mathematical Path</p>
-                <input type="text" id="scholar-input" placeholder="Scholar Name" style="width:100%; background:transparent; border:none; border-bottom:1px solid var(--border); color:#fff; text-align:center; padding:15px; font-size:1.2rem; margin-bottom:30px; font-family:var(--serif);">
-                <button class="btn-3d" style="width:200px;" onclick="submitLogin()">ENTER</button>
-            </div>
-        </section>
-
-        <!-- HOME -->
-        <section id="screen-home" class="screen hidden">
-            <header class="header-minimal">
-                <h2 id="display-name">Scholar</h2>
-                <div class="stat-pill" id="accuracy-val">0% ACCURACY</div>
-            </header>
-
-            <div class="count-display">
-                <label>Total Equations Mastered</label>
-                <span id="total-val">0</span>
-            </div>
-
-            <div class="scroll-area">
-                <button class="btn-3d" style="width:100%; margin-bottom:15px;" onclick="showScreen('screen-chapters')">COMMENCE REVISION</button>
-                <button id="repair-btn" class="glass-panel" style="width:100%; padding:20px; color:var(--accent); display:none;" onclick="startRepair()">ADDRESS WEAKNESSES</button>
-            </div>
-        </section>
-
-        <!-- GAME -->
-        <section id="screen-game" class="screen hidden">
-            <div class="header-minimal">
-                <div id="lives-box">❤️❤️❤️</div>
-                <div id="streak-box" class="serif-title" style="font-size:1.5rem; color:var(--accent);">0</div>
-            </div>
-            <div style="width:100%; height:2px; background:var(--border); margin-bottom:30px; border-radius:10px; overflow:hidden;">
-                <div id="timer-fill" style="height:100%; background:var(--accent); width:100%;"></div>
-            </div>
-            <div class="focus-stage">
-                <div class="glass-panel manuscript-card">
-                    <div id="formula-display" class="math-text"></div>
+            <div class="glass-content">
+                <div class="crest-glow">A</div>
+                <h1 class="serif-title main-title">AXIOM</h1>
+                <p class="tagline">The Path of Mathematical Mastery</p>
+                <div class="input-group">
+                    <input type="text" id="scholar-input" placeholder="Name of Scholar" autocomplete="off">
+                    <button class="btn-primary" onclick="submitLogin()">Begin Journey</button>
                 </div>
             </div>
+        </section>
+
+        <!-- LIBRARY DASHBOARD -->
+        <section id="screen-home" class="screen hidden">
+            <header class="home-nav">
+                <div class="profile">
+                    <span class="greeting">Welcome,</span>
+                    <h2 id="display-name" class="serif-title">Scholar</h2>
+                </div>
+                <div class="mini-stat">
+                    <label>Accuracy</label>
+                    <span id="accuracy-val">0%</span>
+                </div>
+            </header>
+
+            <div class="dashboard-scroll">
+                <div class="total-count-card">
+                    <label>Equations Revised</label>
+                    <h3 id="total-val">0</h3>
+                </div>
+
+                <div class="menu-grid">
+                    <button class="action-card main" onclick="showScreen('screen-chapters')">
+                        <span class="serif-title">Manuscript Review</span>
+                        <small>Explore archives</small>
+                    </button>
+                    <button id="repair-btn" class="action-card warning" style="display:none;" onclick="startRepair()">
+                        <span class="serif-title">Address Gaps</span>
+                        <small>Refine weak areas</small>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STUDY ROOM (GAME) -->
+        <section id="screen-game" class="screen hidden">
+            <div class="game-hud">
+                <div id="lives-box" class="lives">❤️❤️❤️</div>
+                <div class="timer-container"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="streak-badge">0</div>
+            </div>
+            
+            <div class="focus-area">
+                <div class="glass-card manuscript">
+                    <div id="formula-display" class="math-main"></div>
+                </div>
+            </div>
+
             <div id="options-stack" class="options-grid"></div>
         </section>
 
-        <!-- SUMMARY -->
+        <!-- SUMMARY SCREEN -->
         <section id="screen-summary" class="screen hidden">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                <h2 style="font-family:var(--serif); font-size:2.5rem; margin-bottom:40px;">Lesson Concluded</h2>
-                <div class="glass-panel" style="width:100%; padding:30px; margin-bottom:40px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Identified</span><span id="sum-correct">0</span></div>
-                    <div style="display:flex; justify-content:space-between;"><span>Focus Remaining</span><span id="sum-lives">0</span></div>
+            <div class="summary-wrap">
+                <h2 class="serif-title">Lesson Concluded</h2>
+                <div class="summary-card glass-card">
+                    <div class="sum-row"><span>Correct</span><span id="sum-correct">0</span></div>
+                    <div class="sum-row"><span>Status</span><span id="sum-grade">-</span></div>
                 </div>
-                <button class="btn-3d" style="width:200px;" onclick="showScreen('screen-home')">RETURN</button>
+                <button class="btn-primary" onclick="showScreen('screen-home')">Finish</button>
             </div>
         </section>
 
-        <!-- NAV DOCK -->
-        <nav id="main-dock" class="nav-dock hidden">
-            <div class="nav-item" id="nav-home" onclick="showScreen('screen-home')">Library</div>
-            <div class="nav-item" id="nav-vault" onclick="showScreen('screen-vault')">Vault</div>
-            <div class="nav-item" id="nav-logs" onclick="showScreen('screen-logs')">Gaps</div>
+        <!-- NAVIGATION -->
+        <nav id="main-dock" class="bottom-bar hidden">
+            <div class="bar-item active" onclick="showScreen('screen-home')">Home</div>
+            <div class="bar-item" onclick="showScreen('screen-vault')">Vault</div>
+            <div class="bar-item" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- SUB SCREENS -->
-        <div id="screen-chapters" class="screen hidden"><div class="header-minimal"><button onclick="showScreen('screen-home')" style="background:none; border:none; color:var(--accent); font-size:1.2rem;">←</button><h2>Archives</h2></div><div class="scroll-area" id="chapter-list"></div></div>
-        <div id="screen-difficulty" class="screen hidden">
-            <div class="header-minimal"><button onclick="showScreen('screen-chapters')" style="background:none; border:none; color:var(--accent); font-size:1.2rem;">←</button><h2>Select Pace</h2></div>
-            <div class="scroll-area">
-                <button class="glass-panel" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(30)">Contemplative (30s)</button>
-                <button class="glass-panel" style="width:100%; padding:25px; margin-bottom:15px; color:#fff;" onclick="setDiff(15)">Focused (15s)</button>
-                <button class="btn-3d" style="width:100%; padding:25px; margin-bottom:15px;" onclick="setDiff(8)">Rapid (8s)</button>
-            </div>
-        </div>
-        <div id="screen-vault" class="screen hidden"><div class="header-minimal"><h2>Vault</h2></div><div class="scroll-area" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><div class="header-minimal"><h2>Gaps</h2></div><div class="scroll-area" id="logs-list"></div></div>
+        <!-- SUB SCREENS (Archives/Gaps/Vault) -->
+        <div id="screen-chapters" class="screen hidden"><header class="sub-head"><button class="back" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header><div class="scroll-v" id="chapter-list"></div></div>
+        <div id="screen-difficulty" class="screen hidden"><header class="sub-head"><button class="back" onclick="showScreen('screen-chapters')">←</button><h2>Select Pace</h2></header><div class="scroll-v difficulty-list"></div></div>
+        <div id="screen-vault" class="screen hidden"><header class="sub-head"><h2>The Vault</h2></header><div class="scroll-v" id="vault-list"></div></div>
+        <div id="screen-logs" class="screen hidden"><header class="sub-head"><h2>Identified Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
     </div>
 
-    <!-- OVERLAY -->
-    <div id="roast-overlay" class="overlay hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:flex; align-items:center; justify-content:center; padding:30px;">
-        <div class="glass-panel" style="width:100%; padding:40px; text-align:center;">
-            <p id="roast-msg" style="font-style:italic; color:var(--accent); margin-bottom:20px;"></p>
-            <div id="correct-display" class="math-text" style="margin-bottom:30px;"></div>
-            <button class="btn-3d" style="width:100%;" onclick="closeRoast()">CONTINUE</button>
+    <!-- FEEDBACK OVERLAY -->
+    <div id="roast-overlay" class="overlay hidden">
+        <div class="feedback-sheet">
+            <p id="roast-msg"></p>
+            <div class="correct-box">
+                <small>The correct form was:</small>
+                <div id="correct-display"></div>
+            </div>
+            <button class="btn-primary" onclick="closeRoast()">Resume Study</button>
         </div>
     </div>
 
