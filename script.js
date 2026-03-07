@@ -31,8 +31,8 @@ async function init() {
         `).join('');
     } catch (e) { console.error("Load failed."); }
     
-    if (!callsign) showScreen('screen-login');
-    else showScreen('screen-home');
+    if (!callsign) window.showScreen('screen-login');
+    else window.showScreen('screen-home');
 }
 
 // --- RENDERING & SCALING ---
@@ -72,12 +72,63 @@ function safeTypeset() {
     }
 }
 
-// --- SINGLE PLAYER LOGIC ---
+// --- GLOBAL ATTACHED FUNCTIONS (To fix ReferenceErrors) ---
+
+window.showScreen = (id) => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    const dock = document.getElementById('main-dock');
+    if (['screen-game', 'screen-pvp', 'screen-login'].includes(id)) dock.classList.add('hidden');
+    else { dock.classList.remove('hidden'); updateDash(); }
+    if (id === 'screen-vault') populateVault();
+    if (id === 'screen-logs') populateLogs();
+    safeTypeset();
+};
+
+window.submitLogin = () => {
+    const v = document.getElementById('callsign-input').value.trim();
+    if(v) { callsign = v.toUpperCase(); localStorage.setItem('ax_id', callsign); window.showScreen('screen-home'); }
+};
+
+window.selectChapter = (c) => {
+    filteredQ = allQ.filter(q => q.chap === c);
+    window.showScreen('screen-difficulty');
+};
+
+window.setDiff = (s) => {
+    timeLimit = s; score = 0; lives = 3;
+    sessionQueue = [...filteredQ].sort(() => Math.random() - 0.5);
+    window.showScreen('screen-game');
+    nextRound();
+};
+
+window.closeRoast = () => {
+    document.getElementById('roast-overlay').classList.add('hidden');
+    nextRound();
+};
+
+window.startRepair = () => {
+    const failedList = Object.keys(failLogs);
+    filteredQ = allQ.filter(q => failedList.includes(q.q));
+    if (filteredQ.length) window.showScreen('screen-difficulty');
+};
+
+window.startPvP = () => {
+    p1Score = 0; p2Score = 0; p1Stun = false; p2Stun = false;
+    document.getElementById('p1-score').innerText = "0"; document.getElementById('p2-score').innerText = "0";
+    document.getElementById('p1-zone').classList.remove('stunned'); document.getElementById('p2-zone').classList.remove('stunned');
+    pvpQueue = [...allQ].sort(() => Math.random() - 0.5);
+    window.showScreen('screen-pvp');
+    nextPvPRound();
+};
+
+// --- SESSION LOGIC ---
+
 function nextRound() {
     clearInterval(timerId);
     if (lives <= 0 || sessionQueue.length === 0) { 
         if(score > best) { best = score; localStorage.setItem('ax_best', best); }
-        showScreen('screen-home'); return; 
+        window.showScreen('screen-home'); return; 
     }
 
     currentQ = sessionQueue[0];
@@ -112,17 +163,10 @@ function handleFail() {
 }
 
 // --- PVP LOGIC ---
-window.startPvP = () => {
-    p1Score = 0; p2Score = 0; p1Stun = false; p2Stun = false;
-    document.getElementById('p1-score').innerText = "0"; document.getElementById('p2-score').innerText = "0";
-    document.getElementById('p1-zone').classList.remove('stunned'); document.getElementById('p2-zone').classList.remove('stunned');
-    pvpQueue = [...allQ].sort(() => Math.random() - 0.5);
-    showScreen('screen-pvp'); nextPvPRound();
-};
 
 function nextPvPRound() {
     if (document.getElementById('screen-pvp').classList.contains('hidden')) return;
-    if (pvpQueue.length === 0) { alert("Duel Finished!"); showScreen('screen-home'); return; }
+    if (pvpQueue.length === 0) { alert("Duel Finished!"); window.showScreen('screen-home'); return; }
     const q = pvpQueue.shift();
     document.getElementById('p1-formula').innerHTML = "\\(" + q.q + "\\)";
     document.getElementById('p2-formula').innerHTML = "\\(" + q.q + "\\)";
@@ -157,17 +201,12 @@ function stun(pNum) {
     }, 1000);
 }
 
-// --- FEATURES ---
-window.showScreen = (id) => {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    const dock = document.getElementById('main-dock');
-    if (['screen-game', 'screen-pvp', 'screen-login'].includes(id)) dock.classList.add('hidden');
-    else { dock.classList.remove('hidden'); updateDash(); }
-    if (id === 'screen-vault') populateVault();
-    if (id === 'screen-logs') populateLogs();
-    safeTypeset();
-};
+// --- UTILS ---
+
+function startTimer() {
+    let cur = timeLimit; const bar = document.getElementById('timer-fill');
+    timerId = setInterval(() => { cur -= 0.1; if(bar) bar.style.width = (cur/timeLimit)*100+"%"; if(cur<=0) handleFail(); }, 100);
+}
 
 function updateDash() {
     document.getElementById('display-name').innerText = callsign;
@@ -175,7 +214,7 @@ function updateDash() {
     document.getElementById('level-val').innerText = Math.floor(xp / 1000) + 1;
     document.getElementById('xp-ring').style.strokeDasharray = (xp % 1000) / 10 + ", 100";
     document.getElementById('accuracy-val').innerText = (history.total > 0 ? Math.round((history.correct / history.total) * 100) : 0) + "%";
-    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length > 0 ? 'block' : 'none';
+    document.getElementById('repair-btn').style.display = Object.keys(failLogs).length ? 'block' : 'none';
 }
 
 function populateVault() {
@@ -195,20 +234,6 @@ function populateLogs() {
     safeTypeset();
 }
 
-window.startRepair = () => {
-    filteredQ = allQ.filter(q => Object.keys(failLogs).includes(q.q));
-    if (filteredQ.length) showScreen('screen-difficulty');
-};
-
-// --- HELPERS ---
-function startTimer() {
-    let cur = timeLimit; const bar = document.getElementById('timer-fill');
-    timerId = setInterval(() => { cur -= 0.1; if(bar) bar.style.width = (cur/timeLimit)*100+"%"; if(cur<=0) handleFail(); }, 100);
-}
-window.submitLogin = () => { const v = document.getElementById('callsign-input').value.trim(); if(v) { callsign = v.toUpperCase(); localStorage.setItem('ax_id', callsign); showScreen('screen-home'); } };
-window.closeRoast = () => { document.getElementById('roast-overlay').classList.add('hidden'); nextRound(); };
-window.selectChapter = (c) => { filteredQ = allQ.filter(q => q.chap === c); showScreen('screen-difficulty'); };
-
 function genSymbols() {
     const syms = ["∫", "∑", "π", "∂", "∞", "√"];
     const cont = document.getElementById('symbol-layer');
@@ -218,4 +243,5 @@ function genSymbols() {
         s.style.left = Math.random()*95+"%"; s.style.top = Math.random()*95+"%"; cont.appendChild(s);
     }
 }
+
 init();
