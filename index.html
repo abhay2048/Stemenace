@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXIOM | Mathematical Library</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AXIOM | The Scholar's Path</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -15,99 +15,108 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Animated background layer -->
+    <div class="nebula"></div>
     <div id="symbol-layer" class="scholarly-bg"></div>
 
     <div class="app-container">
         <!-- ENTRANCE -->
         <section id="screen-login" class="screen">
-            <div class="academic-wrap">
-                <div class="scholar-crest">A</div>
-                <h1 class="axiom-title">AXIOM</h1>
-                <p class="tagline">Mathematical Archive & Revision</p>
-                <div class="entry-card">
-                    <input type="text" id="scholar-input" placeholder="Scholar Name" autocomplete="off">
-                    <button class="btn-primary" onclick="submitLogin()">Enter Library</button>
+            <div class="glass-content">
+                <div class="crest-glow">A</div>
+                <h1 class="serif-title main-title">AXIOM</h1>
+                <p class="tagline">The Path of Mathematical Mastery</p>
+                <div class="input-group">
+                    <input type="text" id="scholar-input" placeholder="Name of Scholar" autocomplete="off">
+                    <button class="btn-primary" onclick="submitLogin()">Begin Journey</button>
                 </div>
             </div>
         </section>
 
         <!-- LIBRARY DASHBOARD -->
         <section id="screen-home" class="screen hidden">
-            <header class="library-header">
-                <div class="profile-meta">
+            <header class="home-nav">
+                <div class="profile">
+                    <span class="greeting">Welcome,</span>
                     <h2 id="display-name" class="serif-title">Scholar</h2>
-                    <p class="tagline">Personal Study Record</p>
+                </div>
+                <div class="mini-stat">
+                    <label>Accuracy</label>
+                    <span id="accuracy-val">0%</span>
                 </div>
             </header>
 
-            <div class="stats-grid">
-                <div class="stat-box"><label>EQUATIONS REVIEWED</label><span id="total-val">0</span></div>
-                <div class="stat-box"><label>MASTERY RATE</label><span id="accuracy-val">0%</span></div>
-            </div>
+            <div class="dashboard-scroll">
+                <div class="total-count-card">
+                    <label>Equations Revised</label>
+                    <h3 id="total-val">0</h3>
+                </div>
 
-            <div class="menu-stack">
-                <button class="menu-action-card primary-study" onclick="showScreen('screen-chapters')">
-                    <span class="serif-title">Begin Revision</span>
-                    <small>Review categorized manuscripts</small>
-                </button>
-                <button id="repair-btn" class="menu-action-card weakness-btn" style="display:none;" onclick="startRepair()">
-                    <span class="serif-title">Address Gaps</span>
-                    <small>Focus on previous misunderstandings</small>
-                </button>
+                <div class="menu-grid">
+                    <button class="action-card main" onclick="showScreen('screen-chapters')">
+                        <span class="serif-title">Manuscript Review</span>
+                        <small>Explore archives</small>
+                    </button>
+                    <button id="repair-btn" class="action-card warning" style="display:none;" onclick="startRepair()">
+                        <span class="serif-title">Address Gaps</span>
+                        <small>Refine weak areas</small>
+                    </button>
+                </div>
             </div>
         </section>
 
         <!-- STUDY ROOM (GAME) -->
         <section id="screen-game" class="screen hidden">
-            <div class="study-meta">
-                <div id="lives-box">❤️❤️❤️</div>
-                <div class="progress-line"><div id="timer-fill"></div></div>
-                <div id="streak-box" class="serif-title">0</div>
+            <div class="game-hud">
+                <div id="lives-box" class="lives">❤️❤️❤️</div>
+                <div class="timer-container"><div id="timer-fill"></div></div>
+                <div id="streak-box" class="streak-badge">0</div>
             </div>
             
-            <div class="manuscript-display">
-                <div class="manuscript-paper">
+            <div class="focus-area">
+                <div class="glass-card manuscript">
                     <div id="formula-display" class="math-main"></div>
                 </div>
             </div>
 
-            <div id="options-stack" class="options-container"></div>
+            <div id="options-stack" class="options-grid"></div>
         </section>
 
-        <!-- LESSON SUMMARY -->
+        <!-- SUMMARY SCREEN -->
         <section id="screen-summary" class="screen hidden">
-            <div class="academic-wrap">
-                <h2 class="serif-title" style="font-size: 2rem;">Lesson Concluded</h2>
-                <p class="tagline">Performance Review</p>
-                <div class="summary-results">
-                    <div class="summary-row"><span>Correct Identifications</span><span id="sum-correct">0</span></div>
-                    <div class="summary-row"><span>Remaining Focus</span><span id="sum-lives">0</span></div>
-                    <div class="summary-row grade-row"><span>Archive Standing</span><span id="sum-grade">-</span></div>
+            <div class="summary-wrap">
+                <h2 class="serif-title">Lesson Concluded</h2>
+                <div class="summary-card glass-card">
+                    <div class="sum-row"><span>Correct</span><span id="sum-correct">0</span></div>
+                    <div class="sum-row"><span>Status</span><span id="sum-grade">-</span></div>
                 </div>
-                <button class="btn-primary" onclick="showScreen('screen-home')">Return to Library</button>
+                <button class="btn-primary" onclick="showScreen('screen-home')">Finish</button>
             </div>
         </section>
 
         <!-- NAVIGATION -->
-        <nav id="main-dock" class="bottom-dock hidden">
-            <div class="nav-item active" onclick="showScreen('screen-home')">Library</div>
-            <div class="nav-item" onclick="showScreen('screen-vault')">Vault</div>
-            <div class="nav-item" onclick="showScreen('screen-logs')">Gaps</div>
+        <nav id="main-dock" class="bottom-bar hidden">
+            <div class="bar-item active" onclick="showScreen('screen-home')">Home</div>
+            <div class="bar-item" onclick="showScreen('screen-vault')">Vault</div>
+            <div class="bar-item" onclick="showScreen('screen-logs')">Gaps</div>
         </nav>
 
-        <!-- SUB SCREENS -->
-        <div id="screen-chapters" class="screen hidden"><header class="sub-header"><button class="btn-back" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header><div class="scroll-v" id="chapter-list"></div></div>
-        <div id="screen-difficulty" class="screen hidden"><header class="sub-header"><button class="btn-back" onclick="showScreen('screen-chapters')">←</button><h2>Select Pace</h2></header><div class="scroll-v"><button class="menu-action-card" onclick="setDiff(30)">Contemplative (30s)</button><button class="menu-action-card" onclick="setDiff(15)">Focused (15s)</button><button class="menu-action-card critical" onclick="setDiff(8)">Rapid (8s)</button></div></div>
-        <div id="screen-vault" class="screen hidden"><header class="sub-header"><h2>Manuscript Vault</h2></header><div class="scroll-v" id="vault-list"></div></div>
-        <div id="screen-logs" class="screen hidden"><header class="sub-header"><h2>Knowledge Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
+        <!-- SUB SCREENS (Archives/Gaps/Vault) -->
+        <div id="screen-chapters" class="screen hidden"><header class="sub-head"><button class="back" onclick="showScreen('screen-home')">←</button><h2>Archives</h2></header><div class="scroll-v" id="chapter-list"></div></div>
+        <div id="screen-difficulty" class="screen hidden"><header class="sub-head"><button class="back" onclick="showScreen('screen-chapters')">←</button><h2>Select Pace</h2></header><div class="scroll-v difficulty-list"></div></div>
+        <div id="screen-vault" class="screen hidden"><header class="sub-head"><h2>The Vault</h2></header><div class="scroll-v" id="vault-list"></div></div>
+        <div id="screen-logs" class="screen hidden"><header class="sub-head"><h2>Identified Gaps</h2></header><div class="scroll-v" id="logs-list"></div></div>
     </div>
 
     <!-- FEEDBACK OVERLAY -->
     <div id="roast-overlay" class="overlay hidden">
-        <div class="modal-sheet">
-            <p id="roast-msg" class="roast-text"></p>
-            <div class="answer-reveal"><label>Correct Interpretation</label><div id="correct-display" class="math-main"></div></div>
-            <button class="btn-primary" onclick="closeRoast()">Continue Study</button>
+        <div class="feedback-sheet">
+            <p id="roast-msg"></p>
+            <div class="correct-box">
+                <small>The correct form was:</small>
+                <div id="correct-display"></div>
+            </div>
+            <button class="btn-primary" onclick="closeRoast()">Resume Study</button>
         </div>
     </div>
 
